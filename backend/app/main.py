@@ -1,16 +1,19 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from dotenv import load_dotenv
 import os
 import joblib
 from pathlib import Path
 import sys
+import time
+from datetime import datetime
 
 # Agregar el directorio padre al path para importar módulos ML
 sys.path.append(str(Path(__file__).parent.parent))
 from ml.preprocess import preprocess_text
 
-from .models import AnalyzeRequest, AnalyzeResponse
+from .models import AnalyzeRequest, AnalyzeResponse, ErrorResponse
 from .services import toxicity_classifier
 
 # Cargar variables de entorno
@@ -71,14 +74,51 @@ async def startup_event():
     print("🚀 Iniciando ToxiGuard API...")
     load_ml_model()
 
-# Configurar CORS
+# Configurar CORS - Solo permitir llamadas desde el frontend
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[os.getenv("FRONTEND_URL", "http://localhost:5173")],
+    allow_origins=[
+        os.getenv("FRONTEND_URL", "http://localhost:5173"),
+        "http://localhost:3000",  # Para desarrollo local
+        "http://127.0.0.1:5173",
+        "http://127.0.0.1:3000"
+    ],
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST"],
     allow_headers=["*"],
 )
+
+# Middleware para medir tiempo de respuesta
+@app.middleware("http")
+async def add_process_time_header(request: Request, call_next):
+    start_time = time.time()
+    response = await call_next(request)
+    process_time = time.time() - start_time
+    response.headers["X-Process-Time"] = str(process_time)
+    return response
+
+# Exception handler personalizado
+@app.exception_handler(ValueError)
+async def value_error_handler(request: Request, exc: ValueError):
+    return JSONResponse(
+        status_code=400,
+        content=ErrorResponse(
+            error="Error de validación",
+            detail=str(exc),
+            status_code=400
+        ).dict()
+    )
+
+@app.exception_handler(Exception)
+async def general_exception_handler(request: Request, exc: Exception):
+    return JSONResponse(
+        status_code=500,
+        content=ErrorResponse(
+            error="Error interno del servidor",
+            detail=str(exc),
+            status_code=500
+        ).dict()
+    )
 
 @app.get("/")
 async def root():
@@ -86,7 +126,8 @@ async def root():
     return {
         "message": "ToxiGuard API",
         "version": "1.0.0",
-        "status": "running"
+        "status": "running",
+        "phase": "3 - Enhanced API"
     }
 
 @app.get("/health")
@@ -100,7 +141,8 @@ async def api_health():
     return {
         "status": "ok",
         "service": "ToxiGuard Backend",
-        "timestamp": "2024-01-01T00:00:00Z"
+        "phase": "3 - Enhanced API",
+        "timestamp": datetime.now().isoformat()
     }
 
 @app.get("/ml/status")
@@ -111,7 +153,8 @@ async def ml_model_status():
         "ml_model_available": ml_model is not None,
         "vectorizer_available": ml_vectorizer is not None,
         "status": "ready" if model_loaded else "not_ready",
-        "message": "Modelo ML cargado y listo" if model_loaded else "Modelo ML no disponible"
+        "message": "Modelo ML cargado y listo" if model_loaded else "Modelo ML no disponible",
+        "fallback_available": True
     }
 
 @app.post("/ml/test")
@@ -160,18 +203,26 @@ async def analyze_toxicity(request: AnalyzeRequest):
     Retorna:
     - **toxic**: Boolean indicando si es tóxico
     - **score**: Score de toxicidad de 0.0 a 1.0
+    - **toxicity_percentage**: Nivel de toxicidad en porcentaje (0-100)
+    - **category**: Categoría detectada (insulto, acoso, spam, etc.)
     - **labels**: Lista de etiquetas de toxicidad
     - **text_length**: Longitud del texto analizado
     - **keywords_found**: Número de palabras clave encontradas
+    - **response_time_ms**: Tiempo de respuesta en milisegundos
+    - **timestamp**: Timestamp del análisis
+    - **model_used**: Tipo de modelo utilizado
     """
+    start_time = time.time()
+    
     try:
         # Verificar que el modelo ML esté cargado
         if not model_loaded or ml_model is None:
-            # Fallback al clasificador naïve si el modelo ML no está disponible
-            print("⚠️  Modelo ML no disponible, usando clasificador naïve")
-            is_toxic, score, labels, text_length, keywords_found = toxicity_classifier.analyze_text(
+            # Fallback al clasificador mejorado si el modelo ML no está disponible
+            print("⚠️  Modelo ML no disponible, usando clasificador mejorado")
+            is_toxic, score, labels, text_length, keywords_found, category, toxicity_percentage = toxicity_classifier.analyze_text(
                 request.text
             )
+            model_used = "Enhanced Classifier"
         else:
             # Usar modelo ML para análisis
             print(f"🤖 Analizando texto con modelo ML: {len(request.text)} caracteres")
@@ -187,40 +238,62 @@ async def analyze_toxicity(request: AnalyzeRequest):
             is_toxic = bool(prediction)
             score = float(probability[int(prediction)])  # Probabilidad de la clase predicha
             text_length = len(request.text)
+            toxicity_percentage = round(score * 100, 1)
             
             # Determinar etiquetas basadas en la predicción
             if is_toxic:
                 labels = ["toxic", "ml_detected"]
+                # Intentar categorizar usando el clasificador mejorado
+                _, _, _, _, _, detected_category, _ = toxicity_classifier.analyze_text(request.text)
+                category = detected_category
             else:
                 labels = ["safe", "ml_detected"]
+                category = None
             
             # Contar palabras clave encontradas (para compatibilidad)
             keywords_found = len([word for word in request.text.lower().split() 
                                 if word in toxicity_classifier.toxic_keywords])
+            
+            model_used = "ML Model"
+        
+        # Calcular tiempo de respuesta
+        response_time_ms = round((time.time() - start_time) * 1000, 2)
         
         return AnalyzeResponse(
             toxic=is_toxic,
             score=round(score, 3),  # Redondear a 3 decimales
+            toxicity_percentage=toxicity_percentage,
+            category=category,
             labels=labels,
             text_length=text_length,
-            keywords_found=keywords_found
+            keywords_found=keywords_found,
+            response_time_ms=response_time_ms,
+            timestamp=datetime.now(),
+            model_used=model_used
         )
         
     except Exception as e:
         print(f"❌ Error en análisis ML: {e}")
-        # Fallback al clasificador naïve en caso de error
+        # Fallback al clasificador mejorado en caso de error
         try:
-            print("🔄 Intentando fallback al clasificador naïve...")
-            is_toxic, score, labels, text_length, keywords_found = toxicity_classifier.analyze_text(
+            print("🔄 Intentando fallback al clasificador mejorado...")
+            is_toxic, score, labels, text_length, keywords_found, category, toxicity_percentage = toxicity_classifier.analyze_text(
                 request.text
             )
+            
+            response_time_ms = round((time.time() - start_time) * 1000, 2)
             
             return AnalyzeResponse(
                 toxic=is_toxic,
                 score=round(score, 3),
+                toxicity_percentage=toxicity_percentage,
+                category=category,
                 labels=labels + ["fallback"],
                 text_length=text_length,
-                keywords_found=keywords_found
+                keywords_found=keywords_found,
+                response_time_ms=response_time_ms,
+                timestamp=datetime.now(),
+                model_used="Enhanced Classifier (Fallback)"
             )
             
         except Exception as fallback_error:
@@ -235,11 +308,12 @@ async def get_keywords():
     return {
         "keywords": toxicity_classifier.get_keywords_list(),
         "count": len(toxicity_classifier.toxic_keywords),
-        "threshold": toxicity_classifier.toxicity_threshold
+        "threshold": toxicity_classifier.toxicity_threshold,
+        "categories": toxicity_classifier.get_categories_info()
     }
 
 @app.post("/keywords/add")
-async def add_keyword(keyword: str):
+async def add_keyword(keyword: str, category: str = "insulto"):
     """Añade una nueva palabra clave tóxica al clasificador"""
     if not keyword or not keyword.strip():
         raise HTTPException(
@@ -247,10 +321,17 @@ async def add_keyword(keyword: str):
             detail="La palabra clave no puede estar vacía"
         )
     
-    toxicity_classifier.add_keyword(keyword)
+    if category not in toxicity_classifier.toxicity_categories:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Categoría '{category}' no válida. Categorías disponibles: {list(toxicity_classifier.toxicity_categories.keys())}"
+        )
+    
+    toxicity_classifier.add_keyword(keyword, category)
     return {
-        "message": f"Palabra clave '{keyword}' añadida exitosamente",
-        "total_keywords": len(toxicity_classifier.toxic_keywords)
+        "message": f"Palabra clave '{keyword}' añadida exitosamente a la categoría '{category}'",
+        "total_keywords": len(toxicity_classifier.toxic_keywords),
+        "category_keywords": len(toxicity_classifier.toxicity_categories[category])
     }
 
 @app.delete("/keywords/remove")
@@ -266,6 +347,15 @@ async def remove_keyword(keyword: str):
             status_code=404,
             detail=f"Palabra clave '{keyword}' no encontrada"
         )
+
+@app.get("/categories")
+async def get_categories():
+    """Retorna información detallada de todas las categorías de toxicidad"""
+    return {
+        "categories": toxicity_classifier.get_categories_info(),
+        "total_categories": len(toxicity_classifier.toxicity_categories),
+        "weights": toxicity_classifier.category_weights
+    }
 
 if __name__ == "__main__":
     import uvicorn
