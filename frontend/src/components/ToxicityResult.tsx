@@ -1,7 +1,4 @@
 import { AnalyzeResponse } from '../lib/api';
-import { ToxicityGauge } from './ToxicityGauge';
-import { ResultExplanation } from './ResultExplanation';
-import { LoadingSpinner } from './LoadingSpinner';
 
 interface ToxicityResultProps {
   result: AnalyzeResponse | null;
@@ -17,10 +14,15 @@ export function ToxicityResult({
   if (isLoading) {
     return (
       <div className='card'>
-        <LoadingSpinner 
-          message="Analizando toxicidad del texto..." 
-          size="lg" 
-        />
+        <div className='flex flex-col items-center justify-center p-8 space-y-4'>
+          <div className='w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin'></div>
+          <p className='text-gray-700 font-medium'>
+            Analizando toxicidad del texto...
+          </p>
+          <p className='text-sm text-gray-500'>
+            Esto puede tomar unos segundos...
+          </p>
+        </div>
       </div>
     );
   }
@@ -39,7 +41,9 @@ export function ToxicityResult({
             </svg>
           </div>
           <div>
-            <div className='text-red-800 font-semibold text-lg'>Error en el análisis</div>
+            <div className='text-red-800 font-semibold text-lg'>
+              Error en el análisis
+            </div>
             <p className='text-red-700 mt-1'>{error}</p>
           </div>
         </div>
@@ -52,22 +56,73 @@ export function ToxicityResult({
   }
 
   const isToxic = result.toxic;
-  const toxicityPercentage = result.toxicity_percentage;
+  const toxicityPercentage =
+    result.toxicity_percentage || Math.round(result.score * 100);
 
   return (
     <div className='space-y-6'>
-      {/* Gauge principal */}
+      {/* Resultado principal */}
       <div className='card text-center'>
         <h3 className='text-xl font-bold text-gray-900 mb-6'>
           Resultado del Análisis
         </h3>
-        
+
+        {/* Gauge circular simple */}
         <div className='flex justify-center mb-6'>
-          <ToxicityGauge 
-            percentage={toxicityPercentage} 
-            size={220}
-            strokeWidth={14}
-          />
+          <div className='relative w-48 h-48'>
+            <svg width='192' height='192' className='transform -rotate-90'>
+              <circle
+                cx='96'
+                cy='96'
+                r='80'
+                stroke='#E5E7EB'
+                strokeWidth='12'
+                fill='transparent'
+              />
+              <circle
+                cx='96'
+                cy='96'
+                r='80'
+                stroke={
+                  toxicityPercentage < 30
+                    ? '#10B981'
+                    : toxicityPercentage < 70
+                    ? '#F59E0B'
+                    : '#EF4444'
+                }
+                strokeWidth='12'
+                fill='transparent'
+                strokeDasharray={`${2 * Math.PI * 80}`}
+                strokeDashoffset={`${
+                  2 * Math.PI * 80 * (1 - toxicityPercentage / 100)
+                }`}
+                strokeLinecap='round'
+                className='transition-all duration-1000 ease-out'
+              />
+            </svg>
+            <div className='absolute inset-0 flex flex-col items-center justify-center'>
+              <div
+                className='text-3xl font-bold'
+                style={{
+                  color:
+                    toxicityPercentage < 30
+                      ? '#10B981'
+                      : toxicityPercentage < 70
+                      ? '#F59E0B'
+                      : '#EF4444',
+                }}
+              >
+                {Math.round(toxicityPercentage)}%
+              </div>
+              <div className='text-sm font-medium text-gray-600 mt-1'>
+                {toxicityPercentage < 30
+                  ? 'Seguro'
+                  : toxicityPercentage < 70
+                  ? 'Cuidado'
+                  : 'Tóxico'}
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Estado principal */}
@@ -104,22 +159,19 @@ export function ToxicityResult({
           </div>
           <div className='text-center p-3 bg-gray-50 rounded-lg'>
             <div className='text-lg font-bold text-gray-900'>
-              {result.response_time_ms}ms
+              {result.response_time_ms ? `${result.response_time_ms}ms` : 'N/A'}
             </div>
             <div className='text-xs text-gray-500'>Respuesta</div>
           </div>
         </div>
       </div>
 
-      {/* Explicación detallada */}
-      <ResultExplanation result={result} />
-
       {/* Información adicional */}
       <div className='card'>
         <h4 className='text-lg font-semibold text-gray-900 mb-4 text-center'>
           Información Técnica
         </h4>
-        
+
         <div className='grid grid-cols-2 md:grid-cols-4 gap-4'>
           <div className='text-center p-3 bg-blue-50 rounded-lg border border-blue-100'>
             <div className='text-sm font-medium text-blue-900'>Score</div>
@@ -127,31 +179,35 @@ export function ToxicityResult({
               {result.score.toFixed(3)}
             </div>
           </div>
-          
+
           <div className='text-center p-3 bg-purple-50 rounded-lg border border-purple-100'>
-            <div className='text-sm font-medium text-purple-900'>Porcentaje</div>
+            <div className='text-sm font-medium text-purple-900'>
+              Porcentaje
+            </div>
             <div className='text-lg font-bold text-purple-700'>
               {toxicityPercentage.toFixed(1)}%
             </div>
           </div>
-          
+
           <div className='text-center p-3 bg-indigo-50 rounded-lg border border-indigo-100'>
             <div className='text-sm font-medium text-indigo-900'>Modelo</div>
             <div className='text-sm font-bold text-indigo-700 truncate'>
-              {result.model_used}
+              {result.model_used || 'N/A'}
             </div>
           </div>
-          
+
           <div className='text-center p-3 bg-teal-50 rounded-lg border border-teal-100'>
             <div className='text-sm font-medium text-teal-900'>Timestamp</div>
             <div className='text-xs font-bold text-teal-700'>
-              {new Date(result.timestamp).toLocaleTimeString()}
+              {result.timestamp
+                ? new Date(result.timestamp).toLocaleTimeString()
+                : 'N/A'}
             </div>
           </div>
         </div>
 
         {/* Etiquetas */}
-        {result.labels.length > 0 && (
+        {result.labels && result.labels.length > 0 && (
           <div className='mt-6 text-center'>
             <div className='text-sm text-gray-600 mb-3'>
               Etiquetas de análisis:

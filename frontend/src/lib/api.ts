@@ -6,14 +6,14 @@ export interface AnalyzeRequest {
 export interface AnalyzeResponse {
   toxic: boolean;
   score: number;
-  toxicity_percentage: number;
-  category: string | null;
+  toxicity_percentage?: number;
+  category?: string | null;
   labels: string[];
   text_length: number;
   keywords_found: number;
-  response_time_ms: number;
-  timestamp: string;
-  model_used: string;
+  response_time_ms?: number;
+  timestamp?: string;
+  model_used?: string;
 }
 
 // Función para analizar texto usando el backend
