@@ -15,6 +15,7 @@ from ml.preprocess import preprocess_text
 
 from .models import AnalyzeRequest, AnalyzeResponse, ErrorResponse
 from .services import toxicity_classifier
+from .database import history_db
 
 # Cargar variables de entorno
 load_dotenv()
@@ -259,7 +260,8 @@ async def analyze_toxicity(request: AnalyzeRequest):
         # Calcular tiempo de respuesta
         response_time_ms = round((time.time() - start_time) * 1000, 2)
         
-        return AnalyzeResponse(
+        # Crear respuesta
+        response = AnalyzeResponse(
             toxic=is_toxic,
             score=round(score, 3),  # Redondear a 3 decimales
             toxicity_percentage=toxicity_percentage,
@@ -272,6 +274,15 @@ async def analyze_toxicity(request: AnalyzeRequest):
             model_used=model_used
         )
         
+        # Guardar en el historial
+        try:
+            history_db.save_analysis(request.text, response.dict())
+            print(f"💾 Análisis guardado en historial")
+        except Exception as e:
+            print(f"⚠️ Error guardando en historial: {e}")
+        
+        return response
+        
     except Exception as e:
         print(f"❌ Error en análisis ML: {e}")
         # Fallback al clasificador mejorado en caso de error
@@ -283,7 +294,8 @@ async def analyze_toxicity(request: AnalyzeRequest):
             
             response_time_ms = round((time.time() - start_time) * 1000, 2)
             
-            return AnalyzeResponse(
+            # Crear respuesta de fallback
+            fallback_response = AnalyzeResponse(
                 toxic=is_toxic,
                 score=round(score, 3),
                 toxicity_percentage=toxicity_percentage,
@@ -295,6 +307,15 @@ async def analyze_toxicity(request: AnalyzeRequest):
                 timestamp=datetime.now(),
                 model_used="Enhanced Classifier (Fallback)"
             )
+            
+            # Guardar en el historial
+            try:
+                history_db.save_analysis(request.text, fallback_response.dict())
+                print(f"💾 Análisis de fallback guardado en historial")
+            except Exception as e:
+                print(f"⚠️ Error guardando fallback en historial: {e}")
+            
+            return fallback_response
             
         except Exception as fallback_error:
             raise HTTPException(
@@ -356,6 +377,91 @@ async def get_categories():
         "total_categories": len(toxicity_classifier.toxicity_categories),
         "weights": toxicity_classifier.category_weights
     }
+
+@app.get("/history")
+async def get_analysis_history(limit: int = 50, offset: int = 0):
+    """Obtiene el historial de análisis"""
+    try:
+        history = history_db.get_history(limit=limit, offset=offset)
+        return {
+            "history": history,
+            "total": len(history),
+            "limit": limit,
+            "offset": offset
+        }
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Error obteniendo historial: {str(e)}"
+        )
+
+@app.get("/history/stats")
+async def get_history_statistics():
+    """Obtiene estadísticas del historial de análisis"""
+    try:
+        stats = history_db.get_statistics()
+        return stats
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Error obteniendo estadísticas: {str(e)}"
+        )
+
+@app.get("/history/search")
+async def search_analysis_history(q: str, limit: int = 20):
+    """Busca en el historial de análisis"""
+    if not q or not q.strip():
+        raise HTTPException(
+            status_code=400,
+            detail="El parámetro de búsqueda 'q' no puede estar vacío"
+        )
+    
+    try:
+        results = history_db.search_history(q.strip(), limit=limit)
+        return {
+            "results": results,
+            "query": q,
+            "total": len(results),
+            "limit": limit
+        }
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Error en búsqueda: {str(e)}"
+        )
+
+@app.delete("/history/{analysis_id}")
+async def delete_analysis(analysis_id: int):
+    """Elimina un análisis específico del historial"""
+    try:
+        deleted = history_db.delete_analysis(analysis_id)
+        if deleted:
+            return {"message": f"Análisis {analysis_id} eliminado exitosamente"}
+        else:
+            raise HTTPException(
+                status_code=404,
+                detail=f"Análisis {analysis_id} no encontrado"
+            )
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Error eliminando análisis: {str(e)}"
+        )
+
+@app.delete("/history")
+async def clear_analysis_history():
+    """Limpia todo el historial de análisis"""
+    try:
+        deleted_count = history_db.clear_history()
+        return {
+            "message": f"Historial limpiado exitosamente",
+            "deleted_analyses": deleted_count
+        }
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Error limpiando historial: {str(e)}"
+        )
 
 if __name__ == "__main__":
     import uvicorn

@@ -1,33 +1,14 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-@layer base {
-  body {
-    font-family: 'Inter', system-ui, sans-serif;
-  }
+/* Simple, clean reset */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
-@layer components {
-  .btn {
-    @apply px-4 py-2 rounded-lg font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed;
-  }
-
-  .btn-primary {
-    @apply btn bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500;
-  }
-
-  .btn-secondary {
-    @apply btn bg-gray-200 text-gray-700 hover:bg-gray-300 focus:ring-gray-500;
-  }
-
-  .input {
-    @apply w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white;
-  }
-
-  .card {
-    @apply bg-white rounded-xl shadow-sm border border-gray-200 p-6;
-  }
+body {
+  font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+  line-height: 1.6;
+  color: #333;
 }
+
+/* That's it! All styling is done inline in the React components */

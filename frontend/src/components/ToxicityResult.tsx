@@ -13,7 +13,7 @@ export function ToxicityResult({
 }: ToxicityResultProps) {
   if (isLoading) {
     return (
-      <div className='card'>
+      <div className='bg-white rounded-xl shadow-sm border p-6'>
         <div className='flex flex-col items-center justify-center p-8 space-y-4'>
           <div className='w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin'></div>
           <p className='text-gray-700 font-medium'>
@@ -29,7 +29,7 @@ export function ToxicityResult({
 
   if (error) {
     return (
-      <div className='card border-red-200 bg-red-50'>
+      <div className='bg-white rounded-xl shadow-sm border p-6 border-red-200 bg-red-50'>
         <div className='flex items-center space-x-3'>
           <div className='w-8 h-8 text-red-500'>
             <svg fill='currentColor' viewBox='0 0 20 20'>
@@ -62,7 +62,7 @@ export function ToxicityResult({
   return (
     <div className='space-y-6'>
       {/* Resultado principal */}
-      <div className='card text-center'>
+      <div className='bg-white rounded-xl shadow-sm border p-6 text-center'>
         <h3 className='text-xl font-bold text-gray-900 mb-6'>
           Resultado del Análisis
         </h3>
@@ -167,7 +167,7 @@ export function ToxicityResult({
       </div>
 
       {/* Información adicional */}
-      <div className='card'>
+      <div className='bg-white rounded-xl shadow-sm border p-6'>
         <h4 className='text-lg font-semibold text-gray-900 mb-4 text-center'>
           Información Técnica
         </h4>
