@@ -151,7 +151,7 @@ function ToxicityPieChart({ stats }: { stats: HistoryStats }) {
   };
 
   return (
-    <div style={{ height: '300px', width: '100%' }}>
+    <div style={{ height: '250px', width: '100%' }}>
       <Pie data={data} options={options} />
     </div>
   );
@@ -235,7 +235,7 @@ function ToxicityDistributionChart({ history }: { history: HistoryItem[] }) {
   };
 
   return (
-    <div style={{ height: '300px', width: '100%' }}>
+    <div style={{ height: '250px', width: '100%' }}>
       <Bar data={data} options={options} />
     </div>
   );
@@ -315,7 +315,7 @@ function CategoriesChart({ stats }: { stats: HistoryStats }) {
   };
 
   return (
-    <div style={{ height: '300px', width: '100%' }}>
+    <div style={{ height: '250px', width: '100%' }}>
       <Bar data={data} options={options} />
     </div>
   );
@@ -507,7 +507,7 @@ function App() {
 
   return (
     <div style={containerStyle}>
-      <div style={{ maxWidth: '800px', margin: '0 auto' }}>
+      <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
         {/* Header */}
         <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
           <h1
@@ -596,84 +596,378 @@ function App() {
           </div>
         </div>
 
-        {/* Input Form */}
-        <div style={cardStyle}>
-          <label
-            style={{
-              display: 'block',
-              fontSize: '0.875rem',
-              fontWeight: '500',
-              color: '#374151',
-              marginBottom: '0.5rem',
-            }}
-          >
-            Ingresa el texto a analizar:
-          </label>
-          <textarea
-            style={textareaStyle}
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-            placeholder='Escribe aquí el comentario o texto que quieres analizar...'
-            disabled={isLoading}
-          />
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              marginTop: '1rem',
-            }}
-          >
-            <span style={{ fontSize: '0.875rem', color: '#6B7280' }}>
-              {text.length} caracteres
-            </span>
-            <div style={{ display: 'flex', gap: '0.5rem' }}>
-              <button
+        {/* Main Content - Two Column Layout */}
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: result ? '1fr 1fr' : '1fr',
+            gap: '2rem',
+            marginBottom: '2rem',
+          }}
+        >
+          {/* Input Form */}
+          <div style={cardStyle}>
+            <label
+              style={{
+                display: 'block',
+                fontSize: '0.875rem',
+                fontWeight: '500',
+                color: '#374151',
+                marginBottom: '0.5rem',
+              }}
+            >
+              Ingresa el texto a analizar:
+            </label>
+            <textarea
+              style={textareaStyle}
+              value={text}
+              onChange={(e) => setText(e.target.value)}
+              placeholder='Escribe aquí el comentario o texto que quieres analizar...'
+              disabled={isLoading}
+            />
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                marginTop: '1rem',
+              }}
+            >
+              <span style={{ fontSize: '0.875rem', color: '#6B7280' }}>
+                {text.length} caracteres
+              </span>
+              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                <button
+                  style={{
+                    ...secondaryButtonStyle,
+                    opacity: isLoading || !text ? 0.5 : 1,
+                    cursor: isLoading || !text ? 'not-allowed' : 'pointer',
+                  }}
+                  onClick={handleClear}
+                  disabled={isLoading || !text}
+                >
+                  Limpiar
+                </button>
+                <button
+                  style={{
+                    ...primaryButtonStyle,
+                    opacity: isLoading || !text.trim() ? 0.5 : 1,
+                    cursor:
+                      isLoading || !text.trim() ? 'not-allowed' : 'pointer',
+                  }}
+                  onClick={handleAnalyze}
+                  disabled={isLoading || !text.trim()}
+                >
+                  {isLoading ? (
+                    <span
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.5rem',
+                      }}
+                    >
+                      <div
+                        style={{
+                          width: '16px',
+                          height: '16px',
+                          border: '2px solid white',
+                          borderTop: '2px solid transparent',
+                          borderRadius: '50%',
+                          animation: 'spin 1s linear infinite',
+                        }}
+                      ></div>
+                      Analizando...
+                    </span>
+                  ) : (
+                    'Analizar Toxicidad'
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Results - Only show if there's a result */}
+          {result && (
+            <div style={cardStyle}>
+              <h3
                 style={{
-                  ...secondaryButtonStyle,
-                  opacity: isLoading || !text ? 0.5 : 1,
-                  cursor: isLoading || !text ? 'not-allowed' : 'pointer',
+                  textAlign: 'center',
+                  fontSize: '1.5rem',
+                  fontWeight: 'bold',
+                  color: '#111827',
+                  marginBottom: '2rem',
                 }}
-                onClick={handleClear}
-                disabled={isLoading || !text}
               >
-                Limpiar
-              </button>
-              <button
+                Resultado del Análisis
+              </h3>
+
+              {/* Gauge */}
+              <div
                 style={{
-                  ...primaryButtonStyle,
-                  opacity: isLoading || !text.trim() ? 0.5 : 1,
-                  cursor: isLoading || !text.trim() ? 'not-allowed' : 'pointer',
+                  display: 'flex',
+                  justifyContent: 'center',
+                  marginBottom: '2rem',
                 }}
-                onClick={handleAnalyze}
-                disabled={isLoading || !text.trim()}
               >
-                {isLoading ? (
-                  <span
+                <ToxicityGauge percentage={toxicityPercentage} />
+              </div>
+
+              {/* Status */}
+              <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+                <div
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '0.75rem',
+                    padding: '1rem 1.5rem',
+                    borderRadius: '2rem',
+                    fontSize: '1.25rem',
+                    fontWeight: 'bold',
+                    backgroundColor: result.toxic ? '#FEF2F2' : '#F0FDF4',
+                    color: result.toxic ? '#991B1B' : '#166534',
+                    border: result.toxic
+                      ? '2px solid #FECACA'
+                      : '2px solid #BBF7D0',
+                  }}
+                >
+                  <div
                     style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '0.5rem',
+                      width: '16px',
+                      height: '16px',
+                      borderRadius: '50%',
+                      backgroundColor: result.toxic ? '#EF4444' : '#10B981',
+                    }}
+                  ></div>
+                  {result.toxic ? 'CONTENIDO TÓXICO' : 'CONTENIDO SEGURO'}
+                </div>
+              </div>
+
+              {/* Metrics */}
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(3, 1fr)',
+                  gap: '1rem',
+                  marginBottom: '2rem',
+                }}
+              >
+                <div
+                  style={{
+                    textAlign: 'center',
+                    padding: '1rem',
+                    backgroundColor: '#F9FAFB',
+                    borderRadius: '8px',
+                  }}
+                >
+                  <div
+                    style={{
+                      fontSize: '1.125rem',
+                      fontWeight: 'bold',
+                      color: '#111827',
+                    }}
+                  >
+                    {result.text_length}
+                  </div>
+                  <div style={{ fontSize: '0.75rem', color: '#6B7280' }}>
+                    Caracteres
+                  </div>
+                </div>
+                <div
+                  style={{
+                    textAlign: 'center',
+                    padding: '1rem',
+                    backgroundColor: '#F9FAFB',
+                    borderRadius: '8px',
+                  }}
+                >
+                  <div
+                    style={{
+                      fontSize: '1.125rem',
+                      fontWeight: 'bold',
+                      color: '#111827',
+                    }}
+                  >
+                    {result.keywords_found}
+                  </div>
+                  <div style={{ fontSize: '0.75rem', color: '#6B7280' }}>
+                    Palabras clave
+                  </div>
+                </div>
+                <div
+                  style={{
+                    textAlign: 'center',
+                    padding: '1rem',
+                    backgroundColor: '#F9FAFB',
+                    borderRadius: '8px',
+                  }}
+                >
+                  <div
+                    style={{
+                      fontSize: '1.125rem',
+                      fontWeight: 'bold',
+                      color: '#111827',
+                    }}
+                  >
+                    {result.response_time_ms
+                      ? `${result.response_time_ms}ms`
+                      : 'N/A'}
+                  </div>
+                  <div style={{ fontSize: '0.75rem', color: '#6B7280' }}>
+                    Respuesta
+                  </div>
+                </div>
+              </div>
+
+              {/* Technical Info */}
+              <div>
+                <h4
+                  style={{
+                    textAlign: 'center',
+                    fontSize: '1.125rem',
+                    fontWeight: '600',
+                    color: '#111827',
+                    marginBottom: '1rem',
+                  }}
+                >
+                  Información Técnica
+                </h4>
+                <div
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))',
+                    gap: '1rem',
+                  }}
+                >
+                  <div
+                    style={{
+                      textAlign: 'center',
+                      padding: '0.75rem',
+                      backgroundColor: '#EBF8FF',
+                      borderRadius: '8px',
+                      border: '1px solid #93C5FD',
                     }}
                   >
                     <div
                       style={{
-                        width: '16px',
-                        height: '16px',
-                        border: '2px solid white',
-                        borderTop: '2px solid transparent',
-                        borderRadius: '50%',
-                        animation: 'spin 1s linear infinite',
+                        fontSize: '0.875rem',
+                        fontWeight: '500',
+                        color: '#1E40AF',
                       }}
-                    ></div>
-                    Analizando...
-                  </span>
-                ) : (
-                  'Analizar Toxicidad'
+                    >
+                      Score
+                    </div>
+                    <div
+                      style={{
+                        fontSize: '1.125rem',
+                        fontWeight: 'bold',
+                        color: '#1D4ED8',
+                      }}
+                    >
+                      {result.score.toFixed(3)}
+                    </div>
+                  </div>
+                  <div
+                    style={{
+                      textAlign: 'center',
+                      padding: '0.75rem',
+                      backgroundColor: '#FAF5FF',
+                      borderRadius: '8px',
+                      border: '1px solid #C4B5FD',
+                    }}
+                  >
+                    <div
+                      style={{
+                        fontSize: '0.875rem',
+                        fontWeight: '500',
+                        color: '#7C3AED',
+                      }}
+                    >
+                      Porcentaje
+                    </div>
+                    <div
+                      style={{
+                        fontSize: '1.125rem',
+                        fontWeight: 'bold',
+                        color: '#6D28D9',
+                      }}
+                    >
+                      {toxicityPercentage.toFixed(1)}%
+                    </div>
+                  </div>
+                  <div
+                    style={{
+                      textAlign: 'center',
+                      padding: '0.75rem',
+                      backgroundColor: '#F0F9FF',
+                      borderRadius: '8px',
+                      border: '1px solid #7DD3FC',
+                    }}
+                  >
+                    <div
+                      style={{
+                        fontSize: '0.875rem',
+                        fontWeight: '500',
+                        color: '#0369A1',
+                      }}
+                    >
+                      Modelo
+                    </div>
+                    <div
+                      style={{
+                        fontSize: '0.875rem',
+                        fontWeight: 'bold',
+                        color: '#0284C7',
+                      }}
+                    >
+                      {result.model_used || 'N/A'}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Labels */}
+                {result.labels && result.labels.length > 0 && (
+                  <div style={{ marginTop: '1.5rem', textAlign: 'center' }}>
+                    <div
+                      style={{
+                        fontSize: '0.875rem',
+                        color: '#6B7280',
+                        marginBottom: '0.75rem',
+                      }}
+                    >
+                      Etiquetas de análisis:
+                    </div>
+                    <div
+                      style={{
+                        display: 'flex',
+                        flexWrap: 'wrap',
+                        justifyContent: 'center',
+                        gap: '0.5rem',
+                      }}
+                    >
+                      {result.labels.map((label, index) => (
+                        <span
+                          key={index}
+                          style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            padding: '0.25rem 0.75rem',
+                            borderRadius: '9999px',
+                            fontSize: '0.75rem',
+                            fontWeight: '500',
+                            backgroundColor: '#EBF4FF',
+                            color: '#1E40AF',
+                            border: '1px solid #93C5FD',
+                          }}
+                        >
+                          {label}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
                 )}
-              </button>
+              </div>
             </div>
-          </div>
+          )}
         </div>
 
         {/* Loading */}
@@ -726,290 +1020,6 @@ function App() {
                   {error}
                 </p>
               </div>
-            </div>
-          </div>
-        )}
-
-        {/* Results */}
-        {result && (
-          <div style={cardStyle}>
-            <h3
-              style={{
-                textAlign: 'center',
-                fontSize: '1.5rem',
-                fontWeight: 'bold',
-                color: '#111827',
-                marginBottom: '2rem',
-              }}
-            >
-              Resultado del Análisis
-            </h3>
-
-            {/* Gauge */}
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'center',
-                marginBottom: '2rem',
-              }}
-            >
-              <ToxicityGauge percentage={toxicityPercentage} />
-            </div>
-
-            {/* Status */}
-            <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-              <div
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '0.75rem',
-                  padding: '1rem 1.5rem',
-                  borderRadius: '2rem',
-                  fontSize: '1.25rem',
-                  fontWeight: 'bold',
-                  backgroundColor: result.toxic ? '#FEF2F2' : '#F0FDF4',
-                  color: result.toxic ? '#991B1B' : '#166534',
-                  border: result.toxic
-                    ? '2px solid #FECACA'
-                    : '2px solid #BBF7D0',
-                }}
-              >
-                <div
-                  style={{
-                    width: '16px',
-                    height: '16px',
-                    borderRadius: '50%',
-                    backgroundColor: result.toxic ? '#EF4444' : '#10B981',
-                  }}
-                ></div>
-                {result.toxic ? 'CONTENIDO TÓXICO' : 'CONTENIDO SEGURO'}
-              </div>
-            </div>
-
-            {/* Metrics */}
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(3, 1fr)',
-                gap: '1rem',
-                maxWidth: '400px',
-                margin: '0 auto 2rem auto',
-              }}
-            >
-              <div
-                style={{
-                  textAlign: 'center',
-                  padding: '1rem',
-                  backgroundColor: '#F9FAFB',
-                  borderRadius: '8px',
-                }}
-              >
-                <div
-                  style={{
-                    fontSize: '1.125rem',
-                    fontWeight: 'bold',
-                    color: '#111827',
-                  }}
-                >
-                  {result.text_length}
-                </div>
-                <div style={{ fontSize: '0.75rem', color: '#6B7280' }}>
-                  Caracteres
-                </div>
-              </div>
-              <div
-                style={{
-                  textAlign: 'center',
-                  padding: '1rem',
-                  backgroundColor: '#F9FAFB',
-                  borderRadius: '8px',
-                }}
-              >
-                <div
-                  style={{
-                    fontSize: '1.125rem',
-                    fontWeight: 'bold',
-                    color: '#111827',
-                  }}
-                >
-                  {result.keywords_found}
-                </div>
-                <div style={{ fontSize: '0.75rem', color: '#6B7280' }}>
-                  Palabras clave
-                </div>
-              </div>
-              <div
-                style={{
-                  textAlign: 'center',
-                  padding: '1rem',
-                  backgroundColor: '#F9FAFB',
-                  borderRadius: '8px',
-                }}
-              >
-                <div
-                  style={{
-                    fontSize: '1.125rem',
-                    fontWeight: 'bold',
-                    color: '#111827',
-                  }}
-                >
-                  {result.response_time_ms
-                    ? `${result.response_time_ms}ms`
-                    : 'N/A'}
-                </div>
-                <div style={{ fontSize: '0.75rem', color: '#6B7280' }}>
-                  Respuesta
-                </div>
-              </div>
-            </div>
-
-            {/* Technical Info */}
-            <div>
-              <h4
-                style={{
-                  textAlign: 'center',
-                  fontSize: '1.125rem',
-                  fontWeight: '600',
-                  color: '#111827',
-                  marginBottom: '1rem',
-                }}
-              >
-                Información Técnica
-              </h4>
-              <div
-                style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
-                  gap: '1rem',
-                }}
-              >
-                <div
-                  style={{
-                    textAlign: 'center',
-                    padding: '0.75rem',
-                    backgroundColor: '#EBF8FF',
-                    borderRadius: '8px',
-                    border: '1px solid #93C5FD',
-                  }}
-                >
-                  <div
-                    style={{
-                      fontSize: '0.875rem',
-                      fontWeight: '500',
-                      color: '#1E40AF',
-                    }}
-                  >
-                    Score
-                  </div>
-                  <div
-                    style={{
-                      fontSize: '1.125rem',
-                      fontWeight: 'bold',
-                      color: '#1D4ED8',
-                    }}
-                  >
-                    {result.score.toFixed(3)}
-                  </div>
-                </div>
-                <div
-                  style={{
-                    textAlign: 'center',
-                    padding: '0.75rem',
-                    backgroundColor: '#FAF5FF',
-                    borderRadius: '8px',
-                    border: '1px solid #C4B5FD',
-                  }}
-                >
-                  <div
-                    style={{
-                      fontSize: '0.875rem',
-                      fontWeight: '500',
-                      color: '#7C3AED',
-                    }}
-                  >
-                    Porcentaje
-                  </div>
-                  <div
-                    style={{
-                      fontSize: '1.125rem',
-                      fontWeight: 'bold',
-                      color: '#6D28D9',
-                    }}
-                  >
-                    {toxicityPercentage.toFixed(1)}%
-                  </div>
-                </div>
-                <div
-                  style={{
-                    textAlign: 'center',
-                    padding: '0.75rem',
-                    backgroundColor: '#F0F9FF',
-                    borderRadius: '8px',
-                    border: '1px solid #7DD3FC',
-                  }}
-                >
-                  <div
-                    style={{
-                      fontSize: '0.875rem',
-                      fontWeight: '500',
-                      color: '#0369A1',
-                    }}
-                  >
-                    Modelo
-                  </div>
-                  <div
-                    style={{
-                      fontSize: '0.875rem',
-                      fontWeight: 'bold',
-                      color: '#0284C7',
-                    }}
-                  >
-                    {result.model_used || 'N/A'}
-                  </div>
-                </div>
-              </div>
-
-              {/* Labels */}
-              {result.labels && result.labels.length > 0 && (
-                <div style={{ marginTop: '1.5rem', textAlign: 'center' }}>
-                  <div
-                    style={{
-                      fontSize: '0.875rem',
-                      color: '#6B7280',
-                      marginBottom: '0.75rem',
-                    }}
-                  >
-                    Etiquetas de análisis:
-                  </div>
-                  <div
-                    style={{
-                      display: 'flex',
-                      flexWrap: 'wrap',
-                      justifyContent: 'center',
-                      gap: '0.5rem',
-                    }}
-                  >
-                    {result.labels.map((label, index) => (
-                      <span
-                        key={index}
-                        style={{
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          padding: '0.25rem 0.75rem',
-                          borderRadius: '9999px',
-                          fontSize: '0.75rem',
-                          fontWeight: '500',
-                          backgroundColor: '#EBF4FF',
-                          color: '#1E40AF',
-                          border: '1px solid #93C5FD',
-                        }}
-                      >
-                        {label}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              )}
             </div>
           </div>
         )}
@@ -1178,8 +1188,8 @@ function App() {
                 <div
                   style={{
                     display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))',
-                    gap: '2rem',
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+                    gap: '1.5rem',
                     marginBottom: '1.5rem',
                   }}
                 >

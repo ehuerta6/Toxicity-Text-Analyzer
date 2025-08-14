@@ -37,7 +37,7 @@ class ToxicityClassifier:
             self.toxic_keywords.update(category_words)
         
         # Umbral para considerar texto como tóxico
-        self.toxicity_threshold = 0.34
+        self.toxicity_threshold = 0.3
         
         # Pesos por categoría para scoring más preciso
         self.category_weights = {
@@ -98,14 +98,21 @@ class ToxicityClassifier:
                 if count > 0
             )
             
-            # Normalizar por longitud del texto
-            score = min(1.0, (weighted_score * 0.3) + (weighted_score / max(text_length, 1) * 0.7))
+            # Fórmula mejorada: más sensible a palabras tóxicas
+            # Base score por palabras encontradas + factor de densidad
+            base_score = min(1.0, weighted_score * 0.25)  # Cada palabra tóxica agrega al score
+            density_score = min(0.5, total_matches / max(text_length / 20, 1))  # Densidad de toxicidad
+            score = min(1.0, base_score + density_score)
+            
+            # Si hay palabras tóxicas, score mínimo de 0.4
+            if total_matches > 0:
+                score = max(score, 0.4)
             
             # Determinar si es tóxico
             is_toxic = score >= self.toxicity_threshold
             
             # Determinar categoría principal
-            if is_toxic:
+            if total_matches > 0:
                 category = max(category_matches.items(), key=lambda x: x[1] * self.category_weights[x[0]])[0]
                 labels = [category, "detected"]
             else:
