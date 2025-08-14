@@ -37,18 +37,23 @@ function App() {
   };
 
   return (
-    <div className='min-h-screen bg-gray-50 py-8'>
+    <div className='min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 py-8'>
       <div className='max-w-4xl mx-auto px-4'>
         {/* Header */}
         <div className='text-center mb-8'>
-          <h1 className='text-4xl font-bold text-gray-900 mb-2'>ToxiGuard</h1>
-          <p className='text-lg text-gray-600'>
-            Detecta comentarios tóxicos en tiempo real
+          <h1 className='text-5xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-3'>
+            ToxiGuard
+          </h1>
+          <p className='text-xl text-gray-600'>
+            Detecta comentarios tóxicos en tiempo real con IA avanzada
+          </p>
+          <p className='text-sm text-gray-500 mt-2'>
+            Fase 3 - Enhanced API & Visual Results
           </p>
         </div>
 
         {/* Formulario principal */}
-        <div className='card mb-6'>
+        <div className='card mb-6 shadow-lg border-0 bg-white/80 backdrop-blur-sm'>
           <div className='space-y-4'>
             <div>
               <label
@@ -62,7 +67,7 @@ function App() {
                 value={text}
                 onChange={(e) => setText(e.target.value)}
                 placeholder='Escribe aquí el comentario o texto que quieres analizar...'
-                className='input min-h-[120px] resize-none'
+                className='input min-h-[120px] resize-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500'
                 disabled={isLoading}
               />
               <div className='flex justify-between items-center mt-2'>
@@ -73,14 +78,14 @@ function App() {
                   <button
                     onClick={handleClear}
                     disabled={isLoading || !text}
-                    className='btn-secondary disabled:opacity-50 disabled:cursor-not-allowed'
+                    className='btn-secondary disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100'
                   >
                     Limpiar
                   </button>
                   <button
                     onClick={handleAnalyze}
                     disabled={isLoading || !text.trim()}
-                    className='btn-primary disabled:opacity-50 disabled:cursor-not-allowed'
+                    className='btn-primary disabled:opacity-50 disabled:cursor-not-allowed hover:bg-blue-600 transform hover:scale-105 transition-all duration-200'
                   >
                     {isLoading ? (
                       <div className='flex items-center space-x-2'>
@@ -88,7 +93,7 @@ function App() {
                         <span>Analizando...</span>
                       </div>
                     ) : (
-                      'Analizar'
+                      'Analizar Toxicidad'
                     )}
                   </button>
                 </div>
@@ -102,8 +107,8 @@ function App() {
 
         {/* Información adicional */}
         {!result && !isLoading && !error && (
-          <div className='card text-center text-gray-500'>
-            <div className='w-16 h-16 mx-auto mb-4 text-gray-300'>
+          <div className='card text-center text-gray-500 bg-white/60 backdrop-blur-sm border-0 shadow-lg'>
+            <div className='w-20 h-20 mx-auto mb-4 text-gray-300'>
               <svg fill='currentColor' viewBox='0 0 20 20'>
                 <path
                   fillRule='evenodd'
@@ -112,7 +117,15 @@ function App() {
                 />
               </svg>
             </div>
-            <p>Ingresa un texto y haz clic en "Analizar" para comenzar</p>
+            <p className='text-lg font-medium mb-2'>¿Listo para analizar?</p>
+            <p className='text-gray-600'>
+              Ingresa un texto y haz clic en "Analizar Toxicidad" para comenzar
+            </p>
+            <div className='mt-4 text-xs text-gray-400 space-y-1'>
+              <p>✨ Análisis con IA avanzada</p>
+              <p>🎯 Detección precisa de toxicidad</p>
+              <p>📊 Resultados visuales detallados</p>
+            </div>
           </div>
         )}
       </div>
