@@ -16,11 +16,11 @@ El frontend se encarga de:
 ```
 frontend/
 ├── src/
-│   ├── components/           # Componentes reutilizables (futuro)
-│   ├── services/             # Llamadas a la API del backend (futuro)
-│   ├── types/                # Definiciones de TypeScript (futuro)
-│   ├── utils/                # Utilidades y helpers (futuro)
-│   ├── App.tsx               # Componente principal simplificado
+│   ├── components/           # Componentes reutilizables
+│   │   └── ToxicityResult.tsx   # Componente de visualización de resultados
+│   ├── lib/                  # Utilidades y servicios
+│   │   └── api.ts               # Funciones de comunicación con el backend
+│   ├── App.tsx               # Componente principal de la aplicación
 │   ├── main.tsx              # Punto de entrada
 │   └── index.css             # Estilos base de TailwindCSS
 ├── public/                   # Archivos estáticos
@@ -40,7 +40,10 @@ frontend/
 - **✅ TailwindCSS** - Framework CSS utilitario configurado y funcionando
 - **✅ Variables de entorno** - Configuración de API URL
 - **✅ Servidor de desarrollo** - Funcionando en puerto 5173
-- **✅ Pantalla en blanco** - Lista para implementar componentes
+- **✅ Integración con backend** - Comunicación completa implementada
+- **✅ Interfaz de usuario** - Textarea, botón de análisis y visualización de resultados
+- **✅ Manejo de errores** - Gestión de errores de red y backend
+- **✅ Estados de carga** - Indicadores visuales durante el análisis
 
 ## 🛠 Tecnologías
 
@@ -50,6 +53,7 @@ frontend/
 - **TailwindCSS** - Framework CSS utilitario con componentes personalizados
 - **PostCSS** - Procesamiento de CSS
 - **Autoprefixer** - Añade prefijos de navegador automáticamente
+- **Fetch API** - Comunicación HTTP con el backend
 
 ## 📋 Configuración completada ✅
 
@@ -58,9 +62,50 @@ frontend/
 3. ✅ PostCSS y Autoprefixer configurados
 4. ✅ Variables de entorno configuradas (VITE_API_URL)
 5. ✅ Servidor de desarrollo funcionando en puerto 5173
-6. ✅ Pantalla en blanco lista para implementar componentes
-7. ✅ Estilos base de TailwindCSS con componentes personalizados
-8. ✅ Configuración de TypeScript optimizada
+6. ✅ **NUEVO** Integración completa con backend implementada
+7. ✅ **NUEVO** Interfaz de usuario funcional
+8. ✅ **NUEVO** Manejo de estados y errores
+9. ✅ Estilos base de TailwindCSS con componentes personalizados
+10. ✅ Configuración de TypeScript optimizada
+
+## 🔌 Integración con Backend
+
+### API Functions (`src/lib/api.ts`)
+
+- **`analyze(text: string)`** - Envía texto al backend para análisis
+- **`checkBackendHealth()`** - Verifica la salud del backend
+- **Tipos TypeScript** - Interfaces para request/response
+
+### Endpoints utilizados
+
+- **`POST /analyze`** - Análisis principal de toxicidad
+- **`GET /health`** - Verificación de salud del backend
+
+### Manejo de errores
+
+- Errores de red (conexión fallida)
+- Errores del backend (respuestas HTTP no exitosas)
+- Validación de entrada (texto vacío)
+- Estados de carga durante el análisis
+
+## 🎨 Interfaz de Usuario
+
+### Componente Principal (`src/App.tsx`)
+
+- **Header** - Título y descripción de la aplicación
+- **Textarea** - Input para ingresar texto a analizar
+- **Botones** - "Analizar" y "Limpiar" con estados deshabilitados
+- **Contador de caracteres** - Muestra longitud del texto
+- **Estados de carga** - Spinner y texto "Analizando..."
+
+### Componente de Resultados (`src/components/ToxicityResult.tsx`)
+
+- **Estado principal** - Badge "TÓXICO" o "NO TÓXICO"
+- **Score visual** - Porcentaje con barra de progreso
+- **Detalles** - Longitud del texto y palabras clave encontradas
+- **Etiquetas** - Categorías de toxicidad detectadas
+- **Estados** - Carga, error y resultados
+- **Animaciones** - Transiciones suaves y efectos visuales
 
 ## 🚀 Cómo ejecutar
 
@@ -90,7 +135,7 @@ npm run preview
 
 ## 🌐 URLs de acceso
 
-- **Servidor de desarrollo:** http://localhost:5173
+- **Frontend (desarrollo):** http://localhost:5173
 - **Backend API:** http://localhost:8000 (configurado en .env)
 
 ## 🔧 Variables de entorno
@@ -128,19 +173,20 @@ El archivo `.env` contiene:
 
 1. ✅ ~~Inicializar proyecto con Vite + React + TypeScript~~ **COMPLETADO**
 2. ✅ ~~Configurar TailwindCSS~~ **COMPLETADO**
-3. 🔄 Crear componentes básicos de UI:
-   - Componente de input para comentarios
-   - Componente de visualización de resultados
-   - Layout principal de la aplicación
-4. 🔄 Implementar comunicación con el backend
-5. 🔄 Añadir manejo de estados y errores
-6. 🔄 Implementar diseño responsivo
+3. ✅ ~~Crear componentes básicos de UI~~ **COMPLETADO**
+4. ✅ ~~Implementar comunicación con el backend~~ **COMPLETADO**
+5. ✅ ~~Añadir manejo de estados y errores~~ **COMPLETADO**
+6. 🔄 Implementar diseño responsivo y mejoras de UX
+7. 🔄 Añadir historial de análisis
+8. 🔄 Implementar autenticación (futuro)
 
 ## 🧪 Desarrollo
 
 ### Estructura de archivos
 
-- **`src/App.tsx`** - Componente principal (simplificado)
+- **`src/App.tsx`** - Componente principal con lógica de análisis
+- **`src/components/ToxicityResult.tsx`** - Visualización de resultados
+- **`src/lib/api.ts`** - Funciones de comunicación con backend
 - **`src/index.css`** - Estilos base de TailwindCSS
 - **`tailwind.config.js`** - Configuración de TailwindCSS
 - **`postcss.config.js`** - Configuración de PostCSS
@@ -152,6 +198,15 @@ El archivo `.env` contiene:
 - `npm run preview` - Previsualizar build
 - `npm run lint` - Linting del código
 
+## 🔍 Flujo de la aplicación
+
+1. **Usuario ingresa texto** en el textarea
+2. **Hace clic en "Analizar"** para enviar al backend
+3. **Frontend muestra estado de carga** con spinner
+4. **Backend procesa y responde** con análisis de toxicidad
+5. **Frontend muestra resultados** con visualización completa
+6. **Manejo de errores** si algo falla en el proceso
+
 ---
 
-_Frontend configurado y funcionando - Fase 1 completada ✅_
+_Frontend configurado y funcionando con integración completa - Fase 1 completada ✅_
