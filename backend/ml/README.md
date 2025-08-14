@@ -73,15 +73,17 @@ TEST_SIZE=0.2
 3. **Estructura de carpetas** - Organización ML lista
 4. **Configuración centralizada** - Archivo config.py implementado
 5. **Script de prueba** - Verificación de instalación funcionando
+6. **Preprocesador de texto** - Clase TextPreprocessor implementada y probada
+7. **Dataset cargado y procesado** - 1,000 comentarios preprocesados exitosamente
+8. **Script de preprocesamiento** - Pipeline completo de carga y limpieza
 
 ### 🔄 Pendientes (Fase 2)
 
-1. **Preprocesador de texto** - Limpieza y normalización
-2. **Vectorizador TF-IDF** - Conversión texto → características
-3. **Modelos de clasificación** - Logistic Regression, Naive Bayes
-4. **Entrenador de modelos** - Pipeline de entrenamiento
-5. **Evaluador** - Métricas y validación
-6. **Integración con backend** - Reemplazar clasificador naïve
+1. **Vectorizador TF-IDF** - Conversión texto → características
+2. **Modelos de clasificación** - Logistic Regression, Naive Bayes, Random Forest
+3. **Entrenador de modelos** - Pipeline de entrenamiento
+4. **Evaluador** - Métricas y validación
+5. **Integración con backend** - Reemplazar clasificador naïve
 
 ## 🧪 Pruebas
 
