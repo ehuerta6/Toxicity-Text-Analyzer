@@ -463,6 +463,110 @@ async def clear_analysis_history():
             detail=f"Error limpiando historial: {str(e)}"
         )
 
+# ================================
+# 🔧 ENDPOINTS DE GESTIÓN DEL MODELO
+# ================================
+
+@app.get("/model/status")
+async def get_model_status():
+    """Obtiene el estado del modelo ML"""
+    try:
+        # Importar aquí para evitar errores de import circular
+        sys.path.append(str(Path(__file__).parent.parent))
+        from ml.model_manager import ModelManager
+        
+        manager = ModelManager()
+        status = manager.get_model_status()
+        
+        # Agregar información del estado actual del servidor
+        status['server_model_loaded'] = model_loaded
+        status['server_model_type'] = type(ml_model).__name__ if ml_model else None
+        
+        return status
+        
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Error obteniendo estado del modelo: {str(e)}"
+        )
+
+@app.post("/model/reload")
+async def reload_model():
+    """Recarga el modelo ML desde archivos"""
+    try:
+        success = load_ml_model()
+        
+        if success:
+            return {
+                "message": "Modelo recargado exitosamente",
+                "model_loaded": model_loaded,
+                "model_type": type(ml_model).__name__ if ml_model else None
+            }
+        else:
+            raise HTTPException(
+                status_code=500,
+                detail="Error recargando modelo"
+            )
+            
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Error recargando modelo: {str(e)}"
+        )
+
+@app.post("/model/backup")
+async def create_model_backup():
+    """Crea un backup del modelo actual"""
+    try:
+        sys.path.append(str(Path(__file__).parent.parent))
+        from ml.model_manager import ModelManager
+        
+        manager = ModelManager()
+        success = manager.backup_current_model()
+        
+        if success:
+            return {
+                "message": "Backup creado exitosamente",
+                "backup_created": True
+            }
+        else:
+            raise HTTPException(
+                status_code=400,
+                detail="No se pudo crear el backup"
+            )
+            
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Error creando backup: {str(e)}"
+        )
+
+@app.get("/model/needs-retrain")
+async def check_retrain_needed():
+    """Verifica si el modelo necesita reentrenamiento"""
+    try:
+        sys.path.append(str(Path(__file__).parent.parent))
+        from ml.model_manager import ModelManager
+        
+        manager = ModelManager()
+        needs_retrain = manager.needs_retraining()
+        age = manager.get_model_age()
+        
+        return {
+            "needs_retraining": needs_retrain,
+            "model_age_days": age.days if age else None,
+            "recommendation": (
+                "Modelo requiere reentrenamiento" if needs_retrain 
+                else "Modelo está actualizado"
+            )
+        }
+        
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Error verificando reentrenamiento: {str(e)}"
+        )
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
