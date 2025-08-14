@@ -16,38 +16,104 @@ El backend se encarga de:
 ```
 backend/
 ├── app/
-│   ├── main.py              # Punto de entrada de FastAPI
-│   ├── models/              # Modelos Pydantic para validación
-│   ├── services/            # Lógica de negocio y ML
-│   └── utils/               # Utilidades y helpers
+│   └── main.py              # Punto de entrada de FastAPI
+├── .venv/                    # Entorno virtual de Python
 ├── requirements.txt          # Dependencias de Python
-├── .env.example             # Variables de entorno de ejemplo
-└── README.md                # Este archivo
+├── .env                      # Variables de entorno
+├── .gitignore               # Archivos a ignorar en Git
+├── test_server.py            # Script de prueba del servidor
+└── README.md                 # Este archivo
 ```
 
-## 🚀 Endpoints principales
+## 🚀 Endpoints implementados
 
+- `GET /` - Información general de la API
 - `GET /health` - Verificación de estado del servicio
-- `POST /analyze` - Análisis de toxicidad de comentarios
-- `GET /history` - Historial de comentarios analizados (futuro)
+- `GET /api/health` - Endpoint alternativo de salud
 
 ## 🛠 Tecnologías
 
 - **FastAPI** - Framework web moderno y rápido
 - **Python 3.8+** - Lenguaje principal
-- **scikit-learn** - Modelos de Machine Learning
-- **spaCy** - Procesamiento de lenguaje natural
-- **Pydantic** - Validación de datos
-- **SQLite/PostgreSQL** - Base de datos (opcional para MVP)
+- **uvicorn** - Servidor ASGI para desarrollo
+- **pydantic** - Validación de datos
+- **python-dotenv** - Manejo de variables de entorno
+- **requests** - Cliente HTTP para pruebas
 
-## 📋 Próximos pasos
+## 📋 Configuración completada ✅
 
-1. Configurar entorno virtual de Python
-2. Instalar dependencias con `pip install -r requirements.txt`
-3. Crear estructura de carpetas y archivos base
-4. Implementar endpoints básicos de salud y análisis
-5. Integrar modelo ML de toxicidad
+1. ✅ Entorno virtual de Python creado (`.venv`)
+2. ✅ Dependencias instaladas (`fastapi`, `uvicorn[standard]`, `pydantic`, `python-dotenv`)
+3. ✅ Estructura de carpetas y archivos base creada
+4. ✅ Endpoints básicos de salud implementados
+5. ✅ Configuración de CORS para frontend
+6. ✅ Variables de entorno configuradas
+7. ✅ Servidor funcionando en puerto 8000
+
+## 🚀 Cómo ejecutar
+
+### 1. Activar entorno virtual
+
+```bash
+# Windows PowerShell
+.venv\Scripts\Activate.ps1
+
+# Windows CMD
+.venv\Scripts\activate.bat
+
+# Linux/Mac
+source .venv/bin/activate
+```
+
+### 2. Instalar dependencias
+
+```bash
+pip install -r requirements.txt
+```
+
+### 3. Ejecutar servidor
+
+```bash
+uvicorn app.main:app --reload --port 8000 --host 0.0.0.0
+```
+
+### 4. Probar endpoints
+
+```bash
+# Endpoint de salud
+curl http://localhost:8000/health
+
+# Endpoint raíz
+curl http://localhost:8000/
+
+# Usar el script de prueba
+python test_server.py
+```
+
+## 🌐 URLs de acceso
+
+- **Servidor local:** http://localhost:8000
+- **Documentación automática:** http://localhost:8000/docs
+- **Documentación alternativa:** http://localhost:8000/redoc
+
+## 📝 Próximos pasos
+
+1. Implementar endpoint `POST /analyze` para análisis de toxicidad
+2. Crear modelos Pydantic para validación de datos
+3. Integrar modelo ML de toxicidad
+4. Añadir base de datos para historial
+5. Implementar autenticación y autorización
+
+## 🔧 Variables de entorno
+
+El archivo `.env` contiene:
+
+- `FRONTEND_URL` - URL del frontend para CORS
+- `HOST` - Host del servidor
+- `PORT` - Puerto del servidor
+- `DATABASE_URL` - URL de la base de datos (futuro)
+- `MODEL_PATH` - Ruta a los modelos ML (futuro)
 
 ---
 
-_Configuración pendiente - Fase 1 del proyecto_
+_Backend configurado y funcionando - Fase 1 completada ✅_
