@@ -110,6 +110,91 @@ const ToxicityGauge: React.FC<{ percentage: number }> = ({ percentage }) => {
   );
 };
 
+const ConfidenceGauge: React.FC<{ confidence: number }> = ({ confidence }) => {
+  const getConfidenceColor = (confidence: number): string => {
+    if (confidence >= 80) return 'var(--secondary)'; // Verde para alta confianza
+    if (confidence >= 60) return 'oklch(0.769 0.188 70.08)'; // Amarillo para confianza media
+    return 'var(--destructive)'; // Rojo para baja confianza
+  };
+
+  const getConfidenceLabel = (confidence: number): string => {
+    if (confidence >= 80) return 'Alto';
+    if (confidence >= 60) return 'Medio';
+    return 'Bajo';
+  };
+
+  const color = getConfidenceColor(confidence);
+  const roundedConfidence = Math.round(confidence);
+
+  return (
+    <div style={{ textAlign: 'center' }}>
+      <div
+        style={{
+          width: '80px',
+          height: '80px',
+          borderRadius: '50%',
+          background: `conic-gradient(${color} ${
+            roundedConfidence * 3.6
+          }deg, var(--muted) ${roundedConfidence * 3.6}deg)`,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          margin: '0 auto 8px',
+          position: 'relative',
+          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
+          border: `2px solid ${color}`,
+        }}
+      >
+        <div
+          style={{
+            width: '56px',
+            height: '56px',
+            borderRadius: '50%',
+            backgroundColor: 'var(--background)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: '14px',
+            fontWeight: 'bold',
+            color: color,
+            boxShadow: 'inset 0 1px 4px rgba(0, 0, 0, 0.1)',
+          }}
+        >
+          {roundedConfidence}%
+        </div>
+      </div>
+
+      <div
+        style={{
+          fontSize: '12px',
+          fontWeight: '700',
+          color: color,
+          textShadow: '0 1px 2px rgba(0, 0, 0, 0.1)',
+          marginBottom: '4px',
+          padding: '4px 8px',
+          backgroundColor: `${color}15`,
+          borderRadius: '12px',
+          display: 'inline-block',
+        }}
+      >
+        {getConfidenceLabel(confidence)}
+      </div>
+
+      <div
+        style={{
+          fontSize: '10px',
+          color: 'var(--muted-foreground)',
+          maxWidth: '120px',
+          margin: '0 auto',
+          lineHeight: '1.2',
+        }}
+      >
+        Model Confidence Level
+      </div>
+    </div>
+  );
+};
+
 const ColoredText: React.FC<{ text: string; toxicityMap: ToxicityMap }> = ({
   text,
   toxicityMap,
@@ -679,7 +764,7 @@ const App: React.FC = () => {
             marginBottom: '24px',
           }}
         >
-          {/* Cuadro Combinado: Toxicity Analysis + Analysis Details */}
+          {/* Cuadro Combinado: Toxicity Analysis + Confidence Analysis + Analysis Details */}
           <div
             style={{
               backgroundColor: 'var(--card)',
@@ -692,19 +777,43 @@ const App: React.FC = () => {
               gap: '20px',
             }}
           >
-            {/* Sección de Toxicity Analysis */}
-            <div style={{ textAlign: 'center' }}>
-              <h3
-                style={{
-                  fontSize: '16px',
-                  fontWeight: '600',
-                  color: 'var(--foreground)',
-                  margin: '0 0 16px 0',
-                }}
-              >
-                📊 Toxicity Analysis
-              </h3>
-              <ToxicityGauge percentage={result?.toxicity_percentage || 0} />
+            {/* Fila Superior: Toxicity Analysis y Confidence Analysis en disposición horizontal */}
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+                gap: '20px',
+              }}
+            >
+              {/* Toxicity Analysis */}
+              <div style={{ textAlign: 'center' }}>
+                <h3
+                  style={{
+                    fontSize: '16px',
+                    fontWeight: '600',
+                    color: 'var(--foreground)',
+                    margin: '0 0 16px 0',
+                  }}
+                >
+                  📊 Toxicity Analysis
+                </h3>
+                <ToxicityGauge percentage={result?.toxicity_percentage || 0} />
+              </div>
+
+              {/* Confidence Analysis */}
+              <div style={{ textAlign: 'center' }}>
+                <h3
+                  style={{
+                    fontSize: '16px',
+                    fontWeight: '600',
+                    color: 'var(--foreground)',
+                    margin: '0 0 16px 0',
+                  }}
+                >
+                  🎯 Confidence Analysis
+                </h3>
+                <ConfidenceGauge confidence={result?.confidence || 0} />
+              </div>
             </div>
 
             {/* Separador visual sutil */}
@@ -716,7 +825,7 @@ const App: React.FC = () => {
               }}
             />
 
-            {/* Sección de Analysis Details */}
+            {/* Fila Inferior: Analysis Details ocupando todo el ancho */}
             <div>
               <h3
                 style={{
@@ -732,24 +841,25 @@ const App: React.FC = () => {
               <div
                 style={{
                   display: 'grid',
-                  gridTemplateColumns: 'repeat(2, 1fr)',
-                  gap: '12px',
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
+                  gap: '16px',
                 }}
               >
                 <div style={{ textAlign: 'center' }}>
                   <div
                     style={{
-                      fontSize: '10px',
+                      fontSize: '12px',
                       color: 'var(--muted-foreground)',
-                      marginBottom: '4px',
+                      marginBottom: '8px',
+                      fontWeight: '500',
                     }}
                   >
                     Score
                   </div>
                   <div
                     style={{
-                      fontSize: '18px',
-                      fontWeight: '600',
+                      fontSize: '24px',
+                      fontWeight: '700',
                       color: 'var(--foreground)',
                     }}
                   >
@@ -760,9 +870,32 @@ const App: React.FC = () => {
                 <div style={{ textAlign: 'center' }}>
                   <div
                     style={{
-                      fontSize: '10px',
+                      fontSize: '12px',
                       color: 'var(--muted-foreground)',
-                      marginBottom: '4px',
+                      marginBottom: '8px',
+                      fontWeight: '500',
+                    }}
+                  >
+                    Confidence
+                  </div>
+                  <div
+                    style={{
+                      fontSize: '24px',
+                      fontWeight: '700',
+                      color: 'var(--foreground)',
+                    }}
+                  >
+                    {result ? Math.round(result.confidence) : 0}%
+                  </div>
+                </div>
+
+                <div style={{ textAlign: 'center' }}>
+                  <div
+                    style={{
+                      fontSize: '12px',
+                      color: 'var(--muted-foreground)',
+                      marginBottom: '8px',
+                      fontWeight: '500',
                     }}
                   >
                     Category
@@ -788,16 +921,39 @@ const App: React.FC = () => {
                 <div style={{ textAlign: 'center' }}>
                   <div
                     style={{
-                      fontSize: '10px',
+                      fontSize: '12px',
                       color: 'var(--muted-foreground)',
-                      marginBottom: '4px',
+                      marginBottom: '8px',
+                      fontWeight: '500',
                     }}
                   >
-                    Técnica
+                    Model Used
                   </div>
                   <div
                     style={{
-                      fontSize: '14px',
+                      fontSize: '16px',
+                      fontWeight: '600',
+                      color: 'var(--foreground)',
+                    }}
+                  >
+                    {result?.model_used || 'N/A'}
+                  </div>
+                </div>
+
+                <div style={{ textAlign: 'center' }}>
+                  <div
+                    style={{
+                      fontSize: '12px',
+                      color: 'var(--muted-foreground)',
+                      marginBottom: '8px',
+                      fontWeight: '500',
+                    }}
+                  >
+                    Technique
+                  </div>
+                  <div
+                    style={{
+                      fontSize: '16px',
                       fontWeight: '600',
                       color: 'var(--foreground)',
                     }}
@@ -809,16 +965,17 @@ const App: React.FC = () => {
                 <div style={{ textAlign: 'center' }}>
                   <div
                     style={{
-                      fontSize: '10px',
+                      fontSize: '12px',
                       color: 'var(--muted-foreground)',
-                      marginBottom: '4px',
+                      marginBottom: '8px',
+                      fontWeight: '500',
                     }}
                   >
-                    Time
+                    Response Time
                   </div>
                   <div
                     style={{
-                      fontSize: '14px',
+                      fontSize: '16px',
                       fontWeight: '600',
                       color: 'var(--foreground)',
                     }}
@@ -830,11 +987,11 @@ const App: React.FC = () => {
 
               <div
                 style={{
-                  marginTop: '16px',
-                  fontSize: '11px',
+                  marginTop: '20px',
+                  fontSize: '12px',
                   color: 'var(--muted-foreground)',
                   textAlign: 'center',
-                  padding: '8px',
+                  padding: '12px',
                   backgroundColor: 'var(--muted)',
                   borderRadius: 'var(--radius)',
                   border: '1px solid var(--border)',
@@ -1026,6 +1183,210 @@ const App: React.FC = () => {
                   >
                     High Risk
                   </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Sección de Confidence Analysis debajo del Toxicity Level */}
+            <div
+              style={{
+                marginTop: '16px',
+                padding: '16px',
+                backgroundColor: 'var(--card)',
+                borderRadius: 'var(--radius)',
+                border: '1px solid var(--border)',
+              }}
+            >
+              <h4
+                style={{
+                  fontSize: '14px',
+                  fontWeight: '600',
+                  color: 'var(--foreground)',
+                  margin: '0 0 12px 0',
+                  textAlign: 'center',
+                }}
+              >
+                🎯 Confidence Analysis
+              </h4>
+
+              <div style={{ marginBottom: '12px' }}>
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    marginBottom: '8px',
+                  }}
+                >
+                  <span
+                    style={{
+                      fontSize: '12px',
+                      color: 'var(--muted-foreground)',
+                      fontWeight: '500',
+                    }}
+                  >
+                    Confidence Level
+                  </span>
+                  <span
+                    style={{
+                      fontSize: '12px',
+                      color: 'var(--foreground)',
+                      fontWeight: '600',
+                    }}
+                  >
+                    {result ? Math.round(result.confidence) : 0}%
+                  </span>
+                </div>
+                <div
+                  style={{
+                    width: '100%',
+                    height: '12px',
+                    backgroundColor: 'var(--muted)',
+                    borderRadius: '6px',
+                    overflow: 'hidden',
+                    position: 'relative',
+                  }}
+                >
+                  <div
+                    style={{
+                      width: `${result?.confidence || 0}%`,
+                      height: '100%',
+                      backgroundColor: result
+                        ? (() => {
+                            const confidence = result.confidence;
+                            if (confidence >= 80) return 'var(--secondary)';
+                            if (confidence >= 60)
+                              return 'oklch(0.769 0.188 70.08)';
+                            return 'var(--destructive)';
+                          })()
+                        : 'var(--muted)',
+                      borderRadius: '6px',
+                      transition: 'width 1s ease-out',
+                    }}
+                  />
+                </div>
+              </div>
+
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  fontSize: '10px',
+                  color: 'var(--muted-foreground)',
+                  marginBottom: '12px',
+                }}
+              >
+                <span>0%</span>
+                <span>50%</span>
+                <span>100%</span>
+              </div>
+
+              <div
+                style={{
+                  padding: '12px',
+                  backgroundColor: 'var(--muted)',
+                  borderRadius: 'var(--radius)',
+                  border: '1px solid var(--border)',
+                }}
+              >
+                <div
+                  style={{
+                    fontSize: '11px',
+                    fontWeight: '600',
+                    color: 'var(--foreground)',
+                    marginBottom: '8px',
+                    textAlign: 'center',
+                  }}
+                >
+                  🎨 Confidence Color Legend
+                </div>
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-around',
+                    alignItems: 'center',
+                    gap: '4px',
+                  }}
+                >
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '3px',
+                    }}
+                  >
+                    <div
+                      style={{
+                        width: '10px',
+                        height: '10px',
+                        backgroundColor: 'var(--secondary)',
+                        borderRadius: '50%',
+                        border: '1px solid var(--secondary)',
+                      }}
+                    />
+                    <span
+                      style={{
+                        fontSize: '9px',
+                        color: 'var(--secondary)',
+                        fontWeight: '600',
+                      }}
+                    >
+                      Alto
+                    </span>
+                  </div>
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '3px',
+                    }}
+                  >
+                    <div
+                      style={{
+                        width: '10px',
+                        height: '10px',
+                        backgroundColor: 'oklch(0.769 0.188 70.08)',
+                        borderRadius: '50%',
+                        border: '1px solid oklch(0.769 0.188 70.08)',
+                      }}
+                    />
+                    <span
+                      style={{
+                        fontSize: '9px',
+                        color: 'oklch(0.769 0.188 70.08)',
+                        fontWeight: '600',
+                      }}
+                    >
+                      Medio
+                    </span>
+                  </div>
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '3px',
+                    }}
+                  >
+                    <div
+                      style={{
+                        width: '10px',
+                        height: '10px',
+                        backgroundColor: 'var(--destructive)',
+                        borderRadius: '50%',
+                        border: '1px solid var(--destructive)',
+                      }}
+                    />
+                    <span
+                      style={{
+                        fontSize: '9px',
+                        color: 'var(--destructive)',
+                        fontWeight: '600',
+                      }}
+                    >
+                      Bajo
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
