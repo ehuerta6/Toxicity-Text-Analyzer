@@ -1,34 +1,14 @@
-import React, { useState } from 'react';
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend,
-  ArcElement,
-} from 'chart.js';
-import { Bar, Pie, Doughnut } from 'react-chartjs-2';
+import React, { useState, useCallback, useEffect } from 'react';
 import { useToxicityAnalysis } from './hooks/useToxicityAnalysis';
-import { useHistory } from './hooks/useHistory';
 import {
-  commonStyles,
   getToxicityColor,
   getToxicityLabel,
   getToxicityBorderColor,
 } from './styles/common';
 
-// Register Chart.js components
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend,
-  ArcElement
-);
+interface ToxicityMap {
+  [word: string]: number;
+}
 
 const ToxicityGauge: React.FC<{ percentage: number }> = ({ percentage }) => {
   const color = getToxicityColor(percentage);
@@ -100,186 +80,126 @@ const ToxicityGauge: React.FC<{ percentage: number }> = ({ percentage }) => {
   );
 };
 
-const ToxicityPieChart: React.FC<{
-  stats: { safe_count: number; toxic_count: number };
-}> = ({ stats }) => {
-  const data = {
-    labels: ['Seguro', 'Tóxico'],
-    datasets: [
-      {
-        data: [stats.safe_count, stats.toxic_count],
-        backgroundColor: [
-          commonStyles.toxicity.safe,
-          commonStyles.toxicity.toxic,
-        ],
-        borderWidth: 2,
-        borderColor: 'white',
-      },
-    ],
+const ColoredText: React.FC<{ text: string; toxicityMap: ToxicityMap }> = ({
+  text,
+  toxicityMap,
+}) => {
+  const getToxicityColor = (percentage: number): string => {
+    if (percentage <= 30) return '#10b981'; // Verde
+    if (percentage <= 60) return '#f59e0b'; // Amarillo
+    return '#ef4444'; // Rojo
   };
 
-  const options = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: {
-        position: 'bottom' as const,
-      },
-      title: {
-        display: true,
-        text: 'Distribución de Toxicidad',
-      },
-    },
+  const getToxicityClass = (percentage: number): string => {
+    if (percentage <= 30) return 'text-green-600';
+    if (percentage <= 60) return 'text-yellow-600';
+    return 'text-red-600';
   };
 
-  return <Pie data={data} options={options} />;
-};
-
-const ToxicityDistributionChart: React.FC<{
-  history: Array<{ result: { toxicity_percentage: number } }>;
-}> = ({ history }) => {
-  const scoreRanges = {
-    '0-20%': 0,
-    '21-40%': 0,
-    '41-60%': 0,
-    '61-80%': 0,
-    '81-100%': 0,
-  };
-
-  history.forEach((item) => {
-    const percentage = item.result.toxicity_percentage;
-    if (percentage <= 20) scoreRanges['0-20%']++;
-    else if (percentage <= 40) scoreRanges['21-40%']++;
-    else if (percentage <= 60) scoreRanges['41-60%']++;
-    else if (percentage <= 80) scoreRanges['61-80%']++;
-    else scoreRanges['81-100%']++;
-  });
-
-  const data = {
-    labels: Object.keys(scoreRanges),
-    datasets: [
-      {
-        label: 'Número de Análisis',
-        data: Object.values(scoreRanges),
-        backgroundColor: [
-          commonStyles.toxicity.safe,
-          '#fbbf24',
-          '#f59e0b',
-          '#f97316',
-          commonStyles.toxicity.toxic,
-        ],
-        borderWidth: 1,
-        borderColor: 'white',
-      },
-    ],
-  };
-
-  const options = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: {
-        position: 'bottom' as const,
-      },
-      title: {
-        display: true,
-        text: 'Distribución de Scores de Toxicidad',
-      },
-    },
-    scales: {
-      y: {
-        beginAtZero: true,
-        ticks: {
-          stepSize: 1,
-        },
-      },
-    },
-  };
-
-  return <Bar data={data} options={options} />;
-};
-
-const CategoriesChart: React.FC<{
-  history: Array<{ result: { category: string | null } }>;
-}> = ({ history }) => {
-  const categories: { [key: string]: number } = {};
-
-  history.forEach((item) => {
-    const category = item.result.category;
-    if (category) {
-      categories[category] = (categories[category] || 0) + 1;
+  const renderText = () => {
+    if (!text || !toxicityMap || Object.keys(toxicityMap).length === 0) {
+      return <span className='text-gray-700'>{text}</span>;
     }
-  });
 
-  const data = {
-    labels: Object.keys(categories),
-    datasets: [
-      {
-        label: 'Análisis por Categoría',
-        data: Object.values(categories),
-        backgroundColor: [
-          '#ef4444',
-          '#f97316',
-          '#eab308',
-          '#84cc16',
-          '#22c55e',
-          '#06b6d4',
-          '#8b5cf6',
-          '#ec4899',
-        ],
-        borderWidth: 1,
-        borderColor: 'white',
-      },
-    ],
+    const words = text.split(/(\s+)/);
+
+    return words.map((word, index) => {
+      const cleanWord = word.toLowerCase().replace(/[^\w]/g, '');
+      const toxicityPercentage = toxicityMap[cleanWord] || 0;
+
+      if (toxicityPercentage > 0) {
+        const color = getToxicityColor(toxicityPercentage);
+        const textClass = getToxicityClass(toxicityPercentage);
+
+        return (
+          <span
+            key={index}
+            className={`${textClass} cursor-help transition-all duration-200 hover:scale-105`}
+            style={{
+              borderBottom: `3px solid ${color}`,
+              borderBottomStyle: 'solid',
+              borderBottomWidth: '3px',
+              borderBottomColor: color,
+            }}
+            title={`Toxicidad: ${toxicityPercentage}%`}
+          >
+            {word}
+          </span>
+        );
+      }
+
+      return <span key={index}>{word}</span>;
+    });
   };
 
-  const options = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: {
-        position: 'bottom' as const,
-      },
-      title: {
-        display: true,
-        text: 'Análisis por Categoría de Toxicidad',
-      },
-    },
-  };
-
-  return <Doughnut data={data} options={options} />;
+  return <div className='text-gray-800 leading-relaxed'>{renderText()}</div>;
 };
 
 const App: React.FC = () => {
-  const [inputText, setInputText] = useState('');
-  const [showHistory, setShowHistory] = useState(false);
-  const [showCharts, setShowCharts] = useState(false);
+  const [text, setText] = useState('');
+  const [toxicityMap, setToxicityMap] = useState<ToxicityMap>({});
 
   const { result, loading, error, analyzeText, clearResult } =
     useToxicityAnalysis();
-  const {
-    history,
-    stats,
-    loading: historyLoading,
-    deleteItem,
-    clearHistory,
-  } = useHistory();
 
-  const handleAnalyze = async () => {
-    if (inputText.trim()) {
-      console.log('🔄 Iniciando análisis de texto:', inputText.trim());
-      try {
-        await analyzeText(inputText);
-        console.log('✅ Análisis completado exitosamente');
-      } catch (error) {
-        console.error('❌ Error en handleAnalyze:', error);
-      }
+  const generateToxicityMap = useCallback(
+    (text: string, toxicityPercentage: number): ToxicityMap => {
+      if (!text || toxicityPercentage === 0) return {};
+
+      const words = text
+        .toLowerCase()
+        .split(/\s+/)
+        .filter((word) => word.length > 0);
+      const toxicityMap: ToxicityMap = {};
+
+      words.forEach((word) => {
+        const cleanWord = word.replace(/[^\w]/g, '');
+        if (cleanWord.length > 0) {
+          toxicityMap[cleanWord] = Math.round(
+            toxicityPercentage / words.length
+          );
+        }
+      });
+
+      return toxicityMap;
+    },
+    []
+  );
+
+  const handleAnalyze = useCallback(async () => {
+    if (!text.trim()) return;
+
+    try {
+      await analyzeText(text);
+      // El resultado se actualiza automáticamente a través del hook useToxicityAnalysis
+      // y se puede acceder a través de la variable `result`
+    } catch (error) {
+      console.error('Error al analizar texto:', error);
     }
-  };
+  }, [text, analyzeText]);
+
+  // Generar mapa de toxicidad cuando cambie el resultado
+  useEffect(() => {
+    if (result && text.trim()) {
+      const wordToxicityMap = generateToxicityMap(
+        text,
+        result.toxicity_percentage
+      );
+      setToxicityMap(wordToxicityMap);
+    }
+  }, [result, text, generateToxicityMap]);
 
   const handleClear = () => {
-    setInputText('');
+    setText('');
+    setToxicityMap({});
     clearResult();
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleAnalyze();
+    }
   };
 
   return (
@@ -370,9 +290,10 @@ const App: React.FC = () => {
 
             <div style={{ marginBottom: '20px' }}>
               <textarea
-                value={inputText}
-                onChange={(e) => setInputText(e.target.value)}
-                placeholder='Ingresa el texto que quieres analizar...'
+                value={text}
+                onChange={(e) => setText(e.target.value)}
+                onKeyDown={handleKeyDown}
+                placeholder='Escribe o pega el texto que quieres analizar... (Presiona Enter para analizar, Shift+Enter para nueva línea)'
                 style={{
                   width: '100%',
                   minHeight: '160px',
@@ -393,18 +314,18 @@ const App: React.FC = () => {
                     '0 0 0 3px rgba(59, 130, 246, 0.1)';
                 }}
                 onBlur={(e) => {
-                  e.target.style.borderColor = inputText.trim()
+                  e.target.style.borderColor = text.trim()
                     ? '#3b82f6'
                     : '#e2e8f0';
-                  e.target.style.backgroundColor = inputText.trim()
+                  e.target.style.backgroundColor = text.trim()
                     ? 'white'
                     : '#fafafa';
-                  e.target.style.boxShadow = inputText.trim()
+                  e.target.style.boxShadow = text.trim()
                     ? '0 0 0 3px rgba(59, 130, 246, 0.1)'
                     : 'none';
                 }}
               />
-              {inputText.trim() && (
+              {text.trim() && (
                 <div
                   style={{
                     marginTop: '8px',
@@ -413,7 +334,7 @@ const App: React.FC = () => {
                     textAlign: 'right',
                   }}
                 >
-                  {inputText.length} caracteres
+                  {text.length} caracteres
                 </div>
               )}
             </div>
@@ -421,7 +342,7 @@ const App: React.FC = () => {
             <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
               <button
                 onClick={handleAnalyze}
-                disabled={loading || !inputText.trim()}
+                disabled={loading || !text.trim()}
                 style={{
                   backgroundColor: '#3b82f6',
                   color: 'white',
@@ -430,22 +351,21 @@ const App: React.FC = () => {
                   borderRadius: '8px',
                   fontSize: '16px',
                   fontWeight: '600',
-                  cursor:
-                    loading || !inputText.trim() ? 'not-allowed' : 'pointer',
-                  opacity: loading || !inputText.trim() ? 0.6 : 1,
+                  cursor: loading || !text.trim() ? 'not-allowed' : 'pointer',
+                  opacity: loading || !text.trim() ? 0.6 : 1,
                   transition: 'all 0.2s ease',
                   display: 'flex',
                   alignItems: 'center',
                   gap: '8px',
                 }}
                 onMouseEnter={(e) => {
-                  if (!loading && inputText.trim()) {
+                  if (!loading && text.trim()) {
                     e.currentTarget.style.backgroundColor = '#2563eb';
                     e.currentTarget.style.transform = 'translateY(-1px)';
                   }
                 }}
                 onMouseLeave={(e) => {
-                  if (!loading && inputText.trim()) {
+                  if (!loading && text.trim()) {
                     e.currentTarget.style.backgroundColor = '#3b82f6';
                     e.currentTarget.style.transform = 'translateY(0)';
                   }
@@ -466,7 +386,22 @@ const App: React.FC = () => {
                     Analizando...
                   </>
                 ) : (
-                  '🔍 Analizar'
+                  <>
+                    <svg
+                      className='w-5 h-5'
+                      fill='none'
+                      stroke='currentColor'
+                      viewBox='0 0 24 24'
+                    >
+                      <path
+                        strokeLinecap='round'
+                        strokeLinejoin='round'
+                        strokeWidth={2}
+                        d='M9 5l7 7-7 7'
+                      />
+                    </svg>
+                    <span>Analizar</span>
+                  </>
                 )}
               </button>
 
@@ -681,498 +616,47 @@ const App: React.FC = () => {
                   Analizado el {new Date(result.timestamp).toLocaleString()}
                 </div>
               </div>
+
+              {/* Texto con palabras resaltadas */}
+              <div style={{ marginTop: '24px' }}>
+                <h3
+                  style={{
+                    fontSize: '16px',
+                    fontWeight: '600',
+                    color: '#1e293b',
+                    margin: '0 0 16px 0',
+                  }}
+                >
+                  📝 Texto Analizado con Resaltado de Toxicidad
+                </h3>
+                <div
+                  style={{
+                    backgroundColor: '#f8fafc',
+                    padding: '20px',
+                    borderRadius: '12px',
+                    border: '1px solid #e2e8f0',
+                    maxHeight: '300px',
+                    overflowY: 'auto',
+                  }}
+                >
+                  <ColoredText text={text} toxicityMap={toxicityMap} />
+                </div>
+                <div
+                  style={{
+                    marginTop: '12px',
+                    fontSize: '12px',
+                    color: '#64748b',
+                    textAlign: 'center',
+                  }}
+                >
+                  <span style={{ color: '#10b981' }}>● Verde (0-30%)</span> |{' '}
+                  <span style={{ color: '#f59e0b' }}>● Amarillo (30-60%)</span>{' '}
+                  | <span style={{ color: '#ef4444' }}>● Rojo (60-100%)</span>
+                </div>
+              </div>
             </div>
           )}
         </div>
-
-        {/* Control Buttons */}
-        <div style={{ textAlign: 'center' }}>
-          <button
-            onClick={() => setShowHistory(!showHistory)}
-            style={{
-              backgroundColor: '#f1f5f9',
-              color: '#475569',
-              border: '1px solid #cbd5e1',
-              padding: '12px 24px',
-              borderRadius: '8px',
-              fontSize: '16px',
-              fontWeight: '600',
-              cursor: 'pointer',
-              marginRight: '12px',
-              transition: 'all 0.2s ease',
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = '#e2e8f0';
-              e.currentTarget.style.transform = 'translateY(-1px)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = '#f1f5f9';
-              e.currentTarget.style.transform = 'translateY(0)';
-            }}
-          >
-            {showHistory ? '📊 Ocultar Historial' : '📚 Mostrar Historial'}
-          </button>
-
-          <button
-            onClick={() => setShowCharts(!showCharts)}
-            style={{
-              backgroundColor: '#f1f5f9',
-              color: '#475569',
-              border: '1px solid #cbd5e1',
-              padding: '12px 24px',
-              borderRadius: '8px',
-              fontSize: '16px',
-              fontWeight: '600',
-              cursor: 'pointer',
-              transition: 'all 0.2s ease',
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = '#e2e8f0';
-              e.currentTarget.style.transform = 'translateY(-1px)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = '#f1f5f9';
-              e.currentTarget.style.transform = 'translateY(0)';
-            }}
-          >
-            {showCharts ? '📈 Ocultar Gráficos' : '📈 Mostrar Gráficos'}
-          </button>
-        </div>
-
-        {/* History Section */}
-        {showHistory && (
-          <div
-            style={{
-              backgroundColor: 'white',
-              borderRadius: '16px',
-              padding: '32px',
-              boxShadow: '0 4px 6px rgba(0, 0, 0, 0.05)',
-              border: '1px solid #e2e8f0',
-            }}
-          >
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                marginBottom: '24px',
-              }}
-            >
-              <h2
-                style={{
-                  fontSize: '20px',
-                  fontWeight: '600',
-                  color: '#1e293b',
-                  margin: '0',
-                }}
-              >
-                📚 Historial de Análisis
-              </h2>
-              <button
-                onClick={clearHistory}
-                style={{
-                  backgroundColor: '#fef2f2',
-                  color: '#dc2626',
-                  border: '1px solid #fecaca',
-                  padding: '8px 16px',
-                  borderRadius: '6px',
-                  fontSize: '14px',
-                  fontWeight: '600',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s ease',
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = '#fee2e2';
-                  e.currentTarget.style.transform = 'translateY(-1px)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = '#fef2f2';
-                  e.currentTarget.style.transform = 'translateY(0)';
-                }}
-              >
-                🗑️ Limpiar Todo
-              </button>
-            </div>
-
-            {stats && (
-              <div
-                style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
-                  gap: '20px',
-                  marginBottom: '24px',
-                }}
-              >
-                <div
-                  style={{
-                    textAlign: 'center',
-                    padding: '20px',
-                    backgroundColor: '#f0f9ff',
-                    borderRadius: '12px',
-                    border: '1px solid #bae6fd',
-                  }}
-                >
-                  <div
-                    style={{
-                      fontSize: '24px',
-                      fontWeight: 'bold',
-                      color: '#0369a1',
-                      marginBottom: '8px',
-                    }}
-                  >
-                    {stats.total_analyses}
-                  </div>
-                  <div style={{ fontSize: '14px', color: '#64748b' }}>
-                    Total
-                  </div>
-                </div>
-
-                <div
-                  style={{
-                    textAlign: 'center',
-                    padding: '20px',
-                    backgroundColor: '#f0fdf4',
-                    borderRadius: '12px',
-                    border: '1px solid #bbf7d0',
-                  }}
-                >
-                  <div
-                    style={{
-                      fontSize: '24px',
-                      fontWeight: 'bold',
-                      color: '#16a34a',
-                      marginBottom: '8px',
-                    }}
-                  >
-                    {stats.safe_count}
-                  </div>
-                  <div style={{ fontSize: '14px', color: '#64748b' }}>
-                    Seguros
-                  </div>
-                </div>
-
-                <div
-                  style={{
-                    textAlign: 'center',
-                    padding: '20px',
-                    backgroundColor: '#fef2f2',
-                    borderRadius: '12px',
-                    border: '1px solid #fecaca',
-                  }}
-                >
-                  <div
-                    style={{
-                      fontSize: '24px',
-                      fontWeight: 'bold',
-                      color: '#dc2626',
-                      marginBottom: '8px',
-                    }}
-                  >
-                    {stats.toxic_count}
-                  </div>
-                  <div style={{ fontSize: '14px', color: '#64748b' }}>
-                    Tóxicos
-                  </div>
-                </div>
-
-                <div
-                  style={{
-                    textAlign: 'center',
-                    padding: '20px',
-                    backgroundColor: '#faf5ff',
-                    borderRadius: '12px',
-                    border: '1px solid #ddd6fe',
-                  }}
-                >
-                  <div
-                    style={{
-                      fontSize: '24px',
-                      fontWeight: 'bold',
-                      color: '#7c3aed',
-                      marginBottom: '8px',
-                    }}
-                  >
-                    {stats.average_score?.toFixed(2) || '0.00'}
-                  </div>
-                  <div style={{ fontSize: '14px', color: '#64748b' }}>
-                    Score Promedio
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {historyLoading ? (
-              <div style={{ textAlign: 'center', padding: '40px' }}>
-                <div
-                  style={{
-                    display: 'inline-block',
-                    width: '32px',
-                    height: '32px',
-                    border: '3px solid #e2e8f0',
-                    borderTop: '3px solid #3b82f6',
-                    borderRadius: '50%',
-                    animation: 'spin 1s linear infinite',
-                  }}
-                />
-                <div style={{ marginTop: '16px', color: '#64748b' }}>
-                  ⏳ Cargando historial...
-                </div>
-              </div>
-            ) : history.length > 0 ? (
-              <div style={{ overflowX: 'auto' }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                  <thead>
-                    <tr style={{ backgroundColor: '#f8fafc' }}>
-                      <th
-                        style={{
-                          padding: '16px',
-                          textAlign: 'left',
-                          borderBottom: '1px solid #e2e8f0',
-                          fontSize: '14px',
-                          fontWeight: '600',
-                          color: '#475569',
-                        }}
-                      >
-                        Texto
-                      </th>
-                      <th
-                        style={{
-                          padding: '16px',
-                          textAlign: 'center',
-                          borderBottom: '1px solid #e2e8f0',
-                          fontSize: '14px',
-                          fontWeight: '600',
-                          color: '#475569',
-                        }}
-                      >
-                        Tóxico
-                      </th>
-                      <th
-                        style={{
-                          padding: '16px',
-                          textAlign: 'center',
-                          borderBottom: '1px solid #e2e8f0',
-                          fontSize: '14px',
-                          fontWeight: '600',
-                          color: '#475569',
-                        }}
-                      >
-                        Score
-                      </th>
-                      <th
-                        style={{
-                          padding: '16px',
-                          textAlign: 'center',
-                          borderBottom: '1px solid #e2e8f0',
-                          fontSize: '14px',
-                          fontWeight: '600',
-                          color: '#475569',
-                        }}
-                      >
-                        Fecha
-                      </th>
-                      <th
-                        style={{
-                          padding: '16px',
-                          textAlign: 'center',
-                          borderBottom: '1px solid #e2e8f0',
-                          fontSize: '14px',
-                          fontWeight: '600',
-                          color: '#475569',
-                        }}
-                      >
-                        Acciones
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {history.map((item) => (
-                      <tr
-                        key={item.id}
-                        style={{ borderBottom: '1px solid #f1f5f9' }}
-                      >
-                        <td style={{ padding: '16px', maxWidth: '300px' }}>
-                          <div
-                            style={{
-                              overflow: 'hidden',
-                              textOverflow: 'ellipsis',
-                              whiteSpace: 'nowrap',
-                              fontSize: '14px',
-                              color: '#1e293b',
-                            }}
-                          >
-                            {item.text}
-                          </div>
-                        </td>
-                        <td style={{ padding: '16px', textAlign: 'center' }}>
-                          <span
-                            style={{
-                              padding: '6px 12px',
-                              borderRadius: '6px',
-                              fontSize: '12px',
-                              fontWeight: '600',
-                              backgroundColor: item.result.toxic
-                                ? '#fef2f2'
-                                : '#f0fdf4',
-                              color: item.result.toxic ? '#dc2626' : '#16a34a',
-                            }}
-                          >
-                            {item.result.toxic ? '🚨 Tóxico' : '✅ Seguro'}
-                          </span>
-                        </td>
-                        <td
-                          style={{
-                            padding: '16px',
-                            textAlign: 'center',
-                            fontSize: '14px',
-                            color: '#1e293b',
-                            fontWeight: '500',
-                          }}
-                        >
-                          {item.result.toxicity_percentage}%
-                        </td>
-                        <td
-                          style={{
-                            padding: '16px',
-                            textAlign: 'center',
-                            fontSize: '14px',
-                            color: '#64748b',
-                          }}
-                        >
-                          {new Date(item.timestamp).toLocaleDateString()}
-                        </td>
-                        <td style={{ padding: '16px', textAlign: 'center' }}>
-                          <button
-                            onClick={() => deleteItem(item.id)}
-                            style={{
-                              backgroundColor: '#fef2f2',
-                              color: '#dc2626',
-                              border: '1px solid #fecaca',
-                              padding: '8px 12px',
-                              borderRadius: '6px',
-                              fontSize: '12px',
-                              fontWeight: '600',
-                              cursor: 'pointer',
-                              transition: 'all 0.2s ease',
-                            }}
-                            onMouseEnter={(e) => {
-                              e.currentTarget.style.backgroundColor = '#fee2e2';
-                              e.currentTarget.style.transform =
-                                'translateY(-1px)';
-                            }}
-                            onMouseLeave={(e) => {
-                              e.currentTarget.style.backgroundColor = '#fef2f2';
-                              e.currentTarget.style.transform = 'translateY(0)';
-                            }}
-                          >
-                            🗑️
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            ) : (
-              <div
-                style={{
-                  textAlign: 'center',
-                  padding: '40px',
-                  color: '#64748b',
-                }}
-              >
-                📝 No hay análisis en el historial
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Charts Section */}
-        {showCharts && (
-          <div
-            style={{
-              backgroundColor: 'white',
-              borderRadius: '16px',
-              padding: '32px',
-              boxShadow: '0 4px 6px rgba(0, 0, 0, 0.05)',
-              border: '1px solid #e2e8f0',
-            }}
-          >
-            <h2
-              style={{
-                fontSize: '20px',
-                fontWeight: '600',
-                color: '#1e293b',
-                margin: '0 0 24px 0',
-              }}
-            >
-              📊 Visualizaciones
-            </h2>
-
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-                gap: '32px',
-                marginTop: '24px',
-              }}
-            >
-              {stats && (
-                <div>
-                  <h3
-                    style={{
-                      fontSize: '18px',
-                      fontWeight: '600',
-                      color: '#1e293b',
-                      marginBottom: '16px',
-                    }}
-                  >
-                    Distribución General
-                  </h3>
-                  <div style={{ height: '250px' }}>
-                    <ToxicityPieChart stats={stats} />
-                  </div>
-                </div>
-              )}
-
-              {history.length > 0 && (
-                <>
-                  <div>
-                    <h3
-                      style={{
-                        fontSize: '18px',
-                        fontWeight: '600',
-                        color: '#1e293b',
-                        marginBottom: '16px',
-                      }}
-                    >
-                      Distribución de Scores
-                    </h3>
-                    <div style={{ height: '250px' }}>
-                      <ToxicityDistributionChart history={history} />
-                    </div>
-                  </div>
-
-                  <div>
-                    <h3
-                      style={{
-                        fontSize: '18px',
-                        fontWeight: '600',
-                        color: '#1e293b',
-                        marginBottom: '16px',
-                      }}
-                    >
-                      Análisis por Categoría
-                    </h3>
-                    <div style={{ height: '250px' }}>
-                      <CategoriesChart history={history} />
-                    </div>
-                  </div>
-                </>
-              )}
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );
