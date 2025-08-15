@@ -11,6 +11,7 @@ interface ToxicityResult {
   response_time_ms: number;
   timestamp: string;
   model_used: string;
+  classification_technique: string;
 }
 
 interface UseToxicityAnalysisReturn {

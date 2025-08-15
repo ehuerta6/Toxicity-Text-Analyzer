@@ -6,30 +6,28 @@ API para detección de comentarios tóxicos usando Machine Learning optimizado
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from dotenv import load_dotenv
-import os
+from pydantic import BaseModel
 import time
 import logging
 from datetime import datetime
+from typing import List, Optional
+import os
 
-from .models import AnalyzeRequest, AnalyzeResponse, ErrorResponse, BatchAnalyzeRequest, BatchAnalyzeResponse
+# Importar clasificadores
 from .improved_classifier import optimized_classifier
-from .database import history_db
+from .ml_classifier import ml_classifier
+from .hybrid_classifier import hybrid_classifier
+from .models import AnalyzeRequest, AnalyzeResponse, BatchAnalyzeRequest, BatchAnalyzeResponse
+from .database import AnalysisHistoryDB
 
-# Configurar logging optimizado
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
+# Configurar logging
+logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Cargar variables de entorno
-load_dotenv()
-
-# Crear instancia de FastAPI optimizada
+# Inicializar FastAPI
 app = FastAPI(
     title="ToxiGuard API",
-    description="API optimizada para detección de comentarios tóxicos",
+    description="API profesional para detección de toxicidad en texto usando ML avanzado",
     version="2.0.0",
     docs_url="/docs",
     redoc_url="/redoc"
@@ -39,40 +37,37 @@ app = FastAPI(
 startup_time = None
 app_start_time = None
 
-@app.on_event("startup")
-async def startup_event():
-    """Evento optimizado de inicio de la aplicación"""
-    global startup_time, app_start_time
-    startup_time = time.time()
-    app_start_time = datetime.now()
-    
-    logger.info("🚀 Iniciando ToxiGuard API optimizada...")
-    
-    try:
-        test_result = optimized_classifier.analyze_text("test")
-        logger.info("✅ Clasificador optimizado inicializado correctamente")
-    except Exception as e:
-        logger.error(f"❌ Error inicializando clasificador: {e}")
-        raise
-    
-    startup_duration = time.time() - startup_time
-    logger.info(f"🚀 API optimizada iniciada en {startup_duration:.2f} segundos")
-
-# Configurar CORS optimizado
+# Configurar CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        os.getenv("FRONTEND_URL", "http://localhost:5173"),
-        "http://localhost:3000",
-        "http://127.0.0.1:5173",
-        "http://127.0.0.1:3000",
-        "http://localhost:5174",
-        "http://127.0.0.1:5174"
-    ],
+    allow_origins=["*"],
     allow_credentials=True,
-    allow_methods=["GET", "POST", "DELETE"],
+    allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Inicializar base de datos de historial
+history_db = None
+try:
+    history_db = AnalysisHistoryDB()
+    logger.info("✅ Base de datos de historial inicializada")
+except Exception as e:
+    logger.warning(f"⚠️ No se pudo inicializar la base de datos: {e}")
+
+# Seleccionar clasificador principal (híbrido por defecto)
+primary_classifier = hybrid_classifier
+logger.info(f"✅ Clasificador principal: {primary_classifier.__class__.__name__}")
+
+@app.on_event("startup")
+async def startup_event():
+    """Evento de inicio de la aplicación"""
+    logger.info("🚀 ToxiGuard API iniciando...")
+    
+    # Verificar estado de los clasificadores
+    classifier_info = primary_classifier.get_classifier_info()
+    logger.info(f"📊 Estado de clasificadores: {classifier_info}")
+    
+    logger.info("✅ ToxiGuard API lista para recibir solicitudes")
 
 # Middleware optimizado para medir tiempo de respuesta
 @app.middleware("http")
@@ -118,6 +113,54 @@ async def root():
         "uptime": time.time() - startup_time if startup_time else 0,
         "start_time": app_start_time.isoformat() if app_start_time else None
     }
+
+@app.get("/classifier-info")
+async def get_classifier_info():
+    """
+    Obtener información del clasificador actual
+    
+    Returns:
+        Información detallada del clasificador
+    """
+    try:
+        info = primary_classifier.get_classifier_info()
+        return {
+            "classifier_type": primary_classifier.__class__.__name__,
+            "info": info,
+            "timestamp": datetime.now()
+        }
+    except Exception as e:
+        logger.error(f"Error obteniendo información del clasificador: {e}")
+        raise HTTPException(status_code=500, detail=f"Error interno: {str(e)}")
+
+@app.post("/switch-classifier")
+async def switch_classifier(use_ml: bool = True):
+    """
+    Cambiar entre clasificador ML y basado en reglas
+    
+    Args:
+        use_ml: True para usar ML como principal, False para reglas
+        
+    Returns:
+        Confirmación del cambio
+    """
+    try:
+        if hasattr(primary_classifier, 'set_primary_classifier'):
+            primary_classifier.set_primary_classifier(use_ml)
+            return {
+                "message": f"Clasificador cambiado a: {'ML' if use_ml else 'Rules'}",
+                "current_mode": "ML primary" if use_ml else "Rules primary",
+                "timestamp": datetime.now()
+            }
+        else:
+            return {
+                "message": "Clasificador actual no soporta cambio de modo",
+                "current_mode": "Fixed",
+                "timestamp": datetime.now()
+            }
+    except Exception as e:
+        logger.error(f"Error cambiando clasificador: {e}")
+        raise HTTPException(status_code=500, detail=f"Error interno: {str(e)}")
 
 @app.get("/health")
 async def health_check():
@@ -175,7 +218,7 @@ async def analyze_text(request: AnalyzeRequest):
             raise ValueError("El texto excede el límite de 10,000 caracteres")
         
         # Análisis optimizado usando el clasificador mejorado
-        analysis_result = optimized_classifier.analyze_text(request.text)
+        analysis_result = primary_classifier.analyze_text(request.text)
         
         # Calcular tiempo de respuesta
         response_time = int((time.time() - start_time) * 1000)
@@ -185,13 +228,14 @@ async def analyze_text(request: AnalyzeRequest):
             text=request.text,
             is_toxic=analysis_result["is_toxic"],
             toxicity_percentage=analysis_result["toxicity_percentage"],
-            toxicity_category=analysis_result["toxicity_level"],
+            toxicity_category=analysis_result["toxicity_level"],  # Mapear toxicity_level a toxicity_category
             confidence=analysis_result["confidence"],
             detected_categories=analysis_result["details"]["detected_categories"],
             word_count=analysis_result["details"]["word_count"],
             response_time_ms=response_time,
             timestamp=datetime.now(),
-            model_used=analysis_result["model_used"]
+            model_used=analysis_result["model_used"],
+            classification_technique=analysis_result.get("classification_technique", "Técnica no especificada")
         )
         
         # Guardar en historial si está habilitado
@@ -242,7 +286,7 @@ async def batch_analyze_texts(request: BatchAnalyzeRequest):
                 continue
             
             try:
-                analysis_result = optimized_classifier.analyze_text(text)
+                analysis_result = primary_classifier.analyze_text(text)
                 results.append({
                     "text": text,
                     "toxicity_percentage": analysis_result["toxicity_percentage"],
@@ -250,7 +294,8 @@ async def batch_analyze_texts(request: BatchAnalyzeRequest):
                     "confidence": analysis_result["confidence"],
                     "is_toxic": analysis_result["is_toxic"],
                     "detected_categories": analysis_result["details"]["detected_categories"],
-                    "word_count": analysis_result["details"]["word_count"]
+                    "word_count": analysis_result["details"]["word_count"],
+                    "classification_technique": analysis_result.get("classification_technique", "Técnica no especificada")
                 })
                 total_toxicity += analysis_result["toxicity_percentage"]
             except Exception as e:

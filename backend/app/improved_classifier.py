@@ -64,6 +64,9 @@ class OptimizedToxicityClassifier:
             "isolated_words": 0.6
         }
         
+        # Técnica de clasificación
+        self.classification_technique = "Análisis de Patrones y Keywords"
+        
         # Compilar patrones regex una sola vez
         self._compile_patterns()
         
@@ -129,6 +132,7 @@ class OptimizedToxicityClassifier:
             "toxicity_level": category,
             "confidence": round(confidence, 3),
             "model_used": "optimized_classifier_v2",
+            "classification_technique": self.classification_technique,
             "details": {
                 "toxicity_score": round(toxicity_score, 4),
                 "detected_categories": detected_categories,
@@ -212,7 +216,8 @@ class OptimizedToxicityClassifier:
             "word_count": result["details"]["word_count"],
             "toxicity_category": result["toxicity_level"],
             "toxicity_percentage": result["toxicity_percentage"],
-            "confidence": result["confidence"]
+            "confidence": result["confidence"],
+            "classification_technique": result["classification_technique"]
         }
     
     def _calculate_confidence(self, score: float, word_count: int, category_count: int) -> float:
@@ -241,7 +246,8 @@ class OptimizedToxicityClassifier:
                     "word_count": result["details"]["word_count"],
                     "toxicity_category": result["toxicity_level"],
                     "toxicity_percentage": result["toxicity_percentage"],
-                    "confidence": result["confidence"]
+                    "confidence": result["confidence"],
+                    "classification_technique": result["classification_technique"]
                 })
             except Exception as e:
                 logger.error(f"Error analizando texto: {e}")

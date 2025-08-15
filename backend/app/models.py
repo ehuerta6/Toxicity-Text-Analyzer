@@ -65,6 +65,10 @@ class AnalyzeResponse(BaseModel):
         ...,
         description="Tipo de modelo utilizado para el análisis"
     )
+    classification_technique: str = Field(
+        ...,
+        description="Técnica de clasificación utilizada (ej: Naïve Bayes, Random Forest, SVM, etc.)"
+    )
 
 class BatchAnalyzeRequest(BaseModel):
     """Modelo para solicitudes de análisis en lote"""

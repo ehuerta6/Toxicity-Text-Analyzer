@@ -777,7 +777,7 @@ const App: React.FC = () => {
                     marginBottom: '4px',
                   }}
                 >
-                  Model
+                  Técnica
                 </div>
                 <div
                   style={{
@@ -786,7 +786,7 @@ const App: React.FC = () => {
                     color: 'var(--foreground)',
                   }}
                 >
-                  {result?.model_used || 'N/A'}
+                  {result?.classification_technique || 'N/A'}
                 </div>
               </div>
 
