@@ -82,6 +82,40 @@ class MLToxicityClassifier:
             ('vectorizer', self.vectorizer),
             ('classifier', self.model)
         ])
+        
+        # Intentar cargar modelo entrenado automáticamente
+        self._auto_load_trained_model()
+    
+    def _auto_load_trained_model(self):
+        """Intenta cargar automáticamente un modelo entrenado"""
+        try:
+            # Buscar modelos entrenados en el directorio models/
+            models_dir = "models"
+            if not os.path.exists(models_dir):
+                logger.info(f"Directorio de modelos no encontrado: {models_dir}")
+                return
+            
+            # Buscar archivos de modelo para este tipo
+            model_files = []
+            for file in os.listdir(models_dir):
+                if file.endswith('.pkl') and self.model_type in file:
+                    model_files.append(file)
+            
+            if not model_files:
+                logger.info(f"No se encontraron modelos entrenados para {self.model_type}")
+                return
+            
+            # Cargar el primer modelo encontrado
+            model_file = os.path.join(models_dir, model_files[0])
+            logger.info(f"Intentando cargar modelo automáticamente: {model_file}")
+            
+            if self.load_model(model_file):
+                logger.info(f"✅ Modelo cargado automáticamente: {model_file}")
+            else:
+                logger.warning(f"⚠️ Fallo al cargar modelo automáticamente: {model_file}")
+                
+        except Exception as e:
+            logger.warning(f"Error en carga automática de modelo: {e}")
     
     def train_model(self, texts: List[str], labels: List[int], 
                    test_size: float = 0.2, random_state: int = 42) -> Dict[str, float]:
@@ -232,30 +266,35 @@ class MLToxicityClassifier:
     
     def load_model(self, filepath: str) -> bool:
         """
-        Carga un modelo pre-entrenado
+        Carga un modelo entrenado desde archivo
         
         Args:
-            filepath: Ruta del modelo a cargar
+            filepath: Ruta al archivo del modelo
             
         Returns:
-            True si se cargó exitosamente
+            True si se cargó exitosamente, False en caso contrario
         """
         try:
             if not os.path.exists(filepath):
                 logger.error(f"Archivo de modelo no encontrado: {filepath}")
                 return False
             
-            # Cargar el pipeline
-            self.pipeline = joblib.load(filepath)
-            self.vectorizer = self.pipeline.named_steps['vectorizer']
-            self.model = self.pipeline.named_steps['classifier']
-            self.is_trained = True
+            # Cargar el pipeline completo
+            loaded_pipeline = joblib.load(filepath)
             
-            logger.info(f"Modelo cargado desde: {filepath}")
-            return True
-            
+            if isinstance(loaded_pipeline, Pipeline):
+                self.pipeline = loaded_pipeline
+                self.vectorizer = loaded_pipeline.named_steps['vectorizer']
+                self.model = loaded_pipeline.named_steps['classifier']
+                self.is_trained = True
+                logger.info(f"Modelo cargado exitosamente desde: {filepath}")
+                return True
+            else:
+                logger.error(f"Archivo no contiene un pipeline válido: {filepath}")
+                return False
+                
         except Exception as e:
-            logger.error(f"Error cargando modelo: {e}")
+            logger.error(f"Error cargando modelo desde {filepath}: {e}")
             return False
     
     def get_model_info(self) -> Dict[str, Union[str, bool, int]]:
@@ -294,6 +333,10 @@ class HybridToxicityClassifier:
         
         logger.info("Clasificador híbrido inicializado")
     
+    def has_trained_ml_model(self) -> bool:
+        """Verifica si el clasificador ML está entrenado"""
+        return self.ml_classifier.is_trained
+    
     def analyze_text(self, text: str) -> Tuple[bool, float, List[str], int, int, str, float]:
         """
         Análisis híbrido combinando ML y reglas
@@ -307,8 +350,17 @@ class HybridToxicityClassifier:
         if not text or not text.strip():
             return False, 0.0, [], 0, 0, None, 0.0
         
-        # Análisis basado en ML
-        ml_is_toxic, ml_prob, ml_score = self.ml_classifier.predict_toxicity(text)
+        # Análisis basado en ML si está disponible
+        if self.ml_classifier.is_trained:
+            try:
+                ml_is_toxic, ml_prob, ml_score = self.ml_classifier.predict_toxicity(text)
+                logger.debug(f"Predicción ML: {ml_score:.3f}")
+            except Exception as e:
+                logger.warning(f"Error en predicción ML: {e}")
+                ml_score = 0.0
+        else:
+            ml_score = 0.0
+            logger.debug("Modelo ML no entrenado, usando solo reglas")
         
         # Análisis basado en reglas (placeholder - se puede integrar con el clasificador existente)
         rule_score = 0.0  # Por ahora, placeholder
@@ -335,7 +387,7 @@ class HybridToxicityClassifier:
             category = "alto"
         
         # Etiquetas
-        labels = [category, "ml_enhanced"]
+        labels = [category, "hybrid_ml" if self.ml_classifier.is_trained else "hybrid_rules"]
         
         return is_toxic, combined_score, labels, text_length, word_count, category, toxicity_percentage
     
