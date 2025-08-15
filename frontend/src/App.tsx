@@ -1128,13 +1128,13 @@ const App: React.FC = () => {
             >
               📊 Toxicity Level
             </h3>
-            <div style={{ marginBottom: '12px' }}>
+            <div style={{ marginBottom: DESIGN_SYSTEM.spacing.md }}>
               <div
                 style={{
                   display: 'flex',
                   justifyContent: 'space-between',
                   alignItems: 'center',
-                  marginBottom: '8px',
+                  marginBottom: DESIGN_SYSTEM.spacing.sm,
                 }}
               >
                 <span
@@ -1160,7 +1160,7 @@ const App: React.FC = () => {
                 style={{
                   width: '100%',
                   height: '12px',
-                  backgroundColor: 'var(--muted)',
+                  backgroundColor: DESIGN_SYSTEM.colors.muted,
                   borderRadius: '6px',
                   overflow: 'hidden',
                   position: 'relative',
@@ -1172,7 +1172,7 @@ const App: React.FC = () => {
                     height: '100%',
                     backgroundColor: result
                       ? getToxicityColor(result.toxicity_percentage)
-                      : 'var(--muted)',
+                      : DESIGN_SYSTEM.colors.muted,
                     borderRadius: '6px',
                     transition: 'width 1s ease-out',
                   }}
@@ -1306,38 +1306,36 @@ const App: React.FC = () => {
             {/* Sección de Confidence Analysis debajo del Toxicity Level */}
             <div
               style={{
-                marginTop: '16px',
-                padding: '16px',
-                backgroundColor: 'var(--card)',
-                borderRadius: 'var(--radius)',
-                border: '1px solid var(--border)',
+                marginTop: DESIGN_SYSTEM.spacing.lg,
+                padding: DESIGN_SYSTEM.spacing.lg,
+                backgroundColor: DESIGN_SYSTEM.colors.card,
+                borderRadius: DESIGN_SYSTEM.borders.radius,
+                border: `${DESIGN_SYSTEM.borders.width} solid ${DESIGN_SYSTEM.colors.border}`,
               }}
             >
               <h4
                 style={{
-                  fontSize: '14px',
-                  fontWeight: '600',
-                  color: 'var(--foreground)',
-                  margin: '0 0 12px 0',
+                  ...DESIGN_SYSTEM.typography.h4,
+                  color: DESIGN_SYSTEM.colors.foreground,
                   textAlign: 'center',
                 }}
               >
                 🎯 Confidence Analysis
               </h4>
 
-              <div style={{ marginBottom: '12px' }}>
+              <div style={{ marginBottom: DESIGN_SYSTEM.spacing.md }}>
                 <div
                   style={{
                     display: 'flex',
                     justifyContent: 'space-between',
                     alignItems: 'center',
-                    marginBottom: '8px',
+                    marginBottom: DESIGN_SYSTEM.spacing.sm,
                   }}
                 >
                   <span
                     style={{
-                      fontSize: '12px',
-                      color: 'var(--muted-foreground)',
+                      ...DESIGN_SYSTEM.typography.small,
+                      color: DESIGN_SYSTEM.colors.mutedForeground,
                       fontWeight: '500',
                     }}
                   >
@@ -1345,8 +1343,8 @@ const App: React.FC = () => {
                   </span>
                   <span
                     style={{
-                      fontSize: '12px',
-                      color: 'var(--foreground)',
+                      ...DESIGN_SYSTEM.typography.small,
+                      color: DESIGN_SYSTEM.colors.foreground,
                       fontWeight: '600',
                     }}
                   >
@@ -1357,7 +1355,7 @@ const App: React.FC = () => {
                   style={{
                     width: '100%',
                     height: '12px',
-                    backgroundColor: 'var(--muted)',
+                    backgroundColor: DESIGN_SYSTEM.colors.muted,
                     borderRadius: '6px',
                     overflow: 'hidden',
                     position: 'relative',
@@ -1370,12 +1368,11 @@ const App: React.FC = () => {
                       backgroundColor: result
                         ? (() => {
                             const confidence = result.confidence;
-                            if (confidence >= 80) return 'var(--secondary)';
-                            if (confidence >= 60)
-                              return 'oklch(0.769 0.188 70.08)';
-                            return 'var(--destructive)';
+                            if (confidence >= 80) return DESIGN_SYSTEM.colors.secondary;
+                            if (confidence >= 60) return DESIGN_SYSTEM.colors.accent;
+                            return DESIGN_SYSTEM.colors.destructive;
                           })()
-                        : 'var(--muted)',
+                        : DESIGN_SYSTEM.colors.muted,
                       borderRadius: '6px',
                       transition: 'width 1s ease-out',
                     }}
@@ -1388,9 +1385,9 @@ const App: React.FC = () => {
                   display: 'flex',
                   justifyContent: 'space-between',
                   alignItems: 'center',
-                  fontSize: '10px',
-                  color: 'var(--muted-foreground)',
-                  marginBottom: '12px',
+                  ...DESIGN_SYSTEM.typography.micro,
+                  color: DESIGN_SYSTEM.colors.mutedForeground,
+                  marginBottom: DESIGN_SYSTEM.spacing.md,
                 }}
               >
                 <span>0%</span>
@@ -1400,18 +1397,18 @@ const App: React.FC = () => {
 
               <div
                 style={{
-                  padding: '12px',
-                  backgroundColor: 'var(--muted)',
-                  borderRadius: 'var(--radius)',
-                  border: '1px solid var(--border)',
+                  padding: DESIGN_SYSTEM.spacing.md,
+                  backgroundColor: DESIGN_SYSTEM.colors.muted,
+                  borderRadius: DESIGN_SYSTEM.borders.radius,
+                  border: `${DESIGN_SYSTEM.borders.width} solid ${DESIGN_SYSTEM.colors.border}`,
                 }}
               >
                 <div
                   style={{
-                    fontSize: '11px',
+                    ...DESIGN_SYSTEM.typography.tiny,
                     fontWeight: '600',
-                    color: 'var(--foreground)',
-                    marginBottom: '8px',
+                    color: DESIGN_SYSTEM.colors.foreground,
+                    marginBottom: DESIGN_SYSTEM.spacing.sm,
                     textAlign: 'center',
                   }}
                 >
@@ -1422,29 +1419,29 @@ const App: React.FC = () => {
                     display: 'flex',
                     justifyContent: 'space-around',
                     alignItems: 'center',
-                    gap: '4px',
+                    gap: DESIGN_SYSTEM.spacing.xs,
                   }}
                 >
                   <div
                     style={{
                       display: 'flex',
                       alignItems: 'center',
-                      gap: '3px',
+                      gap: DESIGN_SYSTEM.spacing.xs,
                     }}
                   >
                     <div
                       style={{
                         width: '10px',
                         height: '10px',
-                        backgroundColor: 'var(--secondary)',
+                        backgroundColor: DESIGN_SYSTEM.colors.secondary,
                         borderRadius: '50%',
-                        border: '1px solid var(--secondary)',
+                        border: `${DESIGN_SYSTEM.borders.width} solid ${DESIGN_SYSTEM.colors.secondary}`,
                       }}
                     />
                     <span
                       style={{
-                        fontSize: '9px',
-                        color: 'var(--secondary)',
+                        ...DESIGN_SYSTEM.typography.micro,
+                        color: DESIGN_SYSTEM.colors.secondary,
                         fontWeight: '600',
                       }}
                     >
@@ -1455,22 +1452,22 @@ const App: React.FC = () => {
                     style={{
                       display: 'flex',
                       alignItems: 'center',
-                      gap: '3px',
+                      gap: DESIGN_SYSTEM.spacing.xs,
                     }}
                   >
                     <div
                       style={{
                         width: '10px',
                         height: '10px',
-                        backgroundColor: 'oklch(0.769 0.188 70.08)',
+                        backgroundColor: DESIGN_SYSTEM.colors.accent,
                         borderRadius: '50%',
-                        border: '1px solid oklch(0.769 0.188 70.08)',
+                        border: `${DESIGN_SYSTEM.borders.width} solid ${DESIGN_SYSTEM.colors.accent}`,
                       }}
                     />
                     <span
                       style={{
-                        fontSize: '9px',
-                        color: 'oklch(0.769 0.188 70.08)',
+                        ...DESIGN_SYSTEM.typography.micro,
+                        color: DESIGN_SYSTEM.colors.accent,
                         fontWeight: '600',
                       }}
                     >
@@ -1481,22 +1478,22 @@ const App: React.FC = () => {
                     style={{
                       display: 'flex',
                       alignItems: 'center',
-                      gap: '3px',
+                      gap: DESIGN_SYSTEM.spacing.xs,
                     }}
                   >
                     <div
                       style={{
                         width: '10px',
                         height: '10px',
-                        backgroundColor: 'var(--destructive)',
+                        backgroundColor: DESIGN_SYSTEM.colors.destructive,
                         borderRadius: '50%',
-                        border: '1px solid var(--destructive)',
+                        border: `${DESIGN_SYSTEM.borders.width} solid ${DESIGN_SYSTEM.colors.destructive}`,
                       }}
                     />
                     <span
                       style={{
-                        fontSize: '9px',
-                        color: 'var(--destructive)',
+                        ...DESIGN_SYSTEM.typography.micro,
+                        color: DESIGN_SYSTEM.colors.destructive,
                         fontWeight: '600',
                       }}
                     >
@@ -1513,19 +1510,17 @@ const App: React.FC = () => {
               result.detected_categories.length > 0 && (
                 <div
                   style={{
-                    marginTop: '16px',
-                    padding: '16px',
-                    backgroundColor: 'var(--card)',
-                    borderRadius: 'var(--radius)',
-                    border: '1px solid var(--border)',
+                    marginTop: DESIGN_SYSTEM.spacing.lg,
+                    padding: DESIGN_SYSTEM.spacing.lg,
+                    backgroundColor: DESIGN_SYSTEM.colors.card,
+                    borderRadius: DESIGN_SYSTEM.borders.radius,
+                    border: `${DESIGN_SYSTEM.borders.width} solid ${DESIGN_SYSTEM.colors.border}`,
                   }}
                 >
                   <h4
                     style={{
-                      fontSize: '14px',
-                      fontWeight: '600',
-                      color: 'var(--foreground)',
-                      margin: '0 0 12px 0',
+                      ...DESIGN_SYSTEM.typography.h4,
+                      color: DESIGN_SYSTEM.colors.foreground,
                       textAlign: 'center',
                     }}
                   >
@@ -1536,25 +1531,25 @@ const App: React.FC = () => {
                     style={{
                       display: 'flex',
                       flexDirection: 'column',
-                      gap: '8px',
+                      gap: DESIGN_SYSTEM.spacing.sm,
                     }}
                   >
                     {result.detected_categories.map((category, index) => (
                       <div
                         key={index}
                         style={{
-                          padding: '8px 12px',
-                          backgroundColor: 'var(--muted)',
-                          borderRadius: 'var(--radius)',
-                          border: '1px solid var(--border)',
+                          padding: `${DESIGN_SYSTEM.spacing.sm} ${DESIGN_SYSTEM.spacing.md}`,
+                          backgroundColor: DESIGN_SYSTEM.colors.muted,
+                          borderRadius: DESIGN_SYSTEM.borders.radius,
+                          border: `${DESIGN_SYSTEM.borders.width} solid ${DESIGN_SYSTEM.colors.border}`,
                         }}
                       >
                         <div
                           style={{
-                            fontSize: '12px',
+                            ...DESIGN_SYSTEM.typography.small,
                             fontWeight: '600',
-                            color: 'var(--foreground)',
-                            marginBottom: '4px',
+                            color: DESIGN_SYSTEM.colors.foreground,
+                            marginBottom: DESIGN_SYSTEM.spacing.xs,
                             textTransform: 'capitalize',
                           }}
                         >
@@ -1565,15 +1560,15 @@ const App: React.FC = () => {
                           result.explanations[category] && (
                             <div
                               style={{
-                                fontSize: '11px',
-                                color: 'var(--muted-foreground)',
+                                ...DESIGN_SYSTEM.typography.tiny,
+                                color: DESIGN_SYSTEM.colors.mutedForeground,
                                 fontStyle: 'italic',
                                 lineHeight: '1.4',
-                                marginTop: '4px',
-                                padding: '4px 8px',
-                                backgroundColor: 'var(--background)',
+                                marginTop: DESIGN_SYSTEM.spacing.xs,
+                                padding: `${DESIGN_SYSTEM.spacing.xs} ${DESIGN_SYSTEM.spacing.sm}`,
+                                backgroundColor: DESIGN_SYSTEM.colors.background,
                                 borderRadius: '4px',
-                                border: '1px solid var(--border)',
+                                border: `${DESIGN_SYSTEM.borders.width} solid ${DESIGN_SYSTEM.colors.border}`,
                                 opacity: 0.8,
                               }}
                             >
@@ -1591,20 +1586,18 @@ const App: React.FC = () => {
         {/* Texto Analizado con Palabras Resaltadas */}
         <div
           style={{
-            backgroundColor: 'var(--card)',
-            borderRadius: 'var(--radius)',
-            padding: '20px',
-            boxShadow: '0 2px 4px rgba(0, 0, 0, 0.05)',
-            border: '1px solid var(--border)',
-            marginBottom: '24px',
+            backgroundColor: DESIGN_SYSTEM.colors.card,
+            borderRadius: DESIGN_SYSTEM.borders.radius,
+            padding: DESIGN_SYSTEM.spacing.xl,
+            boxShadow: DESIGN_SYSTEM.borders.shadow,
+            border: `${DESIGN_SYSTEM.borders.width} solid ${DESIGN_SYSTEM.colors.border}`,
+            marginBottom: DESIGN_SYSTEM.spacing.xxl,
           }}
         >
           <h3
             style={{
-              fontSize: '18px',
-              fontWeight: '600',
-              color: 'var(--foreground)',
-              margin: '0 0 16px 0',
+              ...DESIGN_SYSTEM.typography.h3,
+              color: DESIGN_SYSTEM.colors.foreground,
               textAlign: 'center',
             }}
           >
@@ -1612,10 +1605,10 @@ const App: React.FC = () => {
           </h3>
           <div
             style={{
-              backgroundColor: 'var(--muted)',
-              padding: '16px',
-              borderRadius: 'var(--radius)',
-              border: '1px solid var(--border)',
+              backgroundColor: DESIGN_SYSTEM.colors.muted,
+              padding: DESIGN_SYSTEM.spacing.lg,
+              borderRadius: DESIGN_SYSTEM.borders.radius,
+              border: `${DESIGN_SYSTEM.borders.width} solid ${DESIGN_SYSTEM.colors.border}`,
               maxHeight: '200px',
               overflowY: 'auto',
             }}
@@ -1630,22 +1623,20 @@ const App: React.FC = () => {
         {/* Nueva Caja de Texto para Análisis Adicionales */}
         <div
           style={{
-            backgroundColor: 'var(--card)',
-            borderRadius: 'var(--radius)',
-            padding: '20px',
-            boxShadow: '0 2px 4px rgba(0, 0, 0, 0.05)',
-            border: '1px solid var(--border)',
+            backgroundColor: DESIGN_SYSTEM.colors.card,
+            borderRadius: DESIGN_SYSTEM.borders.radius,
+            padding: DESIGN_SYSTEM.spacing.xl,
+            boxShadow: DESIGN_SYSTEM.borders.shadow,
+            border: `${DESIGN_SYSTEM.borders.width} solid ${DESIGN_SYSTEM.colors.border}`,
           }}
         >
           <h3
             style={{
-              fontSize: '18px',
-              fontWeight: '600',
-              color: 'var(--foreground)',
-              margin: '0 0 16px 0',
+              ...DESIGN_SYSTEM.typography.h3,
+              color: DESIGN_SYSTEM.colors.foreground,
               display: 'flex',
               alignItems: 'center',
-              gap: '6px',
+              gap: DESIGN_SYSTEM.spacing.xs,
             }}
           >
             ⚡ Analyze New Text
@@ -1660,7 +1651,7 @@ const App: React.FC = () => {
             showCharCount={true}
           />
 
-          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', gap: DESIGN_SYSTEM.spacing.sm, flexWrap: 'wrap' }}>
             <Button
               onClick={handleAnalyze}
               disabled={loading || !text.trim()}
@@ -1724,28 +1715,28 @@ const App: React.FC = () => {
           {error && (
             <div
               style={{
-                marginTop: '16px',
-                padding: '12px',
-                backgroundColor: 'var(--destructive)',
+                marginTop: DESIGN_SYSTEM.spacing.lg,
+                padding: DESIGN_SYSTEM.spacing.md,
+                backgroundColor: DESIGN_SYSTEM.colors.destructive,
                 color: 'var(--destructive-foreground)',
-                borderRadius: 'var(--radius)',
-                border: '1px solid var(--destructive)',
+                borderRadius: DESIGN_SYSTEM.borders.radius,
+                border: `${DESIGN_SYSTEM.borders.width} solid ${DESIGN_SYSTEM.colors.destructive}`,
                 animation: 'shake 0.5s ease-in-out',
-                fontSize: '13px',
+                ...DESIGN_SYSTEM.typography.caption,
               }}
             >
-              <div style={{ marginBottom: '6px', fontWeight: '600' }}>
+              <div style={{ marginBottom: DESIGN_SYSTEM.spacing.xs, fontWeight: '600' }}>
                 ❌ {error}
               </div>
               {error.includes('Failed to fetch') && (
                 <div
                   style={{
-                    fontSize: '12px',
+                    ...DESIGN_SYSTEM.typography.small,
                     color: 'var(--destructive-foreground)',
                   }}
                 >
                   <strong>🔧 Solution:</strong>
-                  <ul style={{ marginTop: '6px', marginLeft: '16px' }}>
+                  <ul style={{ marginTop: DESIGN_SYSTEM.spacing.xs, marginLeft: DESIGN_SYSTEM.spacing.lg }}>
                     <li>
                       Verify that the backend is running on
                       http://127.0.0.1:8000
