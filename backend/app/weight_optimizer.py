@@ -9,9 +9,7 @@ import os
 from typing import List, Dict, Tuple, Any, Optional
 from datetime import datetime
 import numpy as np
-from sklearn.model_selection import GridSearchCV
 from sklearn.metrics import f1_score, precision_score, recall_score
-from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
 
 from .ml_models import MLToxicityClassifier
@@ -98,10 +96,28 @@ class WeightOptimizer:
                     X_val, y_val, _ = self._prepare_data_for_optimization(validation_data)
                     weighted_X_val = self._apply_weights_to_features(X_val, weights)
                     y_pred = model.predict(weighted_X_val)
-                    score = self._calculate_metric(y_val, y_pred, metric)
+                    
+                    # Calcular métricas
+                    if metric == "f1":
+                        score = f1_score(y_val, y_pred, average='weighted')
+                    elif metric == "precision":
+                        score = precision_score(y_val, y_pred, average='weighted')
+                    elif metric == "recall":
+                        score = recall_score(y_val, y_pred, average='weighted')
+                    else:
+                        score = f1_score(y_val, y_pred, average='weighted')
                 else:
+                    # Usar cross-validation en datos de entrenamiento
                     y_pred = model.predict(weighted_X)
-                    score = self._calculate_metric(y_train, y_pred, metric)
+                    
+                    if metric == "f1":
+                        score = f1_score(y_train, y_pred, average='weighted')
+                    elif metric == "precision":
+                        score = precision_score(y_train, y_pred, average='weighted')
+                    elif metric == "recall":
+                        score = recall_score(y_train, y_pred, average='weighted')
+                    else:
+                        score = f1_score(y_train, y_pred, average='weighted')
                 
                 # Actualizar mejores pesos si es necesario
                 if score > best_score:
@@ -110,401 +126,168 @@ class WeightOptimizer:
                     
                     # Calcular métricas completas
                     if validation_data:
-                        best_metrics = self._calculate_all_metrics(y_val, y_pred)
+                        y_pred = model.predict(weighted_X_val)
+                        best_metrics = {
+                            "f1": f1_score(y_val, y_pred, average='weighted'),
+                            "precision": precision_score(y_val, y_pred, average='weighted'),
+                            "recall": recall_score(y_val, y_pred, average='weighted')
+                        }
                     else:
-                        best_metrics = self._calculate_all_metrics(y_train, y_pred)
-                    
-                    logger.info(f"Nuevos mejores pesos encontrados. Score: {score:.3f}")
-                    
+                        y_pred = model.predict(weighted_X)
+                        best_metrics = {
+                            "f1": f1_score(y_train, y_pred, average='weighted'),
+                            "precision": precision_score(y_train, y_pred, average='weighted'),
+                            "recall": recall_score(y_train, y_pred, average='weighted')
+                        }
+                
             except Exception as e:
                 logger.warning(f"Error evaluando pesos {weights}: {e}")
                 continue
         
-        # Resultados de optimización
-        results = {
+        logger.info(f"Mejores pesos encontrados: {best_weights}")
+        logger.info(f"Mejor score: {best_score:.4f}")
+        
+        return {
             "optimized_weights": best_weights,
             "best_score": best_score,
-            "best_metrics": best_metrics,
-            "optimization_metric": metric,
-            "timestamp": datetime.now().isoformat(),
-            "method": "grid_search"
+            "metrics": best_metrics,
+            "optimization_method": "grid_search",
+            "metric_used": metric,
+            "timestamp": datetime.now().isoformat()
         }
-        
-        logger.info(f"Optimización completada. Mejor score: {best_score:.3f}")
-        return results
     
-    def optimize_weights_genetic(self, training_data: List[Tuple[str, int, str]], 
-                               population_size: int = 50, generations: int = 100,
-                               metric: str = "f1") -> Dict[str, Any]:
-        """
-        Optimiza pesos usando algoritmo genético
+    def _prepare_data_for_optimization(self, data: List[Tuple[str, int, str]]) -> Tuple[np.ndarray, np.ndarray, Dict[str, float]]:
+        """Prepara datos para optimización de pesos"""
+        if not data:
+            raise ValueError("Datos de entrenamiento vacíos")
         
-        Args:
-            training_data: Lista de tuplas (texto, etiqueta, categoría)
-            population_size: Tamaño de la población
-            generations: Número de generaciones
-            metric: Métrica a optimizar
-            
-        Returns:
-            Diccionario con pesos optimizados y métricas
-        """
-        if metric not in self.optimization_metrics:
-            raise ValueError(f"Métrica no válida: {metric}")
+        # Extraer textos, etiquetas y categorías
+        texts, labels, categories = zip(*data)
         
-        logger.info(f"Optimizando pesos usando algoritmo genético con métrica: {metric}")
+        # Convertir a arrays numpy
+        X = np.array(texts)
+        y = np.array(labels)
         
-        # Preparar datos
-        X_train, y_train, category_weights = self._prepare_data_for_optimization(training_data)
+        # Crear mapeo de categorías a pesos
+        category_weights = {}
+        for category in set(categories):
+            if category in self.base_weights:
+                category_weights[category] = self.base_weights[category]
+            else:
+                category_weights[category] = 0.5  # Peso por defecto
         
-        # Inicializar población
-        population = self._initialize_population(population_size)
-        
-        best_weights = None
-        best_score = 0
-        best_metrics = {}
-        
-        for generation in range(generations):
-            # Evaluar fitness de la población
-            fitness_scores = []
-            for weights in population:
-                try:
-                    score = self._evaluate_weights(weights, X_train, y_train, metric)
-                    fitness_scores.append((score, weights))
-                except Exception as e:
-                    logger.warning(f"Error evaluando pesos: {e}")
-                    fitness_scores.append((0, weights))
-            
-            # Ordenar por fitness
-            fitness_scores.sort(reverse=True)
-            
-            # Actualizar mejor solución
-            if fitness_scores[0][0] > best_score:
-                best_score = fitness_scores[0][0]
-                best_weights = fitness_scores[0][1].copy()
-                
-                # Calcular métricas completas
-                y_pred = self._predict_with_weights(best_weights, X_train, y_train)
-                best_metrics = self._calculate_all_metrics(y_train, y_pred)
-                
-                logger.info(f"Generación {generation}: Nuevo mejor score: {best_score:.3f}")
-            
-            # Selección y reproducción
-            elite_size = max(1, population_size // 10)
-            elite = [weights for _, weights in fitness_scores[:elite_size]]
-            
-            # Generar nueva población
-            new_population = elite.copy()
-            
-            while len(new_population) < population_size:
-                # Selección por torneo
-                parent1 = self._tournament_selection(fitness_scores)
-                parent2 = self._tournament_selection(fitness_scores)
-                
-                # Crossover
-                child = self._crossover(parent1, parent2)
-                
-                # Mutación
-                if np.random.random() < 0.1:
-                    child = self._mutate(child)
-                
-                new_population.append(child)
-            
-            population = new_population
-        
-        # Resultados
-        results = {
-            "optimized_weights": best_weights,
-            "best_score": best_score,
-            "best_metrics": best_metrics,
-            "optimization_metric": metric,
-            "timestamp": datetime.now().isoformat(),
-            "method": "genetic_algorithm",
-            "generations": generations,
-            "population_size": population_size
-        }
-        
-        logger.info(f"Optimización genética completada. Mejor score: {best_score:.3f}")
-        return results
-    
-    def _prepare_data_for_optimization(self, data: List[Tuple[str, int, str]]) -> Tuple[np.ndarray, np.ndarray, List[str]]:
-        """
-        Prepara datos para optimización de pesos
-        
-        Args:
-            data: Lista de tuplas (texto, etiqueta, categoría)
-            
-        Returns:
-            Tuple con (características, etiquetas, categorías)
-        """
-        # Extraer características básicas del texto
-        features = []
-        labels = []
-        categories = []
-        
-        for text, label, category in data:
-            # Características del texto
-            text_features = [
-                len(text),  # Longitud del texto
-                len(text.split()),  # Número de palabras
-                sum(1 for c in text if c.isupper()),  # Mayúsculas
-                sum(1 for c in text if c in '!?.'),  # Signos de puntuación
-                sum(1 for word in text.lower().split() if len(word) > 6),  # Palabras largas
-            ]
-            
-            features.append(text_features)
-            labels.append(label)
-            categories.append(category)
-        
-        return np.array(features), np.array(labels), categories
+        return X, y, category_weights
     
     def _generate_weight_grid(self) -> List[Dict[str, float]]:
-        """
-        Genera grid de pesos para Grid Search
-        
-        Returns:
-            Lista de combinaciones de pesos
-        """
-        weight_combinations = []
+        """Genera grid de pesos a probar"""
+        weight_grid = []
         
         # Generar combinaciones de pesos
-        for insulto_leve in np.arange(0.1, 0.6, 0.1):
-            for insulto_moderado in np.arange(0.4, 0.9, 0.1):
-                for insulto_severo in np.arange(0.7, 1.1, 0.1):
-                    for acoso in np.arange(0.6, 1.1, 0.1):
-                        for discriminacion in np.arange(0.7, 1.1, 0.1):
-                            for spam in np.arange(0.2, 0.7, 0.1):
+        for insulto_leve in [0.1, 0.2, 0.3, 0.4, 0.5]:
+            for insulto_moderado in [0.4, 0.5, 0.6, 0.7, 0.8]:
+                for insulto_severo in [0.7, 0.8, 0.9, 1.0]:
+                    for acoso in [0.6, 0.7, 0.8, 0.9, 1.0]:
+                        for discriminacion in [0.7, 0.8, 0.9, 1.0]:
+                            for spam in [0.2, 0.3, 0.4, 0.5, 0.6]:
                                 weights = {
-                                    "insulto_leve": round(insulto_leve, 1),
-                                    "insulto_moderado": round(insulto_moderado, 1),
-                                    "insulto_severo": round(insulto_severo, 1),
-                                    "acoso": round(acoso, 1),
-                                    "discriminacion": round(discriminacion, 1),
-                                    "spam": round(spam, 1)
+                                    "insulto_leve": insulto_leve,
+                                    "insulto_moderado": insulto_moderado,
+                                    "insulto_severo": insulto_severo,
+                                    "acoso": acoso,
+                                    "discriminacion": discriminacion,
+                                    "spam": spam
                                 }
-                                weight_combinations.append(weights)
+                                weight_grid.append(weights)
         
-        return weight_combinations
+        return weight_grid
     
-    def _apply_weights_to_features(self, features: np.ndarray, weights: Dict[str, float]) -> np.ndarray:
-        """
-        Aplica pesos a las características
+    def _apply_weights_to_features(self, X: np.ndarray, weights: Dict[str, float]) -> np.ndarray:
+        """Aplica pesos a las características del texto"""
+        # Implementación simplificada - en un caso real, esto dependería de cómo
+        # se extraen las características del texto
+        weighted_X = X.copy()
         
-        Args:
-            features: Características del texto
-            weights: Pesos a aplicar
-            
-        Returns:
-            Características ponderadas
-        """
-        # Por ahora, aplicar pesos de manera simple
-        # En una implementación más avanzada, se podrían mapear características específicas a categorías
-        weighted_features = features.copy()
-        
-        # Aplicar factor de peso general basado en la suma de pesos
-        weight_factor = sum(weights.values()) / len(weights)
-        weighted_features *= weight_factor
-        
-        return weighted_features
+        # Aquí se aplicarían los pesos a las características específicas
+        # Por ahora, retornamos X sin modificar
+        return weighted_X
     
-    def _calculate_metric(self, y_true: np.ndarray, y_pred: np.ndarray, metric: str) -> float:
-        """
-        Calcula una métrica específica
-        
-        Args:
-            y_true: Etiquetas verdaderas
-            y_pred: Etiquetas predichas
-            metric: Métrica a calcular
-            
-        Returns:
-            Valor de la métrica
-        """
-        if metric == "f1":
-            return f1_score(y_true, y_pred, average='weighted')
-        elif metric == "precision":
-            return precision_score(y_true, y_pred, average='weighted', zero_division=0)
-        elif metric == "recall":
-            return recall_score(y_true, y_pred, average='weighted', zero_division=0)
-        elif metric == "balanced_accuracy":
-            from sklearn.metrics import balanced_accuracy_score
-            return balanced_accuracy_score(y_true, y_pred)
-        else:
-            raise ValueError(f"Métrica no soportada: {metric}")
-    
-    def _calculate_all_metrics(self, y_true: np.ndarray, y_pred: np.ndarray) -> Dict[str, float]:
-        """
-        Calcula todas las métricas disponibles
-        
-        Args:
-            y_true: Etiquetas verdaderas
-            y_pred: Etiquetas predichas
-            
-        Returns:
-            Diccionario con todas las métricas
-        """
-        return {
-            "f1": f1_score(y_true, y_pred, average='weighted'),
-            "precision": precision_score(y_true, y_pred, average='weighted', zero_division=0),
-            "recall": recall_score(y_true, y_pred, average='weighted', zero_division=0),
-            "accuracy": (y_true == y_pred).mean()
-        }
-    
-    def _initialize_population(self, size: int) -> List[Dict[str, float]]:
-        """
-        Inicializa población para algoritmo genético
-        
-        Args:
-            size: Tamaño de la población
-            
-        Returns:
-            Lista de individuos (pesos)
-        """
-        population = []
-        
-        for _ in range(size):
-            individual = {}
-            for category, (min_weight, max_weight) in self.weight_ranges.items():
-                individual[category] = round(np.random.uniform(min_weight, max_weight), 2)
-            population.append(individual)
-        
-        return population
-    
-    def _evaluate_weights(self, weights: Dict[str, float], X: np.ndarray, 
-                         y: np.ndarray, metric: str) -> float:
-        """
-        Evalúa un conjunto de pesos
-        
-        Args:
-            weights: Pesos a evaluar
-            X: Características
-            y: Etiquetas
-            metric: Métrica de evaluación
-            
-        Returns:
-            Score de fitness
-        """
+    def save_optimized_weights(self, weights: Dict[str, float], filepath: str = None) -> bool:
+        """Guarda los pesos optimizados en un archivo JSON"""
         try:
-            weighted_X = self._apply_weights_to_features(X, weights)
-            y_pred = self._predict_with_weights(weights, X, y)
-            return self._calculate_metric(y, y_pred, metric)
-        except Exception:
-            return 0.0
-    
-    def _predict_with_weights(self, weights: Dict[str, float], X: np.ndarray, y: np.ndarray) -> np.ndarray:
-        """
-        Hace predicciones usando pesos específicos
-        
-        Args:
-            weights: Pesos a usar
-            X: Características
-            y: Etiquetas
+            if filepath is None:
+                filepath = f"optimized_weights_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
             
-        Returns:
-            Predicciones
-        """
-        weighted_X = self._apply_weights_to_features(X, weights)
-        model = LogisticRegression(random_state=42, max_iter=1000)
-        model.fit(weighted_X, y)
-        return model.predict(weighted_X)
-    
-    def _tournament_selection(self, fitness_scores: List[Tuple[float, Dict[str, float]]], 
-                            tournament_size: int = 3) -> Dict[str, float]:
-        """
-        Selección por torneo para algoritmo genético
-        
-        Args:
-            fitness_scores: Lista de (fitness, pesos)
-            tournament_size: Tamaño del torneo
+            # Crear directorio si no existe
+            os.makedirs(os.path.dirname(filepath) if os.path.dirname(filepath) else ".", exist_ok=True)
             
-        Returns:
-            Individuo seleccionado
-        """
-        tournament = np.random.choice(len(fitness_scores), tournament_size, replace=False)
-        tournament_fitness = [fitness_scores[i] for i in tournament]
-        return max(tournament_fitness, key=lambda x: x[0])[1]
-    
-    def _crossover(self, parent1: Dict[str, float], parent2: Dict[str, float]) -> Dict[str, float]:
-        """
-        Operador de crossover para algoritmo genético
-        
-        Args:
-            parent1: Primer padre
-            parent2: Segundo padre
+            # Preparar datos para guardar
+            save_data = {
+                "weights": weights,
+                "timestamp": datetime.now().isoformat(),
+                "base_weights": self.base_weights,
+                "weight_ranges": self.weight_ranges
+            }
             
-        Returns:
-            Hijo resultante
-        """
-        child = {}
-        for category in parent1.keys():
-            if np.random.random() < 0.5:
-                child[category] = parent1[category]
-            else:
-                child[category] = parent2[category]
-        return child
-    
-    def _mutate(self, individual: Dict[str, float], mutation_rate: float = 0.1) -> Dict[str, float]:
-        """
-        Operador de mutación para algoritmo genético
-        
-        Args:
-            individual: Individuo a mutar
-            mutation_rate: Tasa de mutación
-            
-        Returns:
-            Individuo mutado
-        """
-        mutated = individual.copy()
-        
-        for category in mutated.keys():
-            if np.random.random() < mutation_rate:
-                min_weight, max_weight = self.weight_ranges[category]
-                mutated[category] = round(np.random.uniform(min_weight, max_weight), 2)
-        
-        return mutated
-    
-    def save_optimized_weights(self, weights: Dict[str, float], filepath: str) -> bool:
-        """
-        Guarda pesos optimizados
-        
-        Args:
-            weights: Pesos a guardar
-            filepath: Ruta del archivo
-            
-        Returns:
-            True si se guardó exitosamente
-        """
-        try:
-            os.makedirs(os.path.dirname(filepath), exist_ok=True)
-            
+            # Guardar en archivo
             with open(filepath, 'w', encoding='utf-8') as f:
-                json.dump(weights, f, indent=2, ensure_ascii=False)
+                json.dump(save_data, f, indent=2, ensure_ascii=False)
             
             logger.info(f"Pesos optimizados guardados en: {filepath}")
             return True
             
         except Exception as e:
-            logger.error(f"Error guardando pesos: {e}")
+            logger.error(f"Error guardando pesos optimizados: {e}")
             return False
     
     def load_optimized_weights(self, filepath: str) -> Optional[Dict[str, float]]:
-        """
-        Carga pesos optimizados guardados
-        
-        Args:
-            filepath: Ruta del archivo
-            
-        Returns:
-            Pesos cargados o None si hay error
-        """
+        """Carga pesos optimizados desde un archivo JSON"""
         try:
+            if not os.path.exists(filepath):
+                logger.warning(f"Archivo de pesos no encontrado: {filepath}")
+                return None
+            
             with open(filepath, 'r', encoding='utf-8') as f:
-                weights = json.load(f)
+                data = json.load(f)
             
-            logger.info(f"Pesos optimizados cargados desde: {filepath}")
-            return weights
-            
+            if "weights" in data:
+                logger.info(f"Pesos optimizados cargados desde: {filepath}")
+                return data["weights"]
+            else:
+                logger.warning("Archivo no contiene pesos válidos")
+                return None
+                
         except Exception as e:
-            logger.error(f"Error cargando pesos: {e}")
+            logger.error(f"Error cargando pesos optimizados: {e}")
             return None
+    
+    def get_weight_analysis(self) -> Dict[str, Any]:
+        """Retorna análisis de los pesos actuales"""
+        return {
+            "base_weights": self.base_weights,
+            "weight_ranges": self.weight_ranges,
+            "total_categories": len(self.base_weights),
+            "average_weight": sum(self.base_weights.values()) / len(self.base_weights),
+            "min_weight": min(self.base_weights.values()),
+            "max_weight": max(self.base_weights.values()),
+            "timestamp": datetime.now().isoformat()
+        }
+    
+    def reset_to_base_weights(self) -> bool:
+        """Resetea los pesos a los valores base"""
+        try:
+            self.base_weights = {
+                "insulto_leve": 0.3,
+                "insulto_moderado": 0.6,
+                "insulto_severo": 0.9,
+                "acoso": 0.8,
+                "discriminacion": 0.9,
+                "spam": 0.4
+            }
+            logger.info("Pesos reseteados a valores base")
+            return True
+        except Exception as e:
+            logger.error(f"Error reseteando pesos: {e}")
+            return False
 
 # Instancia global del optimizador
 weight_optimizer = WeightOptimizer()

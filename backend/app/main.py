@@ -6,7 +6,6 @@ API para detección de comentarios tóxicos usando Machine Learning optimizado y
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from pydantic import BaseModel
 import time
 import logging
 from datetime import datetime
@@ -33,10 +32,6 @@ app = FastAPI(
     docs_url="/docs",
     redoc_url="/redoc"
 )
-
-# Variables globales optimizadas
-startup_time = None
-app_start_time = None
 
 # Configurar CORS
 app.add_middleware(
@@ -96,11 +91,11 @@ async def value_error_handler(request: Request, exc: ValueError):
     """Maneja errores de validación de manera optimizada"""
     return JSONResponse(
         status_code=400,
-        content=ErrorResponse(
-            error="Error de validación",
-            detail=str(exc),
-            timestamp=datetime.now()
-        ).dict()
+        content={
+            "error": "Error de validación",
+            "detail": str(exc),
+            "timestamp": datetime.now()
+        }
     )
 
 @app.exception_handler(Exception)
@@ -109,11 +104,11 @@ async def general_exception_handler(request: Request, exc: Exception):
     logger.error(f"Error no manejado: {exc}")
     return JSONResponse(
         status_code=500,
-        content=ErrorResponse(
-            error="Error interno del servidor",
-            detail="Ocurrió un error inesperado",
-            timestamp=datetime.now()
-        ).dict()
+        content={
+            "error": "Error interno del servidor",
+            "detail": "Ocurrió un error inesperado",
+            "timestamp": datetime.now()
+        }
     )
 
 @app.get("/")
@@ -123,8 +118,6 @@ async def root():
         "message": "ToxiGuard API - Backend Optimizado con Análisis Contextual",
         "version": "2.1.0",
         "status": "operational",
-        "uptime": time.time() - startup_time if startup_time else 0,
-        "start_time": app_start_time.isoformat() if app_start_time else None,
         "features": [
             "Análisis contextual con embeddings",
             "Detección de negaciones y contexto",
@@ -195,7 +188,6 @@ async def health_check():
     return {
         "status": "healthy",
         "timestamp": datetime.now(),
-        "uptime": time.time() - startup_time if startup_time else 0,
         "classifier": "hybrid_ultra_sensitive",
         "database": "connected" if history_db else "disconnected",
         "advanced_analysis": True,
