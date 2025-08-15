@@ -1,6 +1,14 @@
+"""
+🔍 Servicios de Clasificación - ToxiGuard
+Clasificador mejorado de toxicidad con categorización avanzada
+"""
+
 import re
+import logging
 from typing import List, Tuple, Dict
-from datetime import datetime
+
+# Configurar logging
+logger = logging.getLogger(__name__)
 
 class ToxicityClassifier:
     """Clasificador mejorado de toxicidad con categorización avanzada"""
@@ -36,8 +44,8 @@ class ToxicityClassifier:
         for category_words in self.toxicity_categories.values():
             self.toxic_keywords.update(category_words)
         
-        # Umbral para considerar texto como tóxico
-        self.toxicity_threshold = 0.3
+        # Umbral dinámico basado en la intensidad del contenido
+        self.base_threshold = 0.25
         
         # Pesos por categoría para scoring más preciso
         self.category_weights = {
@@ -48,6 +56,12 @@ class ToxicityClassifier:
         }
         
         # Compilar regex para búsqueda eficiente
+        self._compile_patterns()
+        
+        logger.info(f"Clasificador inicializado con {len(self.toxic_keywords)} palabras clave")
+    
+    def _compile_patterns(self):
+        """Compila los patrones regex para búsqueda eficiente"""
         self.keyword_pattern = re.compile(
             r'\b(' + '|'.join(map(re.escape, self.toxic_keywords)) + r')\b',
             re.IGNORECASE
@@ -55,7 +69,7 @@ class ToxicityClassifier:
     
     def analyze_text(self, text: str) -> Tuple[bool, float, List[str], int, int, str, float]:
         """
-        Analiza un texto y determina su toxicidad con categorización
+        Analiza un texto y determina su toxicidad con categorización mejorada
         
         Args:
             text: Texto a analizar
@@ -67,62 +81,101 @@ class ToxicityClassifier:
             return False, 0.0, [], 0, 0, None, 0.0
         
         # Limpiar y normalizar texto
-        clean_text = text.lower().strip()
+        clean_text = self._normalize_text(text)
         text_length = len(clean_text)
         
         # Encontrar palabras clave tóxicas por categoría
+        category_matches = self._find_category_matches(clean_text)
+        total_matches = sum(category_matches.values())
+        
+        # Calcular score dinámico
+        score, is_toxic, category, labels = self._calculate_dynamic_score(
+            clean_text, category_matches, total_matches, text_length
+        )
+        
+        # Calcular porcentaje de toxicidad
+        toxicity_percentage = round(score * 100, 1)
+        
+        # Logs para debugging
+        logger.debug(f"Texto: '{text[:50]}...' -> Score: {score:.3f}, Tóxico: {is_toxic}")
+        
+        return is_toxic, score, labels, text_length, total_matches, category, toxicity_percentage
+    
+    def _normalize_text(self, text: str) -> str:
+        """Normalización mejorada del texto"""
+        # Convertir a minúsculas y remover espacios extra
+        text = text.lower().strip()
+        
+        # Remover caracteres especiales pero mantener estructura
+        text = re.sub(r'[^\w\s]', ' ', text)
+        text = re.sub(r'\s+', ' ', text)
+        
+        return text.strip()
+    
+    def _find_category_matches(self, clean_text: str) -> Dict[str, int]:
+        """Encuentra coincidencias por categoría de manera eficiente"""
         category_matches = {}
-        total_matches = 0
         
         for category, keywords in self.toxicity_categories.items():
+            # Crear patrón específico para la categoría
             category_pattern = re.compile(
                 r'\b(' + '|'.join(map(re.escape, keywords)) + r')\b',
                 re.IGNORECASE
             )
             matches = category_pattern.findall(clean_text)
             category_matches[category] = len(matches)
-            total_matches += len(matches)
         
-        # Determinar la categoría principal
+        return category_matches
+    
+    def _calculate_dynamic_score(self, clean_text: str, category_matches: Dict[str, int], 
+                                total_matches: int, text_length: int) -> Tuple[float, bool, str, List[str]]:
+        """Calcula score dinámico basado en múltiples factores"""
+        
         if total_matches == 0:
-            score = 0.0
-            is_toxic = False
-            labels = []
-            category = None
-            toxicity_percentage = 0.0
-        else:
-            # Calcular score ponderado por categoría
-            weighted_score = sum(
-                count * self.category_weights[cat] 
-                for cat, count in category_matches.items() 
-                if count > 0
-            )
-            
-            # Fórmula mejorada: más sensible a palabras tóxicas
-            # Base score por palabras encontradas + factor de densidad
-            base_score = min(1.0, weighted_score * 0.25)  # Cada palabra tóxica agrega al score
-            density_score = min(0.5, total_matches / max(text_length / 20, 1))  # Densidad de toxicidad
-            score = min(1.0, base_score + density_score)
-            
-            # Si hay palabras tóxicas, score mínimo de 0.4
-            if total_matches > 0:
-                score = max(score, 0.4)
-            
-            # Determinar si es tóxico
-            is_toxic = score >= self.toxicity_threshold
-            
-            # Determinar categoría principal
-            if total_matches > 0:
-                category = max(category_matches.items(), key=lambda x: x[1] * self.category_weights[x[0]])[0]
-                labels = [category, "detected"]
-            else:
-                category = None
-                labels = []
-            
-            # Calcular porcentaje de toxicidad
-            toxicity_percentage = round(score * 100, 1)
+            return 0.0, False, None, []
         
-        return is_toxic, score, labels, text_length, total_matches, category, toxicity_percentage
+        # Score base por palabras encontradas
+        weighted_score = sum(
+            count * self.category_weights[cat] 
+            for cat, count in category_matches.items() 
+            if count > 0
+        )
+        
+        # Factor de densidad (palabras tóxicas por longitud)
+        density_factor = min(0.6, total_matches / max(text_length / 15, 1))
+        
+        # Factor de intensidad (múltiples palabras de la misma categoría)
+        intensity_factor = min(0.4, sum(count ** 0.5 for count in category_matches.values() if count > 0) / 10)
+        
+        # Score combinado
+        base_score = min(0.8, weighted_score * 0.2)
+        combined_score = min(1.0, base_score + density_factor + intensity_factor)
+        
+        # Ajuste por categoría dominante
+        if total_matches > 0:
+            dominant_category = max(category_matches.items(), key=lambda x: x[1] * self.category_weights[x[0]])
+            category_weight = self.category_weights[dominant_category[0]]
+            combined_score = min(1.0, combined_score * (1 + category_weight * 0.1))
+        
+        # Umbral dinámico basado en la intensidad
+        dynamic_threshold = self.base_threshold
+        if total_matches > 2:
+            dynamic_threshold *= 0.8  # Más sensible para múltiples palabras
+        if text_length < 20 and total_matches > 0:
+            dynamic_threshold *= 0.7  # Más sensible para textos cortos
+        
+        # Determinar si es tóxico
+        is_toxic = combined_score >= dynamic_threshold
+        
+        # Determinar categoría principal
+        if total_matches > 0:
+            category = max(category_matches.items(), key=lambda x: x[1] * self.category_weights[x[0]])[0]
+            labels = [category, "detected"]
+        else:
+            category = None
+            labels = []
+        
+        return combined_score, is_toxic, category, labels
     
     def get_keywords_list(self) -> List[str]:
         """Retorna la lista de palabras clave tóxicas"""
@@ -142,13 +195,13 @@ class ToxicityClassifier:
     def add_keyword(self, keyword: str, category: str = "insulto") -> None:
         """Añade una nueva palabra clave tóxica a una categoría específica"""
         if keyword and keyword.strip() and category in self.toxicity_categories:
-            self.toxicity_categories[category].add(keyword.lower().strip())
-            self.toxic_keywords.add(keyword.lower().strip())
+            keyword_lower = keyword.lower().strip()
+            self.toxicity_categories[category].add(keyword_lower)
+            self.toxic_keywords.add(keyword_lower)
+            
             # Recompilar el patrón regex
-            self.keyword_pattern = re.compile(
-                r'\b(' + '|'.join(map(re.escape, self.toxic_keywords)) + r')\b',
-                re.IGNORECASE
-            )
+            self._compile_patterns()
+            logger.info(f"Palabra clave '{keyword}' añadida a categoría '{category}'")
     
     def remove_keyword(self, keyword: str) -> bool:
         """Remueve una palabra clave tóxica de todas las categorías"""
@@ -166,12 +219,22 @@ class ToxicityClassifier:
         
         if removed:
             # Recompilar el patrón regex
-            self.keyword_pattern = re.compile(
-                r'\b(' + '|'.join(map(re.escape, self.toxic_keywords)) + r')\b',
-                re.IGNORECASE
-            )
+            self._compile_patterns()
+            logger.info(f"Palabra clave '{keyword}' removida")
         
         return removed
+    
+    def get_toxicity_threshold(self) -> float:
+        """Retorna el umbral actual de toxicidad"""
+        return self.base_threshold
+    
+    def set_toxicity_threshold(self, threshold: float) -> None:
+        """Establece un nuevo umbral de toxicidad"""
+        if 0.0 <= threshold <= 1.0:
+            self.base_threshold = threshold
+            logger.info(f"Umbral de toxicidad actualizado a {threshold}")
+        else:
+            raise ValueError("El umbral debe estar entre 0.0 y 1.0")
 
 # Instancia global del clasificador
 toxicity_classifier = ToxicityClassifier()
