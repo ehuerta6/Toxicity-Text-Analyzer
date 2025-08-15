@@ -16,6 +16,8 @@ import {
   commonStyles,
   getToxicityColor,
   getToxicityLabel,
+  getToxicityBackgroundColor,
+  getToxicityBorderColor,
 } from './styles/common';
 
 // Register Chart.js components
@@ -37,8 +39,8 @@ const ToxicityGauge: React.FC<{ percentage: number }> = ({ percentage }) => {
     <div style={{ textAlign: 'center' }}>
       <div
         style={{
-          width: '120px',
-          height: '120px',
+          width: '140px',
+          height: '140px',
           borderRadius: '50%',
           background: `conic-gradient(${color} ${
             percentage * 3.6
@@ -46,29 +48,54 @@ const ToxicityGauge: React.FC<{ percentage: number }> = ({ percentage }) => {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          margin: '0 auto 16px',
+          margin: '0 auto 20px',
           position: 'relative',
+          boxShadow: '0 8px 25px rgba(0, 0, 0, 0.15)',
+          border: `4px solid ${color}`,
         }}
       >
         <div
           style={{
-            width: '80px',
-            height: '80px',
+            width: '100px',
+            height: '100px',
             borderRadius: '50%',
             backgroundColor: 'white',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            fontSize: '18px',
+            fontSize: '20px',
             fontWeight: 'bold',
             color: color,
+            boxShadow: 'inset 0 2px 10px rgba(0, 0, 0, 0.1)',
           }}
         >
           {percentage}%
         </div>
       </div>
-      <div style={{ fontSize: '18px', fontWeight: '600', color: color }}>
+      <div
+        style={{
+          fontSize: '20px',
+          fontWeight: '700',
+          color: color,
+          textShadow: '0 1px 2px rgba(0, 0, 0, 0.1)',
+          marginBottom: '8px',
+        }}
+      >
         {label}
+      </div>
+      <div
+        style={{
+          fontSize: '14px',
+          color: '#6b7280',
+          maxWidth: '200px',
+          margin: '0 auto',
+        }}
+      >
+        {percentage < 30
+          ? 'El contenido es seguro y apropiado'
+          : percentage < 70
+          ? 'El contenido requiere atención moderada'
+          : 'El contenido presenta niveles altos de toxicidad'}
       </div>
     </div>
   );
@@ -241,7 +268,13 @@ const App: React.FC = () => {
 
   const handleAnalyze = async () => {
     if (inputText.trim()) {
-      await analyzeText(inputText);
+      console.log('🔄 Iniciando análisis de texto:', inputText.trim());
+      try {
+        await analyzeText(inputText);
+        console.log('✅ Análisis completado exitosamente');
+      } catch (error) {
+        console.error('❌ Error en handleAnalyze:', error);
+      }
     }
   };
 
@@ -283,8 +316,42 @@ const App: React.FC = () => {
                   minHeight: '120px',
                   resize: 'vertical',
                   fontFamily: 'inherit',
+                  backgroundColor: '#fafafa',
+                  borderColor: inputText.trim() ? '#3b82f6' : '#e5e7eb',
+                  boxShadow: inputText.trim()
+                    ? '0 0 0 3px rgba(59, 130, 246, 0.1)'
+                    : 'none',
+                }}
+                onFocus={(e) => {
+                  e.target.style.borderColor = '#3b82f6';
+                  e.target.style.boxShadow =
+                    '0 0 0 3px rgba(59, 130, 246, 0.1)';
+                  e.target.style.backgroundColor = 'white';
+                }}
+                onBlur={(e) => {
+                  e.target.style.borderColor = inputText.trim()
+                    ? '#3b82f6'
+                    : '#e5e7eb';
+                  e.target.style.boxShadow = inputText.trim()
+                    ? '0 0 0 3px rgba(59, 130, 246, 0.1)'
+                    : 'none';
+                  e.target.style.backgroundColor = inputText.trim()
+                    ? 'white'
+                    : '#fafafa';
                 }}
               />
+              {inputText.trim() && (
+                <div
+                  style={{
+                    marginTop: '8px',
+                    fontSize: '12px',
+                    color: '#6b7280',
+                    textAlign: 'right',
+                  }}
+                >
+                  {inputText.length} caracteres
+                </div>
+              )}
             </div>
             <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
               <button
@@ -293,13 +360,66 @@ const App: React.FC = () => {
                 style={{
                   ...commonStyles.button.primary,
                   opacity: loading || !inputText.trim() ? 0.6 : 1,
+                  position: 'relative',
+                  transform:
+                    loading || !inputText.trim() ? 'none' : 'translateY(0)',
+                  boxShadow:
+                    loading || !inputText.trim()
+                      ? 'none'
+                      : '0 4px 6px rgba(0, 0, 0, 0.1)',
+                }}
+                onMouseEnter={(e) => {
+                  if (!loading && inputText.trim()) {
+                    e.currentTarget.style.transform = 'translateY(-2px)';
+                    e.currentTarget.style.boxShadow =
+                      '0 6px 20px rgba(59, 130, 246, 0.3)';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!loading && inputText.trim()) {
+                    e.currentTarget.style.transform = 'translateY(0)';
+                    e.currentTarget.style.boxShadow =
+                      '0 4px 6px rgba(0, 0, 0, 0.1)';
+                  }
                 }}
               >
-                {loading ? '⏳ Analizando...' : '🔍 Analizar'}
+                {loading ? (
+                  <>
+                    <div
+                      style={{
+                        display: 'inline-block',
+                        width: '16px',
+                        height: '16px',
+                        border: '2px solid transparent',
+                        borderTop: '2px solid white',
+                        borderRadius: '50%',
+                        animation: 'spin 1s linear infinite',
+                        marginRight: '8px',
+                      }}
+                    />
+                    Analizando...
+                  </>
+                ) : (
+                  '🔍 Analizar'
+                )}
               </button>
               <button
                 onClick={handleClear}
-                style={commonStyles.button.secondary}
+                style={{
+                  ...commonStyles.button.secondary,
+                  transform: 'translateY(0)',
+                  boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'translateY(-2px)';
+                  e.currentTarget.style.boxShadow =
+                    '0 6px 20px rgba(107, 114, 128, 0.3)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow =
+                    '0 4px 6px rgba(0, 0, 0, 0.1)';
+                }}
               >
                 🗑️ Limpiar
               </button>
@@ -309,39 +429,173 @@ const App: React.FC = () => {
                 style={{
                   marginTop: '16px',
                   color: commonStyles.toxicity.toxic,
+                  padding: '16px',
+                  backgroundColor: '#fef2f2',
+                  borderRadius: '8px',
+                  border: '1px solid #fecaca',
+                  animation: 'shake 0.5s ease-in-out',
                 }}
               >
-                ❌ {error}
+                <div style={{ marginBottom: '8px', fontWeight: '600' }}>
+                  ❌ {error}
+                </div>
+                {error.includes('No se pudo conectar') && (
+                  <div style={{ fontSize: '14px', color: '#dc2626' }}>
+                    <strong>🔧 Solución:</strong>
+                    <ul style={{ marginTop: '8px', marginLeft: '20px' }}>
+                      <li>
+                        Verifica que el backend esté ejecutándose en
+                        http://127.0.0.1:8000
+                      </li>
+                      <li>
+                        Abre la consola del navegador (F12) para ver más
+                        detalles
+                      </li>
+                      <li>
+                        Prueba el archivo test-connection.html para verificar la
+                        conectividad
+                      </li>
+                    </ul>
+                  </div>
+                )}
               </div>
             )}
           </div>
 
           {/* Results */}
           {result && (
-            <div style={commonStyles.card}>
+            <div
+              style={{
+                ...commonStyles.card,
+                backgroundColor: getToxicityBackgroundColor(
+                  result.toxicity_percentage
+                ),
+                borderColor: getToxicityBorderColor(result.toxicity_percentage),
+                borderWidth: '2px',
+              }}
+            >
               <h2 style={commonStyles.text.subheading}>
                 📊 Resultados del Análisis
               </h2>
               <div style={{ marginBottom: '24px' }}>
                 <ToxicityGauge percentage={result.toxicity_percentage} />
               </div>
-              <div style={{ marginBottom: '16px' }}>
-                <strong>Score:</strong> {result.score.toFixed(3)}
-              </div>
-              {result.category && (
-                <div style={{ marginBottom: '16px' }}>
-                  <strong>Categoría:</strong> {result.category}
+
+              {/* Enhanced Results Display */}
+              <div
+                style={{
+                  backgroundColor: 'white',
+                  padding: '16px',
+                  borderRadius: '8px',
+                  border: '1px solid #e2e8f0',
+                  boxShadow: '0 2px 4px rgba(0, 0, 0, 0.05)',
+                }}
+              >
+                <div
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))',
+                    gap: '12px',
+                    marginBottom: '16px',
+                  }}
+                >
+                  <div style={{ textAlign: 'center' }}>
+                    <div
+                      style={{
+                        fontSize: '12px',
+                        color: '#6b7280',
+                        marginBottom: '4px',
+                      }}
+                    >
+                      Score
+                    </div>
+                    <div
+                      style={{
+                        fontSize: '18px',
+                        fontWeight: '600',
+                        color: '#1f2937',
+                      }}
+                    >
+                      {result.score.toFixed(3)}
+                    </div>
+                  </div>
+                  {result.category && (
+                    <div style={{ textAlign: 'center' }}>
+                      <div
+                        style={{
+                          fontSize: '12px',
+                          color: '#6b7280',
+                          marginBottom: '4px',
+                        }}
+                      >
+                        Categoría
+                      </div>
+                      <div
+                        style={{
+                          fontSize: '18px',
+                          fontWeight: '600',
+                          color: '#1f2937',
+                        }}
+                      >
+                        {result.category}
+                      </div>
+                    </div>
+                  )}
+                  <div style={{ textAlign: 'center' }}>
+                    <div
+                      style={{
+                        fontSize: '12px',
+                        color: '#6b7280',
+                        marginBottom: '4px',
+                      }}
+                    >
+                      Modelo
+                    </div>
+                    <div
+                      style={{
+                        fontSize: '18px',
+                        fontWeight: '600',
+                        color: '#1f2937',
+                      }}
+                    >
+                      {result.model_used}
+                    </div>
+                  </div>
+                  <div style={{ textAlign: 'center' }}>
+                    <div
+                      style={{
+                        fontSize: '12px',
+                        color: '#6b7280',
+                        marginBottom: '4px',
+                      }}
+                    >
+                      Tiempo
+                    </div>
+                    <div
+                      style={{
+                        fontSize: '18px',
+                        fontWeight: '600',
+                        color: '#1f2937',
+                      }}
+                    >
+                      {result.response_time_ms}ms
+                    </div>
+                  </div>
                 </div>
-              )}
-              <div style={{ marginBottom: '16px' }}>
-                <strong>Modelo usado:</strong> {result.model_used}
-              </div>
-              <div style={{ marginBottom: '16px' }}>
-                <strong>Tiempo de respuesta:</strong> {result.response_time_ms}
-                ms
-              </div>
-              <div style={{ fontSize: '14px', color: '#6b7280' }}>
-                Analizado el {new Date(result.timestamp).toLocaleString()}
+
+                <div
+                  style={{
+                    fontSize: '14px',
+                    color: '#6b7280',
+                    textAlign: 'center',
+                    padding: '8px',
+                    backgroundColor: '#f8fafc',
+                    borderRadius: '6px',
+                    border: '1px solid #e5e7eb',
+                  }}
+                >
+                  Analizado el {new Date(result.timestamp).toLocaleString()}
+                </div>
               </div>
             </div>
           )}
@@ -354,13 +608,37 @@ const App: React.FC = () => {
             style={{
               ...commonStyles.button.secondary,
               marginRight: '12px',
+              transform: 'translateY(0)',
+              boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = 'translateY(-2px)';
+              e.currentTarget.style.boxShadow =
+                '0 6px 20px rgba(107, 114, 128, 0.3)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1)';
             }}
           >
             {showHistory ? '📊 Ocultar Historial' : '📚 Mostrar Historial'}
           </button>
           <button
             onClick={() => setShowCharts(!showCharts)}
-            style={commonStyles.button.secondary}
+            style={{
+              ...commonStyles.button.secondary,
+              transform: 'translateY(0)',
+              boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = 'translateY(-2px)';
+              e.currentTarget.style.boxShadow =
+                '0 6px 20px rgba(107, 114, 128, 0.3)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1)';
+            }}
           >
             {showCharts ? '📈 Ocultar Gráficos' : '📈 Mostrar Gráficos'}
           </button>
@@ -380,7 +658,24 @@ const App: React.FC = () => {
               <h2 style={commonStyles.text.subheading}>
                 📚 Historial de Análisis
               </h2>
-              <button onClick={clearHistory} style={commonStyles.button.danger}>
+              <button
+                onClick={clearHistory}
+                style={{
+                  ...commonStyles.button.danger,
+                  transform: 'translateY(0)',
+                  boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'translateY(-2px)';
+                  e.currentTarget.style.boxShadow =
+                    '0 6px 20px rgba(239, 68, 68, 0.3)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow =
+                    '0 4px 6px rgba(0, 0, 0, 0.1)';
+                }}
+              >
                 🗑️ Limpiar Todo
               </button>
             </div>
@@ -585,7 +880,24 @@ const App: React.FC = () => {
                         <td style={{ padding: '12px', textAlign: 'center' }}>
                           <button
                             onClick={() => deleteItem(item.id)}
-                            style={commonStyles.button.danger}
+                            style={{
+                              ...commonStyles.button.danger,
+                              padding: '6px 12px',
+                              fontSize: '12px',
+                              transform: 'translateY(0)',
+                              boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+                            }}
+                            onMouseEnter={(e) => {
+                              e.currentTarget.style.transform =
+                                'translateY(-1px)';
+                              e.currentTarget.style.boxShadow =
+                                '0 4px 12px rgba(239, 68, 68, 0.3)';
+                            }}
+                            onMouseLeave={(e) => {
+                              e.currentTarget.style.transform = 'translateY(0)';
+                              e.currentTarget.style.boxShadow =
+                                '0 2px 4px rgba(0, 0, 0, 0.1)';
+                            }}
                           >
                             🗑️
                           </button>

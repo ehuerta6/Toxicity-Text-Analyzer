@@ -37,6 +37,9 @@ export const useToxicityAnalysis = (): UseToxicityAnalysisReturn => {
     setResult(null);
 
     try {
+      console.log('🚀 Enviando solicitud a:', 'http://127.0.0.1:8000/analyze');
+      console.log('📝 Texto a analizar:', text.trim());
+
       const response = await fetch('http://127.0.0.1:8000/analyze', {
         method: 'POST',
         headers: {
@@ -45,15 +48,51 @@ export const useToxicityAnalysis = (): UseToxicityAnalysisReturn => {
         body: JSON.stringify({ text: text.trim() }),
       });
 
+      console.log(
+        '📡 Respuesta recibida:',
+        response.status,
+        response.statusText
+      );
+      console.log(
+        '📋 Headers de respuesta:',
+        Object.fromEntries(response.headers.entries())
+      );
+
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.detail || 'Error en el análisis');
+        const errorData = await response
+          .json()
+          .catch(() => ({ detail: 'Error desconocido del servidor' }));
+        console.error('❌ Error del servidor:', errorData);
+        throw new Error(
+          errorData.detail || `Error del servidor: ${response.status}`
+        );
       }
 
       const data = await response.json();
+      console.log('✅ Datos recibidos exitosamente:', data);
       setResult(data);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error desconocido');
+      console.error('💥 Error en análisis:', err);
+
+      if (err instanceof Error) {
+        const errorMessage = err.message;
+        console.log('🔍 Tipo de error:', errorMessage);
+
+        if (errorMessage.includes('Failed to fetch')) {
+          setError(
+            '❌ No se pudo conectar al servidor. Verifica que el backend esté ejecutándose en http://127.0.0.1:8000'
+          );
+        } else if (errorMessage.includes('NetworkError')) {
+          setError('🌐 Error de red. Verifica tu conexión a internet.');
+        } else if (errorMessage.includes('TypeError')) {
+          setError('🔌 Error de conexión. El servidor no está respondiendo.');
+        } else {
+          setError(`⚠️ ${errorMessage}`);
+        }
+      } else {
+        console.error('❓ Error desconocido:', err);
+        setError('❓ Error desconocido durante el análisis');
+      }
     } finally {
       setLoading(false);
     }

@@ -36,14 +36,34 @@ export const useHistory = (): UseHistoryReturn => {
     setError(null);
 
     try {
+      console.log('Cargando historial desde:', 'http://127.0.0.1:8000/history');
+
       const response = await fetch('http://127.0.0.1:8000/history');
+      console.log(
+        'Respuesta del historial:',
+        response.status,
+        response.statusText
+      );
+
       if (!response.ok) {
-        throw new Error('Error cargando historial');
+        throw new Error(`Error cargando historial: ${response.status}`);
       }
+
       const data = await response.json();
+      console.log('Historial recibido:', data);
       setHistory(data.history || []);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error desconocido');
+      console.error('Error cargando historial:', err);
+
+      if (err instanceof Error) {
+        if (err.message.includes('Failed to fetch')) {
+          setError('No se pudo conectar al servidor para cargar el historial');
+        } else {
+          setError(err.message);
+        }
+      } else {
+        setError('Error desconocido cargando historial');
+      }
     } finally {
       setLoading(false);
     }
@@ -51,44 +71,72 @@ export const useHistory = (): UseHistoryReturn => {
 
   const loadStats = useCallback(async () => {
     try {
+      console.log(
+        'Cargando estadísticas desde:',
+        'http://127.0.0.1:8000/history/stats'
+      );
+
       const response = await fetch('http://127.0.0.1:8000/history/stats');
+      console.log(
+        'Respuesta de estadísticas:',
+        response.status,
+        response.statusText
+      );
+
       if (!response.ok) {
-        throw new Error('Error cargando estadísticas');
+        console.warn('Error cargando estadísticas:', response.status);
+        return;
       }
+
       const data = await response.json();
+      console.log('Estadísticas recibidas:', data);
       setStats(data);
     } catch (err) {
       console.error('Error cargando estadísticas:', err);
+      // No establecemos error aquí para no bloquear la UI
     }
   }, []);
 
-  const deleteItem = useCallback(async (id: number) => {
-    try {
-      const response = await fetch(`http://127.0.0.1:8000/history/${id}`, {
-        method: 'DELETE',
-      });
-      if (!response.ok) {
-        throw new Error('Error eliminando elemento');
+  const deleteItem = useCallback(
+    async (id: number) => {
+      try {
+        console.log('Eliminando elemento:', id);
+
+        const response = await fetch(`http://127.0.0.1:8000/history/${id}`, {
+          method: 'DELETE',
+        });
+
+        if (!response.ok) {
+          throw new Error('Error eliminando elemento');
+        }
+
+        // Recargar historial después de eliminar
+        await loadHistory();
+        await loadStats();
+      } catch (err) {
+        console.error('Error eliminando elemento:', err);
+        setError(err instanceof Error ? err.message : 'Error desconocido');
       }
-      // Recargar historial después de eliminar
-      await loadHistory();
-      await loadStats();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error desconocido');
-    }
-  }, [loadHistory, loadStats]);
+    },
+    [loadHistory, loadStats]
+  );
 
   const clearHistory = useCallback(async () => {
     try {
+      console.log('Limpiando historial completo');
+
       const response = await fetch('http://127.0.0.1:8000/history', {
         method: 'DELETE',
       });
+
       if (!response.ok) {
         throw new Error('Error limpiando historial');
       }
+
       setHistory([]);
       setStats(null);
     } catch (err) {
+      console.error('Error limpiando historial:', err);
       setError(err instanceof Error ? err.message : 'Error desconocido');
     }
   }, []);

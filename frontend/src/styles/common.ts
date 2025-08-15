@@ -15,6 +15,7 @@ export const commonStyles = {
     boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
     border: '1px solid #e5e7eb',
     padding: '24px',
+    transition: 'all 0.2s ease-in-out',
   },
   
   // Botones
@@ -28,7 +29,12 @@ export const commonStyles = {
       fontSize: '16px',
       fontWeight: '600',
       cursor: 'pointer',
-      transition: 'background-color 0.2s',
+      transition: 'all 0.2s ease-in-out',
+      ':hover': {
+        backgroundColor: '#2563eb',
+        transform: 'translateY(-1px)',
+        boxShadow: '0 4px 12px rgba(59, 130, 246, 0.4)',
+      },
     },
     secondary: {
       backgroundColor: '#6b7280',
@@ -39,7 +45,12 @@ export const commonStyles = {
       fontSize: '16px',
       fontWeight: '600',
       cursor: 'pointer',
-      transition: 'background-color 0.2s',
+      transition: 'all 0.2s ease-in-out',
+      ':hover': {
+        backgroundColor: '#4b5563',
+        transform: 'translateY(-1px)',
+        boxShadow: '0 4px 12px rgba(107, 114, 128, 0.4)',
+      },
     },
     danger: {
       backgroundColor: '#ef4444',
@@ -50,7 +61,12 @@ export const commonStyles = {
       fontSize: '14px',
       fontWeight: '500',
       cursor: 'pointer',
-      transition: 'background-color 0.2s',
+      transition: 'all 0.2s ease-in-out',
+      ':hover': {
+        backgroundColor: '#dc2626',
+        transform: 'translateY(-1px)',
+        boxShadow: '0 4px 12px rgba(239, 68, 68, 0.4)',
+      },
     },
   },
   
@@ -61,7 +77,12 @@ export const commonStyles = {
     border: '2px solid #e5e7eb',
     borderRadius: '8px',
     fontSize: '16px',
-    transition: 'border-color 0.2s',
+    transition: 'all 0.2s ease-in-out',
+    ':focus': {
+      outline: 'none',
+      borderColor: '#3b82f6',
+      boxShadow: '0 0 0 3px rgba(59, 130, 246, 0.1)',
+    },
   },
   
   // Texto
@@ -141,4 +162,18 @@ export const getToxicityLabel = (percentage: number): string => {
   if (percentage < 30) return 'Seguro';
   if (percentage < 70) return 'Advertencia';
   return 'Tóxico';
+};
+
+// Función para obtener color de fondo basado en toxicidad
+export const getToxicityBackgroundColor = (percentage: number): string => {
+  if (percentage < 30) return '#f0fdf4';
+  if (percentage < 70) return '#fffbeb';
+  return '#fef2f2';
+};
+
+// Función para obtener color de borde basado en toxicidad
+export const getToxicityBorderColor = (percentage: number): string => {
+  if (percentage < 30) return '#bbf7d0';
+  if (percentage < 70) return '#fed7aa';
+  return '#fecaca';
 };
