@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { useToxicityAnalysis } from './hooks/useToxicityAnalysis';
-import { getToxicityColor, getToxicityBorderColor } from './styles/common';
+import { getToxicityColor } from './styles/common';
 
 interface ToxicityMap {
   [word: string]: number;
@@ -39,8 +39,8 @@ const ToxicityGauge: React.FC<{ percentage: number }> = ({ percentage }) => {
     <div style={{ textAlign: 'center' }}>
       <div
         style={{
-          width: '100px',
-          height: '100px',
+          width: '80px',
+          height: '80px',
           borderRadius: '50%',
           background: `conic-gradient(${color} ${
             roundedPercentage * 3.6
@@ -48,25 +48,25 @@ const ToxicityGauge: React.FC<{ percentage: number }> = ({ percentage }) => {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          margin: '0 auto 12px',
+          margin: '0 auto 8px',
           position: 'relative',
-          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
-          border: `3px solid ${color}`,
+          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
+          border: `2px solid ${color}`,
         }}
       >
         <div
           style={{
-            width: '70px',
-            height: '70px',
+            width: '56px',
+            height: '56px',
             borderRadius: '50%',
             backgroundColor: 'var(--background)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            fontSize: '18px',
+            fontSize: '14px',
             fontWeight: 'bold',
             color: color,
-            boxShadow: 'inset 0 2px 8px rgba(0, 0, 0, 0.1)',
+            boxShadow: 'inset 0 1px 4px rgba(0, 0, 0, 0.1)',
           }}
         >
           {roundedPercentage}%
@@ -76,14 +76,14 @@ const ToxicityGauge: React.FC<{ percentage: number }> = ({ percentage }) => {
       {/* Categoría con color asociado */}
       <div
         style={{
-          fontSize: '16px',
+          fontSize: '12px',
           fontWeight: '700',
           color: categoryInfo.color,
           textShadow: '0 1px 2px rgba(0, 0, 0, 0.1)',
-          marginBottom: '6px',
-          padding: '6px 12px',
+          marginBottom: '4px',
+          padding: '4px 8px',
           backgroundColor: `${categoryInfo.color}15`,
-          borderRadius: '16px',
+          borderRadius: '12px',
           display: 'inline-block',
         }}
       >
@@ -92,11 +92,11 @@ const ToxicityGauge: React.FC<{ percentage: number }> = ({ percentage }) => {
 
       <div
         style={{
-          fontSize: '12px',
+          fontSize: '10px',
           color: 'var(--muted-foreground)',
-          maxWidth: '200px',
+          maxWidth: '120px',
           margin: '0 auto',
-          lineHeight: '1.3',
+          lineHeight: '1.2',
         }}
       >
         {categoryInfo.description}
@@ -160,7 +160,7 @@ const ColoredText: React.FC<{ text: string; toxicityMap: ToxicityMap }> = ({
   };
 
   return (
-    <div className='text-foreground leading-relaxed text-sm'>
+    <div className='text-foreground leading-relaxed text-xs'>
       {renderText()}
     </div>
   );
@@ -169,6 +169,7 @@ const ColoredText: React.FC<{ text: string; toxicityMap: ToxicityMap }> = ({
 const App: React.FC = () => {
   const [text, setText] = useState('');
   const [toxicityMap, setToxicityMap] = useState<ToxicityMap>({});
+  const [hasAnalyzed, setHasAnalyzed] = useState(false);
 
   // Guardar temporalmente el último análisis en localStorage
   const [lastAnalysis, setLastAnalysis] = useState(() => {
@@ -262,6 +263,7 @@ const App: React.FC = () => {
 
     try {
       await analyzeText(text);
+      setHasAnalyzed(true);
       // El resultado se actualiza automáticamente a través del hook useToxicityAnalysis
       // y se puede acceder a través de la variable `result`
     } catch (error) {
@@ -297,6 +299,7 @@ const App: React.FC = () => {
     setText('');
     setToxicityMap({});
     clearResult();
+    setHasAnalyzed(false);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -306,93 +309,109 @@ const App: React.FC = () => {
     }
   };
 
-  return (
-    <div
-      style={{
-        minHeight: '100vh',
-        backgroundColor: '#f8fafc',
-        fontFamily:
-          'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-      }}
-    >
-      {/* Header */}
-      <header
-        style={{
-          backgroundColor: 'white',
-          borderBottom: '1px solid #e2e8f0',
-          padding: '24px 0',
-          boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
-        }}
-      >
-        <div
-          style={{ maxWidth: '1400px', margin: '0 auto', padding: '0 24px' }}
-        >
-          <h1
-            style={{
-              fontSize: '28px',
-              fontWeight: '700',
-              color: '#1e293b',
-              textAlign: 'center',
-              margin: '0',
-            }}
-          >
-            🛡️ ToxiGuard – Analiza texto
-          </h1>
-          <p
-            style={{
-              fontSize: '16px',
-              color: '#64748b',
-              textAlign: 'center',
-              margin: '8px 0 0 0',
-            }}
-          >
-            Detección inteligente de contenido tóxico usando Machine Learning
-          </p>
-        </div>
-      </header>
-
-      {/* Main Content Container */}
+  // Si no se ha analizado nada, mostrar solo la página inicial
+  if (!hasAnalyzed) {
+    return (
       <div
         style={{
-          maxWidth: '1400px',
-          margin: '0 auto',
-          padding: '32px 24px',
-          display: 'grid',
-          gridTemplateColumns: '1fr',
-          gap: '32px',
+          minHeight: '100vh',
+          backgroundColor: 'var(--background)',
+          fontFamily:
+            'DM Sans, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
         }}
       >
-        {/* Main Grid Layout */}
-        <div
+        {/* Header Compacto */}
+        <header
           style={{
-            display: 'grid',
-            gridTemplateColumns: result ? '1fr 1fr' : '1fr',
-            gap: '32px',
-            alignItems: 'start',
+            backgroundColor: 'var(--card)',
+            borderBottom: '1px solid var(--border)',
+            padding: '16px 0',
+            boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
           }}
         >
-          {/* Input Form - Left Column */}
+          <div
+            style={{ maxWidth: '1400px', margin: '0 auto', padding: '0 16px' }}
+          >
+            <div style={{ textAlign: 'center' }}>
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px',
+                  marginBottom: '8px',
+                }}
+              >
+                <div style={{ fontSize: '24px' }}>🛡️</div>
+                <h1
+                  style={{
+                    fontSize: '28px',
+                    fontWeight: '700',
+                    color: 'var(--foreground)',
+                    margin: '0',
+                  }}
+                >
+                  ToxiGuard
+                </h1>
+              </div>
+              <p
+                style={{
+                  fontSize: '14px',
+                  color: 'var(--muted-foreground)',
+                  margin: '0',
+                  maxWidth: '400px',
+                  marginLeft: 'auto',
+                  marginRight: 'auto',
+                }}
+              >
+                Professional obscene text detection powered by advanced machine
+                learning algorithms
+              </p>
+            </div>
+          </div>
+        </header>
+
+        {/* Página Inicial - Solo Caja de Texto */}
+        <div
+          style={{
+            maxWidth: '800px',
+            margin: '0 auto',
+            padding: '40px 16px',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            minHeight: 'calc(100vh - 200px)',
+          }}
+        >
           <div
             style={{
-              backgroundColor: 'white',
-              borderRadius: '16px',
+              backgroundColor: 'var(--card)',
+              borderRadius: 'var(--radius)',
               padding: '32px',
-              boxShadow: '0 4px 6px rgba(0, 0, 0, 0.05)',
-              border: '1px solid #e2e8f0',
+              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+              border: '1px solid var(--border)',
+              width: '100%',
+              maxWidth: '600px',
             }}
           >
             <h2
               style={{
-                fontSize: '20px',
+                fontSize: '24px',
                 fontWeight: '600',
-                color: '#1e293b',
+                color: 'var(--foreground)',
                 margin: '0 0 24px 0',
+                textAlign: 'center',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
               }}
             >
-              📝 Analizar Texto
+              ⚡ Analyze Your First Text
             </h2>
 
-            <div style={{ marginBottom: '16px', flex: 1 }}>
+            <div style={{ marginBottom: '24px' }}>
               <textarea
                 value={text}
                 onChange={(e) => setText(e.target.value)}
@@ -400,11 +419,11 @@ const App: React.FC = () => {
                 placeholder='Enter or paste the text you want to analyze for toxicity... (Press Enter to analyze, Shift+Enter for new line)'
                 style={{
                   width: '100%',
-                  minHeight: '120px',
-                  padding: '12px',
+                  minHeight: '150px',
+                  padding: '16px',
                   border: '2px solid var(--border)',
                   borderRadius: 'var(--radius)',
-                  fontSize: '14px',
+                  fontSize: '16px',
                   fontFamily: 'inherit',
                   resize: 'none',
                   backgroundColor: 'var(--input)',
@@ -431,8 +450,8 @@ const App: React.FC = () => {
               {text.trim() && (
                 <div
                   style={{
-                    marginTop: '6px',
-                    fontSize: '12px',
+                    marginTop: '8px',
+                    fontSize: '14px',
                     color: 'var(--muted-foreground)',
                     textAlign: 'right',
                   }}
@@ -442,7 +461,9 @@ const App: React.FC = () => {
               )}
             </div>
 
-            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+            <div
+              style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}
+            >
               <button
                 onClick={handleAnalyze}
                 disabled={loading || !text.trim()}
@@ -451,16 +472,16 @@ const App: React.FC = () => {
                   backgroundColor: 'var(--primary)',
                   color: 'var(--primary-foreground)',
                   border: 'none',
-                  padding: '10px 20px',
+                  padding: '14px 28px',
                   borderRadius: 'var(--radius)',
-                  fontSize: '14px',
+                  fontSize: '16px',
                   fontWeight: '600',
                   cursor: loading || !text.trim() ? 'not-allowed' : 'pointer',
                   opacity: loading || !text.trim() ? 0.6 : 1,
                   transition: 'all 0.2s ease',
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '6px',
+                  gap: '8px',
                 }}
                 onMouseEnter={(e) => {
                   if (!loading && text.trim()) {
@@ -480,8 +501,8 @@ const App: React.FC = () => {
                   <>
                     <div
                       style={{
-                        width: '14px',
-                        height: '14px',
+                        width: '16px',
+                        height: '16px',
                         border: '2px solid transparent',
                         borderTop: '2px solid currentColor',
                         borderRadius: '50%',
@@ -493,14 +514,756 @@ const App: React.FC = () => {
                 ) : (
                   <>
                     🛡️
-                    <span>Analyze</span>
+                    <span>Analyze Text</span>
                   </>
                 )}
               </button>
 
               <button
                 onClick={handleClear}
-                aria-label='Clear text and analysis results'
+                aria-label='Clear text'
+                style={{
+                  backgroundColor: 'var(--muted)',
+                  color: 'var(--muted-foreground)',
+                  border: '1px solid var(--border)',
+                  padding: '14px 28px',
+                  borderRadius: 'var(--radius)',
+                  fontSize: '16px',
+                  fontWeight: '600',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = 'var(--border)';
+                  e.currentTarget.style.transform = 'translateY(-1px)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = 'var(--muted)';
+                  e.currentTarget.style.transform = 'translateY(0)';
+                }}
+              >
+                🗑️ Clear
+              </button>
+            </div>
+
+            {error && (
+              <div
+                style={{
+                  marginTop: '20px',
+                  padding: '16px',
+                  backgroundColor: 'var(--destructive)',
+                  color: 'var(--destructive-foreground)',
+                  borderRadius: 'var(--radius)',
+                  border: '1px solid var(--destructive)',
+                  animation: 'shake 0.5s ease-in-out',
+                  fontSize: '14px',
+                }}
+              >
+                <div style={{ marginBottom: '8px', fontWeight: '600' }}>
+                  ❌ {error}
+                </div>
+                {error.includes('No se pudo conectar') && (
+                  <div
+                    style={{
+                      fontSize: '13px',
+                      color: 'var(--destructive-foreground)',
+                    }}
+                  >
+                    <strong>🔧 Solution:</strong>
+                    <ul style={{ marginTop: '8px', marginLeft: '20px' }}>
+                      <li>
+                        Verify that the backend is running on
+                        http://127.0.0.1:8000
+                      </li>
+                      <li>Open the browser console (F12) for more details</li>
+                      <li>
+                        Try the test-connection.html file to verify connectivity
+                      </li>
+                    </ul>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Footer Compacto */}
+        <footer
+          style={{
+            backgroundColor: 'var(--card)',
+            borderTop: '1px solid var(--border)',
+            marginTop: 'auto',
+          }}
+        >
+          <div
+            style={{
+              maxWidth: '1400px',
+              margin: '0 auto',
+              padding: '16px',
+              textAlign: 'center',
+              color: 'var(--muted-foreground)',
+              fontSize: '12px',
+            }}
+          >
+            <p>&copy; 2024 ToxiGuard. Professional content moderation tools.</p>
+          </div>
+        </footer>
+      </div>
+    );
+  }
+
+  // Dashboard completo después del primer análisis
+  return (
+    <div
+      style={{
+        minHeight: '100vh',
+        backgroundColor: 'var(--background)',
+        fontFamily:
+          'DM Sans, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+      }}
+    >
+      {/* Header Compacto */}
+      <header
+        style={{
+          backgroundColor: 'var(--card)',
+          borderBottom: '1px solid var(--border)',
+          padding: '16px 0',
+          boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+        }}
+      >
+        <div
+          style={{ maxWidth: '1400px', margin: '0 auto', padding: '0 16px' }}
+        >
+          <div style={{ textAlign: 'center' }}>
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
+                marginBottom: '8px',
+              }}
+            >
+              <div style={{ fontSize: '24px' }}>🛡️</div>
+              <h1
+                style={{
+                  fontSize: '28px',
+                  fontWeight: '700',
+                  color: 'var(--foreground)',
+                  margin: '0',
+                }}
+              >
+                ToxiGuard Dashboard
+              </h1>
+            </div>
+            <p
+              style={{
+                fontSize: '14px',
+                color: 'var(--muted-foreground)',
+                margin: '0',
+                maxWidth: '400px',
+                marginLeft: 'auto',
+                marginRight: 'auto',
+              }}
+            >
+              Professional obscene text detection powered by advanced machine
+              learning algorithms
+            </p>
+          </div>
+        </div>
+      </header>
+
+      {/* Dashboard Principal */}
+      <div
+        style={{
+          maxWidth: '1400px',
+          margin: '0 auto',
+          padding: '16px',
+        }}
+      >
+        {/* Grid de Resultados del Análisis */}
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+            gap: '16px',
+            marginBottom: '24px',
+          }}
+        >
+          {/* Tarjeta de Gauge Principal */}
+          <div
+            style={{
+              backgroundColor: 'var(--card)',
+              borderRadius: 'var(--radius)',
+              padding: '20px',
+              boxShadow: '0 2px 4px rgba(0, 0, 0, 0.05)',
+              border: '1px solid var(--border)',
+              textAlign: 'center',
+            }}
+          >
+            <h3
+              style={{
+                fontSize: '16px',
+                fontWeight: '600',
+                color: 'var(--foreground)',
+                margin: '0 0 16px 0',
+              }}
+            >
+              📊 Toxicity Analysis
+            </h3>
+            <ToxicityGauge percentage={result?.toxicity_percentage || 0} />
+          </div>
+
+          {/* Tarjeta de Estadísticas */}
+          <div
+            style={{
+              backgroundColor: 'var(--card)',
+              borderRadius: 'var(--radius)',
+              padding: '20px',
+              boxShadow: '0 2px 4px rgba(0, 0, 0, 0.05)',
+              border: '1px solid var(--border)',
+            }}
+          >
+            <h3
+              style={{
+                fontSize: '16px',
+                fontWeight: '600',
+                color: 'var(--foreground)',
+                margin: '0 0 16px 0',
+                textAlign: 'center',
+              }}
+            >
+              📈 Analysis Details
+            </h3>
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(2, 1fr)',
+                gap: '12px',
+              }}
+            >
+              <div style={{ textAlign: 'center' }}>
+                <div
+                  style={{
+                    fontSize: '10px',
+                    color: 'var(--muted-foreground)',
+                    marginBottom: '4px',
+                  }}
+                >
+                  Score
+                </div>
+                <div
+                  style={{
+                    fontSize: '18px',
+                    fontWeight: '600',
+                    color: 'var(--foreground)',
+                  }}
+                >
+                  {result ? Math.round(result.toxicity_percentage) : 0}%
+                </div>
+              </div>
+
+              <div style={{ textAlign: 'center' }}>
+                <div
+                  style={{
+                    fontSize: '10px',
+                    color: 'var(--muted-foreground)',
+                    marginBottom: '4px',
+                  }}
+                >
+                  Category
+                </div>
+                <div
+                  style={{
+                    fontSize: '18px',
+                    fontWeight: '600',
+                    color: 'var(--foreground)',
+                  }}
+                >
+                  {result
+                    ? (() => {
+                        const percentage = result.toxicity_percentage;
+                        if (percentage <= 30) return 'Safe';
+                        if (percentage <= 60) return 'Moderate';
+                        return 'High Risk';
+                      })()
+                    : 'N/A'}
+                </div>
+              </div>
+
+              <div style={{ textAlign: 'center' }}>
+                <div
+                  style={{
+                    fontSize: '10px',
+                    color: 'var(--muted-foreground)',
+                    marginBottom: '4px',
+                  }}
+                >
+                  Model
+                </div>
+                <div
+                  style={{
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    color: 'var(--foreground)',
+                  }}
+                >
+                  {result?.model_used || 'N/A'}
+                </div>
+              </div>
+
+              <div style={{ textAlign: 'center' }}>
+                <div
+                  style={{
+                    fontSize: '10px',
+                    color: 'var(--muted-foreground)',
+                    marginBottom: '4px',
+                  }}
+                >
+                  Time
+                </div>
+                <div
+                  style={{
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    color: 'var(--foreground)',
+                  }}
+                >
+                  {result?.response_time_ms || 0}ms
+                </div>
+              </div>
+            </div>
+
+            <div
+              style={{
+                marginTop: '16px',
+                fontSize: '11px',
+                color: 'var(--muted-foreground)',
+                textAlign: 'center',
+                padding: '8px',
+                backgroundColor: 'var(--muted)',
+                borderRadius: 'var(--radius)',
+                border: '1px solid var(--border)',
+              }}
+            >
+              Analyzed on{' '}
+              {result ? new Date(result.timestamp).toLocaleString() : 'N/A'}
+            </div>
+          </div>
+
+          {/* Tarjeta de Barra de Progreso */}
+          <div
+            style={{
+              backgroundColor: 'var(--card)',
+              borderRadius: 'var(--radius)',
+              padding: '20px',
+              boxShadow: '0 2px 4px rgba(0, 0, 0, 0.05)',
+              border: '1px solid var(--border)',
+            }}
+          >
+            <h3
+              style={{
+                fontSize: '16px',
+                fontWeight: '600',
+                color: 'var(--foreground)',
+                margin: '0 0 16px 0',
+                textAlign: 'center',
+              }}
+            >
+              📊 Toxicity Level
+            </h3>
+            <div style={{ marginBottom: '12px' }}>
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  marginBottom: '8px',
+                }}
+              >
+                <span
+                  style={{
+                    fontSize: '12px',
+                    color: 'var(--muted-foreground)',
+                    fontWeight: '500',
+                  }}
+                >
+                  Current Level
+                </span>
+                <span
+                  style={{
+                    fontSize: '12px',
+                    color: 'var(--foreground)',
+                    fontWeight: '600',
+                  }}
+                >
+                  {result ? Math.round(result.toxicity_percentage) : 0}%
+                </span>
+              </div>
+              <div
+                style={{
+                  width: '100%',
+                  height: '12px',
+                  backgroundColor: 'var(--muted)',
+                  borderRadius: '6px',
+                  overflow: 'hidden',
+                  position: 'relative',
+                }}
+              >
+                <div
+                  style={{
+                    width: `${result?.toxicity_percentage || 0}%`,
+                    height: '100%',
+                    backgroundColor: result
+                      ? getToxicityColor(result.toxicity_percentage)
+                      : 'var(--muted)',
+                    borderRadius: '6px',
+                    transition: 'width 1s ease-out',
+                  }}
+                />
+              </div>
+            </div>
+
+            {/* Escala de Colores */}
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                fontSize: '10px',
+                color: 'var(--muted-foreground)',
+              }}
+            >
+              <span>0%</span>
+              <span>50%</span>
+              <span>100%</span>
+            </div>
+
+            {/* Leyenda de Colores */}
+            <div
+              style={{
+                marginTop: '16px',
+                padding: '12px',
+                backgroundColor: 'var(--muted)',
+                borderRadius: 'var(--radius)',
+                border: '1px solid var(--border)',
+              }}
+            >
+              <div
+                style={{
+                  fontSize: '11px',
+                  fontWeight: '600',
+                  color: 'var(--foreground)',
+                  marginBottom: '8px',
+                  textAlign: 'center',
+                }}
+              >
+                🎨 Color Legend
+              </div>
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-around',
+                  alignItems: 'center',
+                  gap: '4px',
+                }}
+              >
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '3px',
+                  }}
+                >
+                  <div
+                    style={{
+                      width: '10px',
+                      height: '10px',
+                      backgroundColor: 'var(--secondary)',
+                      borderRadius: '50%',
+                      border: '1px solid var(--secondary)',
+                    }}
+                  />
+                  <span
+                    style={{
+                      fontSize: '9px',
+                      color: 'var(--secondary)',
+                      fontWeight: '600',
+                    }}
+                  >
+                    Safe
+                  </span>
+                </div>
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '3px',
+                  }}
+                >
+                  <div
+                    style={{
+                      width: '10px',
+                      height: '10px',
+                      backgroundColor: 'oklch(0.769 0.188 70.08)',
+                      borderRadius: '50%',
+                      border: '1px solid oklch(0.769 0.188 70.08)',
+                    }}
+                  />
+                  <span
+                    style={{
+                      fontSize: '9px',
+                      color: 'oklch(0.769 0.188 70.08)',
+                      fontWeight: '600',
+                    }}
+                  >
+                    Moderate
+                  </span>
+                </div>
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '3px',
+                  }}
+                >
+                  <div
+                    style={{
+                      width: '10px',
+                      height: '10px',
+                      backgroundColor: 'var(--destructive)',
+                      borderRadius: '50%',
+                      border: '1px solid var(--destructive)',
+                    }}
+                  />
+                  <span
+                    style={{
+                      fontSize: '9px',
+                      color: 'var(--destructive)',
+                      fontWeight: '600',
+                    }}
+                  >
+                    High Risk
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Texto Analizado con Palabras Resaltadas */}
+        <div
+          style={{
+            backgroundColor: 'var(--card)',
+            borderRadius: 'var(--radius)',
+            padding: '20px',
+            boxShadow: '0 2px 4px rgba(0, 0, 0, 0.05)',
+            border: '1px solid var(--border)',
+            marginBottom: '24px',
+          }}
+        >
+          <h3
+            style={{
+              fontSize: '18px',
+              fontWeight: '600',
+              color: 'var(--foreground)',
+              margin: '0 0 16px 0',
+              textAlign: 'center',
+            }}
+          >
+            📝 Analyzed Text with Toxicity Highlighting
+          </h3>
+          <div
+            style={{
+              backgroundColor: 'var(--muted)',
+              padding: '16px',
+              borderRadius: 'var(--radius)',
+              border: '1px solid var(--border)',
+              maxHeight: '200px',
+              overflowY: 'auto',
+            }}
+          >
+            <ColoredText
+              text={lastAnalysis?.text || ''}
+              toxicityMap={toxicityMap}
+            />
+          </div>
+        </div>
+
+        {/* Nueva Caja de Texto para Análisis Adicionales */}
+        <div
+          style={{
+            backgroundColor: 'var(--card)',
+            borderRadius: 'var(--radius)',
+            padding: '20px',
+            boxShadow: '0 2px 4px rgba(0, 0, 0, 0.05)',
+            border: '1px solid var(--border)',
+          }}
+        >
+          <h3
+            style={{
+              fontSize: '18px',
+              fontWeight: '600',
+              color: 'var(--foreground)',
+              margin: '0 0 16px 0',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+            }}
+          >
+            ⚡ Analyze New Text
+          </h3>
+
+          <div style={{ marginBottom: '16px' }}>
+            <textarea
+              value={text}
+              onChange={(e) => setText(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder='Enter or paste new text to analyze... (Press Enter to analyze, Shift+Enter for new line)'
+              style={{
+                width: '100%',
+                minHeight: '100px',
+                padding: '12px',
+                border: '2px solid var(--border)',
+                borderRadius: 'var(--radius)',
+                fontSize: '14px',
+                fontFamily: 'inherit',
+                resize: 'none',
+                backgroundColor: 'var(--input)',
+                transition: 'all 0.2s ease',
+                boxSizing: 'border-box',
+              }}
+              onFocus={(e) => {
+                e.target.style.borderColor = 'var(--ring)';
+                e.target.style.backgroundColor = 'var(--background)';
+                e.target.style.boxShadow = '0 0 0 3px var(--ring)';
+              }}
+              onBlur={(e) => {
+                e.target.style.borderColor = text.trim()
+                  ? 'var(--ring)'
+                  : 'var(--border)';
+                e.target.style.backgroundColor = text.trim()
+                  ? 'var(--background)'
+                  : 'var(--input)';
+                e.target.style.boxShadow = text.trim()
+                  ? '0 0 0 3px var(--ring)'
+                  : 'none';
+              }}
+            />
+            {text.trim() && (
+              <div
+                style={{
+                  marginTop: '6px',
+                  fontSize: '12px',
+                  color: 'var(--muted-foreground)',
+                  textAlign: 'right',
+                }}
+              >
+                {text.length} characters
+              </div>
+            )}
+          </div>
+
+          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+            <button
+              onClick={handleAnalyze}
+              disabled={loading || !text.trim()}
+              aria-label='Analyze new text for toxicity detection'
+              style={{
+                backgroundColor: 'var(--primary)',
+                color: 'var(--primary-foreground)',
+                border: 'none',
+                padding: '10px 20px',
+                borderRadius: 'var(--radius)',
+                fontSize: '14px',
+                fontWeight: '600',
+                cursor: loading || !text.trim() ? 'not-allowed' : 'pointer',
+                opacity: loading || !text.trim() ? 0.6 : 1,
+                transition: 'all 0.2s ease',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+              }}
+              onMouseEnter={(e) => {
+                if (!loading && text.trim()) {
+                  e.currentTarget.style.backgroundColor =
+                    'oklch(0.548 0.15 197.137 / 0.9)';
+                  e.currentTarget.style.transform = 'translateY(-1px)';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!loading && text.trim()) {
+                  e.currentTarget.style.backgroundColor = 'var(--primary)';
+                  e.currentTarget.style.transform = 'translateY(0)';
+                }
+              }}
+            >
+              {loading ? (
+                <>
+                  <div
+                    style={{
+                      width: '14px',
+                      height: '14px',
+                      border: '2px solid transparent',
+                      borderTop: '2px solid currentColor',
+                      borderRadius: '50%',
+                      animation: 'spin 1s linear infinite',
+                    }}
+                  />
+                  Analyzing...
+                </>
+              ) : (
+                <>
+                  🛡️
+                  <span>Analyze</span>
+                </>
+              )}
+            </button>
+
+            <button
+              onClick={handleClear}
+              aria-label='Clear text and reset analysis'
+              style={{
+                backgroundColor: 'var(--muted)',
+                color: 'var(--muted-foreground)',
+                border: '1px solid var(--border)',
+                padding: '10px 20px',
+                borderRadius: 'var(--radius)',
+                fontSize: '14px',
+                fontWeight: '600',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = 'var(--border)';
+                e.currentTarget.style.transform = 'translateY(-1px)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'var(--muted)';
+                e.currentTarget.style.transform = 'translateY(0)';
+              }}
+            >
+              🗑️ Clear & Reset
+            </button>
+
+            {result && (
+              <button
+                onClick={() => {
+                  navigator.clipboard.writeText(text);
+                  // Feedback visual temporal
+                  const button = document.activeElement as HTMLButtonElement;
+                  if (button) {
+                    const originalText = button.innerHTML;
+                    button.innerHTML = '✅ Copied!';
+                    button.style.backgroundColor = 'var(--secondary)';
+                    button.style.color = 'var(--secondary-foreground)';
+                    setTimeout(() => {
+                      button.innerHTML = originalText;
+                      button.style.backgroundColor = 'var(--muted)';
+                      button.style.color = 'var(--muted-foreground)';
+                    }, 2000);
+                  }
+                }}
                 style={{
                   backgroundColor: 'var(--muted)',
                   color: 'var(--muted-foreground)',
@@ -521,450 +1284,47 @@ const App: React.FC = () => {
                   e.currentTarget.style.transform = 'translateY(0)';
                 }}
               >
-                🗑️ Clear
+                📋 Copy Text
               </button>
-
-              {result && (
-                <button
-                  onClick={() => {
-                    navigator.clipboard.writeText(text);
-                    // Feedback visual temporal
-                    const button = document.activeElement as HTMLButtonElement;
-                    if (button) {
-                      const originalText = button.innerHTML;
-                      button.innerHTML = '✅ Copied!';
-                      button.style.backgroundColor = 'var(--secondary)';
-                      button.style.color = 'var(--secondary-foreground)';
-                      setTimeout(() => {
-                        button.innerHTML = originalText;
-                        button.style.backgroundColor = 'var(--muted)';
-                        button.style.color = 'var(--muted-foreground)';
-                      }, 2000);
-                    }
-                  }}
-                  style={{
-                    backgroundColor: 'var(--muted)',
-                    color: 'var(--muted-foreground)',
-                    border: '1px solid var(--border)',
-                    padding: '10px 20px',
-                    borderRadius: 'var(--radius)',
-                    fontSize: '14px',
-                    fontWeight: '600',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s ease',
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = 'var(--border)';
-                    e.currentTarget.style.transform = 'translateY(-1px)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = 'var(--muted)';
-                    e.currentTarget.style.transform = 'translateY(0)';
-                  }}
-                >
-                  📋 Copy Text
-                </button>
-              )}
-            </div>
-
-            {error && (
-              <div
-                style={{
-                  marginTop: '16px',
-                  padding: '12px',
-                  backgroundColor: 'var(--destructive)',
-                  color: 'var(--destructive-foreground)',
-                  borderRadius: 'var(--radius)',
-                  border: '1px solid var(--destructive)',
-                  animation: 'shake 0.5s ease-in-out',
-                  fontSize: '13px',
-                }}
-              >
-                <div style={{ marginBottom: '6px', fontWeight: '600' }}>
-                  ❌ {error}
-                </div>
-                {error.includes('No se pudo conectar') && (
-                  <div
-                    style={{
-                      fontSize: '12px',
-                      color: 'var(--destructive-foreground)',
-                    }}
-                  >
-                    <strong>🔧 Solution:</strong>
-                    <ul style={{ marginTop: '6px', marginLeft: '16px' }}>
-                      <li>
-                        Verify that the backend is running on
-                        http://127.0.0.1:8000
-                      </li>
-                      <li>Open the browser console (F12) for more details</li>
-                      <li>
-                        Try the test-connection.html file to verify connectivity
-                      </li>
-                    </ul>
-                  </div>
-                )}
-              </div>
             )}
           </div>
 
-          {/* Results - Right Column - Compacto */}
-          {result && (
+          {error && (
             <div
               style={{
-                backgroundColor: 'var(--card)',
+                marginTop: '16px',
+                padding: '12px',
+                backgroundColor: 'var(--destructive)',
+                color: 'var(--destructive-foreground)',
                 borderRadius: 'var(--radius)',
-                padding: '20px',
-                boxShadow: '0 2px 4px rgba(0, 0, 0, 0.05)',
-                border: '2px solid',
-                borderColor: getToxicityBorderColor(result.toxicity_percentage),
-                transition: 'all 0.3s ease',
-                animation: 'slideInRight 0.5s ease-out',
-                display: 'flex',
-                flexDirection: 'column',
-                height: 'fit-content',
+                border: '1px solid var(--destructive)',
+                animation: 'shake 0.5s ease-in-out',
+                fontSize: '13px',
               }}
             >
-              <h2
-                style={{
-                  fontSize: '18px',
-                  fontWeight: '600',
-                  color: 'var(--foreground)',
-                  margin: '0 0 16px 0',
-                  textAlign: 'center',
-                }}
-              >
-                📊 Analysis Results
-              </h2>
-
-              <div style={{ marginBottom: '16px' }}>
-                <ToxicityGauge percentage={result.toxicity_percentage} />
-
-                {/* Barra de progreso compacta */}
-                <div style={{ marginTop: '12px' }}>
-                  <div
-                    style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      marginBottom: '6px',
-                    }}
-                  >
-                    <span
-                      style={{
-                        fontSize: '12px',
-                        color: 'var(--muted-foreground)',
-                        fontWeight: '500',
-                      }}
-                    >
-                      Toxicity Level
-                    </span>
-                    <span
-                      style={{
-                        fontSize: '12px',
-                        color: 'var(--foreground)',
-                        fontWeight: '600',
-                      }}
-                    >
-                      {Math.round(result.toxicity_percentage)}%
-                    </span>
-                  </div>
-                  <div
-                    style={{
-                      width: '100%',
-                      height: '8px',
-                      backgroundColor: 'var(--muted)',
-                      borderRadius: '4px',
-                      overflow: 'hidden',
-                      position: 'relative',
-                    }}
-                  >
-                    <div
-                      style={{
-                        width: `${result.toxicity_percentage}%`,
-                        height: '100%',
-                        backgroundColor: getToxicityColor(
-                          result.toxicity_percentage
-                        ),
-                        borderRadius: '4px',
-                        transition: 'width 1s ease-out',
-                        animation: 'slideInProgress 1.2s ease-out',
-                      }}
-                    />
-                  </div>
-                </div>
+              <div style={{ marginBottom: '6px', fontWeight: '600' }}>
+                ❌ {error}
               </div>
-
-              {/* Enhanced Results Display - Compacto */}
-              <div
-                style={{
-                  backgroundColor: 'var(--muted)',
-                  padding: '16px',
-                  borderRadius: 'var(--radius)',
-                  border: '1px solid var(--border)',
-                  marginBottom: '16px',
-                }}
-              >
-                <div
-                  style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(2, 1fr)',
-                    gap: '12px',
-                    marginBottom: '12px',
-                  }}
-                >
-                  <div style={{ textAlign: 'center' }}>
-                    <div
-                      style={{
-                        fontSize: '11px',
-                        color: 'var(--muted-foreground)',
-                        marginBottom: '3px',
-                      }}
-                    >
-                      Score
-                    </div>
-                    <div
-                      style={{
-                        fontSize: '16px',
-                        fontWeight: '600',
-                        color: 'var(--foreground)',
-                      }}
-                    >
-                      {Math.round(result.toxicity_percentage)}%
-                    </div>
-                  </div>
-
-                  <div style={{ textAlign: 'center' }}>
-                    <div
-                      style={{
-                        fontSize: '11px',
-                        color: 'var(--muted-foreground)',
-                        marginBottom: '3px',
-                      }}
-                    >
-                      Category
-                    </div>
-                    <div
-                      style={{
-                        fontSize: '16px',
-                        fontWeight: '600',
-                        color: 'var(--foreground)',
-                      }}
-                    >
-                      {(() => {
-                        const percentage = result.toxicity_percentage;
-                        if (percentage <= 30) return 'Safe';
-                        if (percentage <= 60) return 'Moderate';
-                        return 'High Risk';
-                      })()}
-                    </div>
-                  </div>
-
-                  <div style={{ textAlign: 'center' }}>
-                    <div
-                      style={{
-                        fontSize: '11px',
-                        color: 'var(--muted-foreground)',
-                        marginBottom: '3px',
-                      }}
-                    >
-                      Model
-                    </div>
-                    <div
-                      style={{
-                        fontSize: '14px',
-                        fontWeight: '600',
-                        color: 'var(--foreground)',
-                      }}
-                    >
-                      {result.model_used}
-                    </div>
-                  </div>
-
-                  <div style={{ textAlign: 'center' }}>
-                    <div
-                      style={{
-                        fontSize: '11px',
-                        color: 'var(--muted-foreground)',
-                        marginBottom: '3px',
-                      }}
-                    >
-                      Time
-                    </div>
-                    <div
-                      style={{
-                        fontSize: '14px',
-                        fontWeight: '600',
-                        color: 'var(--foreground)',
-                      }}
-                    >
-                      {result.response_time_ms}ms
-                    </div>
-                  </div>
-                </div>
-
+              {error.includes('No se pudo conectar') && (
                 <div
                   style={{
                     fontSize: '12px',
-                    color: 'var(--muted-foreground)',
-                    textAlign: 'center',
-                    padding: '8px',
-                    backgroundColor: 'var(--card)',
-                    borderRadius: 'var(--radius)',
-                    border: '1px solid var(--border)',
+                    color: 'var(--destructive-foreground)',
                   }}
                 >
-                  Analyzed on {new Date(result.timestamp).toLocaleString()}
-                  {lastAnalysis && (
-                    <div
-                      style={{
-                        marginTop: '6px',
-                        fontSize: '11px',
-                        color: 'var(--muted-foreground)',
-                      }}
-                    >
-                      💾 Analysis temporarily saved
-                    </div>
-                  )}
+                  <strong>🔧 Solution:</strong>
+                  <ul style={{ marginTop: '6px', marginLeft: '16px' }}>
+                    <li>
+                      Verify that the backend is running on
+                      http://127.0.0.1:8000
+                    </li>
+                    <li>Open the browser console (F12) for more details</li>
+                    <li>
+                      Try the test-connection.html file to verify connectivity
+                    </li>
+                  </ul>
                 </div>
-              </div>
-
-              {/* Texto con palabras resaltadas - Compacto */}
-              <div style={{ marginTop: '16px', flex: 1 }}>
-                <h3
-                  style={{
-                    fontSize: '16px',
-                    fontWeight: '600',
-                    color: 'var(--foreground)',
-                    margin: '0 0 12px 0',
-                    textAlign: 'center',
-                  }}
-                >
-                  📝 Analyzed Text
-                </h3>
-                <div
-                  style={{
-                    backgroundColor: 'var(--muted)',
-                    padding: '16px',
-                    borderRadius: 'var(--radius)',
-                    border: '1px solid var(--border)',
-                    maxHeight: '200px',
-                    overflowY: 'auto',
-                    marginBottom: '12px',
-                  }}
-                >
-                  <ColoredText text={text} toxicityMap={toxicityMap} />
-                </div>
-
-                {/* Leyenda de colores compacta */}
-                <div
-                  style={{
-                    padding: '12px',
-                    backgroundColor: 'var(--muted)',
-                    borderRadius: 'var(--radius)',
-                    border: '1px solid var(--border)',
-                  }}
-                >
-                  <div
-                    style={{
-                      fontSize: '12px',
-                      fontWeight: '600',
-                      color: 'var(--foreground)',
-                      marginBottom: '8px',
-                      textAlign: 'center',
-                    }}
-                  >
-                    🎨 Color Legend
-                  </div>
-                  <div
-                    style={{
-                      display: 'flex',
-                      justifyContent: 'space-around',
-                      alignItems: 'center',
-                      flexWrap: 'wrap',
-                      gap: '6px',
-                    }}
-                  >
-                    <div
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '4px',
-                      }}
-                    >
-                      <div
-                        style={{
-                          width: '12px',
-                          height: '12px',
-                          backgroundColor: 'var(--secondary)',
-                          borderRadius: '50%',
-                          border: '2px solid var(--secondary)',
-                        }}
-                      />
-                      <span
-                        style={{
-                          fontSize: '11px',
-                          color: 'var(--secondary)',
-                          fontWeight: '600',
-                        }}
-                      >
-                        Safe
-                      </span>
-                    </div>
-                    <div
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '4px',
-                      }}
-                    >
-                      <div
-                        style={{
-                          width: '12px',
-                          height: '12px',
-                          backgroundColor: 'oklch(0.769 0.188 70.08)',
-                          borderRadius: '50%',
-                          border: '2px solid oklch(0.769 0.188 70.08)',
-                        }}
-                      />
-                      <span
-                        style={{
-                          fontSize: '11px',
-                          color: 'oklch(0.769 0.188 70.08)',
-                          fontWeight: '600',
-                        }}
-                      >
-                        Moderate
-                      </span>
-                    </div>
-                    <div
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '4px',
-                      }}
-                    >
-                      <div
-                        style={{
-                          width: '12px',
-                          height: '12px',
-                          backgroundColor: 'var(--destructive)',
-                          borderRadius: '50%',
-                          border: '2px solid var(--destructive)',
-                        }}
-                      />
-                      <span
-                        style={{
-                          fontSize: '11px',
-                          color: 'var(--destructive)',
-                          fontWeight: '600',
-                        }}
-                      >
-                        High Risk
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
+              )}
             </div>
           )}
         </div>
