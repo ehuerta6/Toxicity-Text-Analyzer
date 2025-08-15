@@ -19,6 +19,24 @@ except ImportError as e:
     IMPROVED_CLASSIFIER_AVAILABLE = False
     logger.warning(f"⚠️ Clasificador mejorado no disponible: {e}")
 
+# Importar nuevos modelos ML
+try:
+    from .ml_models import ml_classifier, hybrid_classifier
+    ML_MODELS_AVAILABLE = True
+    logger.info("✅ Modelos ML disponibles")
+except ImportError as e:
+    ML_MODELS_AVAILABLE = False
+    logger.warning(f"⚠️ Modelos ML no disponibles: {e}")
+
+# Importar optimizador de pesos
+try:
+    from .weight_optimizer import weight_optimizer
+    WEIGHT_OPTIMIZER_AVAILABLE = True
+    logger.info("✅ Optimizador de pesos disponible")
+except ImportError as e:
+    WEIGHT_OPTIMIZER_AVAILABLE = False
+    logger.warning(f"⚠️ Optimizador de pesos no disponible: {e}")
+
 class ToxicityClassifier:
     """Clasificador mejorado de toxicidad con categorización avanzada"""
     
@@ -88,6 +106,35 @@ class ToxicityClassifier:
         """
         if not text or not text.strip():
             return False, 0.0, [], 0, 0, None, 0.0
+        
+        # Intentar usar modelos ML si están disponibles y entrenados
+        if ML_MODELS_AVAILABLE and ml_classifier.is_trained:
+            try:
+                logger.debug("Usando modelo ML entrenado")
+                is_toxic, prob, score = ml_classifier.predict_toxicity(text)
+                
+                # Convertir a formato esperado
+                text_length = len(text)
+                word_count = len(text.split())
+                
+                # Determinar categoría basada en el score
+                if score <= 0.3:
+                    category = "leve"
+                elif score <= 0.6:
+                    category = "moderado"
+                else:
+                    category = "alto"
+                
+                # Etiquetas
+                labels = [category, "ml_enhanced"]
+                
+                # Calcular porcentaje
+                toxicity_percentage = round(score * 100, 1)
+                
+                return is_toxic, score, labels, text_length, word_count, category, toxicity_percentage
+                
+            except Exception as e:
+                logger.warning(f"Error en modelo ML, usando fallback: {e}")
         
         # Intentar usar el clasificador mejorado si está disponible
         if IMPROVED_CLASSIFIER_AVAILABLE:
