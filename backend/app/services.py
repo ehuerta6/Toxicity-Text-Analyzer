@@ -10,6 +10,15 @@ from typing import List, Tuple, Dict
 # Configurar logging
 logger = logging.getLogger(__name__)
 
+# Importar clasificador mejorado
+try:
+    from .improved_classifier import improved_classifier
+    IMPROVED_CLASSIFIER_AVAILABLE = True
+    logger.info("✅ Clasificador mejorado disponible")
+except ImportError as e:
+    IMPROVED_CLASSIFIER_AVAILABLE = False
+    logger.warning(f"⚠️ Clasificador mejorado no disponible: {e}")
+
 class ToxicityClassifier:
     """Clasificador mejorado de toxicidad con categorización avanzada"""
     
@@ -80,6 +89,20 @@ class ToxicityClassifier:
         if not text or not text.strip():
             return False, 0.0, [], 0, 0, None, 0.0
         
+        # Intentar usar el clasificador mejorado si está disponible
+        if IMPROVED_CLASSIFIER_AVAILABLE:
+            try:
+                logger.debug("Usando clasificador mejorado")
+                return improved_classifier.analyze_text(text)
+            except Exception as e:
+                logger.warning(f"Error en clasificador mejorado, usando fallback: {e}")
+        
+        # Fallback al clasificador original
+        logger.debug("Usando clasificador original (fallback)")
+        return self._analyze_text_legacy(text)
+    
+    def _analyze_text_legacy(self, text: str) -> Tuple[bool, float, List[str], int, int, str, float]:
+        """Método legacy del clasificador original"""
         # Limpiar y normalizar texto
         clean_text = self._normalize_text(text)
         text_length = len(clean_text)
