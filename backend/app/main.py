@@ -183,13 +183,15 @@ async def analyze_text(request: AnalyzeRequest):
         # Crear respuesta optimizada
         response = AnalyzeResponse(
             text=request.text,
+            is_toxic=analysis_result["is_toxic"],
             toxicity_percentage=analysis_result["toxicity_percentage"],
-            toxicity_level=analysis_result["toxicity_level"],
+            toxicity_category=analysis_result["toxicity_level"],
             confidence=analysis_result["confidence"],
-            model_used=analysis_result["model_used"],
+            detected_categories=analysis_result["details"]["detected_categories"],
+            word_count=analysis_result["details"]["word_count"],
             response_time_ms=response_time,
             timestamp=datetime.now(),
-            analysis_details=analysis_result.get("details", {})
+            model_used=analysis_result["model_used"]
         )
         
         # Guardar en historial si está habilitado
@@ -245,7 +247,10 @@ async def batch_analyze_texts(request: BatchAnalyzeRequest):
                     "text": text,
                     "toxicity_percentage": analysis_result["toxicity_percentage"],
                     "toxicity_level": analysis_result["toxicity_level"],
-                    "confidence": analysis_result["confidence"]
+                    "confidence": analysis_result["confidence"],
+                    "is_toxic": analysis_result["is_toxic"],
+                    "detected_categories": analysis_result["details"]["detected_categories"],
+                    "word_count": analysis_result["details"]["word_count"]
                 })
                 total_toxicity += analysis_result["toxicity_percentage"]
             except Exception as e:

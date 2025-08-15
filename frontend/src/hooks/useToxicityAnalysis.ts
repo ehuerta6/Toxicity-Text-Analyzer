@@ -1,13 +1,13 @@
 import { useState, useCallback } from 'react';
 
 interface ToxicityResult {
-  toxic: boolean;
-  score: number;
+  text: string;
+  is_toxic: boolean;
   toxicity_percentage: number;
-  category: string | null;
-  labels: string[];
-  text_length: number;
-  keywords_found: number;
+  toxicity_category: string;
+  confidence: number;
+  detected_categories: string[];
+  word_count: number;
   response_time_ms: number;
   timestamp: string;
   model_used: string;

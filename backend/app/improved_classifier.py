@@ -83,7 +83,7 @@ class OptimizedToxicityClassifier:
                 )
                 self.category_patterns[category_name] = pattern
     
-    def analyze_text(self, text: str) -> Tuple[bool, float, List[str], int, int, str, float]:
+    def analyze_text(self, text: str) -> Dict:
         """
         Análisis optimizado de toxicidad con contexto
         
@@ -91,10 +91,17 @@ class OptimizedToxicityClassifier:
             text: Texto a analizar
             
         Returns:
-            Tuple con (es_toxico, score, etiquetas, longitud_texto, palabras_encontradas, categoria, porcentaje)
+            Diccionario con el análisis completo de toxicidad
         """
         if not text or not text.strip():
-            return False, 0.0, [], 0, 0, "safe", 0.0
+            return {
+                "is_toxic": False,
+                "toxicity_percentage": 0.0,
+                "toxicity_level": "safe",
+                "confidence": 0.0,
+                "model_used": "optimized_classifier_v2",
+                "details": {}
+            }
         
         # Preprocesamiento avanzado
         preprocessed_data = advanced_preprocessor.preprocess_text(text)
@@ -113,15 +120,23 @@ class OptimizedToxicityClassifier:
             word_count
         )
         
-        return (
-            is_toxic,
-            toxicity_score,
-            detected_categories,
-            len(text),
-            word_count,
-            category,
-            percentage
-        )
+        # Calcular confianza
+        confidence = self._calculate_confidence(toxicity_score, word_count, len(detected_categories))
+        
+        return {
+            "is_toxic": is_toxic,
+            "toxicity_percentage": round(percentage, 2),
+            "toxicity_level": category,
+            "confidence": round(confidence, 3),
+            "model_used": "optimized_classifier_v2",
+            "details": {
+                "toxicity_score": round(toxicity_score, 4),
+                "detected_categories": detected_categories,
+                "text_length": len(text),
+                "word_count": word_count,
+                "context_score": round(preprocessed_data["context_score"], 3)
+            }
+        }
     
     def _calculate_toxicity_score(self, cleaned_text: str, word_count: int, context_score: float) -> Tuple[float, List[str], int]:
         """Calcula el score de toxicidad de manera optimizada"""
@@ -187,17 +202,17 @@ class OptimizedToxicityClassifier:
     
     def get_detailed_analysis(self, text: str) -> Dict:
         """Obtiene análisis detallado optimizado"""
-        is_toxic, score, categories, length, words, category, percentage = self.analyze_text(text)
+        result = self.analyze_text(text)
         
         return {
-            "is_toxic": is_toxic,
-            "toxicity_score": round(score, 4),
-            "detected_categories": categories,
-            "text_length": length,
-            "word_count": words,
-            "toxicity_category": category,
-            "toxicity_percentage": round(percentage, 2),
-            "confidence": self._calculate_confidence(score, words, len(categories))
+            "is_toxic": result["is_toxic"],
+            "toxicity_score": result["details"]["toxicity_score"],
+            "detected_categories": result["details"]["detected_categories"],
+            "text_length": result["details"]["text_length"],
+            "word_count": result["details"]["word_count"],
+            "toxicity_category": result["toxicity_level"],
+            "toxicity_percentage": result["toxicity_percentage"],
+            "confidence": result["confidence"]
         }
     
     def _calculate_confidence(self, score: float, word_count: int, category_count: int) -> float:
@@ -217,8 +232,17 @@ class OptimizedToxicityClassifier:
         
         for text in texts:
             try:
-                result = self.get_detailed_analysis(text)
-                results.append(result)
+                result = self.analyze_text(text)
+                results.append({
+                    "is_toxic": result["is_toxic"],
+                    "toxicity_score": result["details"]["toxicity_score"],
+                    "detected_categories": result["details"]["detected_categories"],
+                    "text_length": result["details"]["text_length"],
+                    "word_count": result["details"]["word_count"],
+                    "toxicity_category": result["toxicity_level"],
+                    "toxicity_percentage": result["toxicity_percentage"],
+                    "confidence": result["confidence"]
+                })
             except Exception as e:
                 logger.error(f"Error analizando texto: {e}")
                 results.append({

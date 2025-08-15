@@ -53,7 +53,7 @@ class AnalyzeResponse(BaseModel):
         ..., 
         description="Número de palabras en el texto analizado"
     )
-    response_time_ms: float = Field(
+    response_time_ms: int = Field(
         ...,
         description="Tiempo de respuesta en milisegundos"
     )
@@ -77,13 +77,21 @@ class BatchAnalyzeRequest(BaseModel):
 
 class BatchAnalyzeResponse(BaseModel):
     """Modelo para respuestas de análisis en lote"""
+    texts_analyzed: int = Field(
+        ...,
+        description="Número de textos analizados exitosamente"
+    )
+    average_toxicity: float = Field(
+        ...,
+        description="Toxicidad promedio de todos los textos analizados"
+    )
     results: List[dict] = Field(
         ...,
-        description="Lista de resultados de análisis"
+        description="Lista de resultados de análisis individuales"
     )
-    total_texts: int = Field(
+    response_time_ms: int = Field(
         ...,
-        description="Número total de textos analizados"
+        description="Tiempo total de respuesta en milisegundos"
     )
     timestamp: datetime = Field(
         default_factory=datetime.now,

@@ -617,7 +617,7 @@ const App: React.FC = () => {
                 <div style={{ marginBottom: '8px', fontWeight: '600' }}>
                   ❌ {error}
                 </div>
-                {error.includes('No se pudo conectar') && (
+                {error.includes('Failed to fetch') && (
                   <div
                     style={{
                       fontSize: '13px',
@@ -1164,7 +1164,7 @@ const App: React.FC = () => {
               <div style={{ marginBottom: '6px', fontWeight: '600' }}>
                 ❌ {error}
               </div>
-              {error.includes('No se pudo conectar') && (
+              {error.includes('Failed to fetch') && (
                 <div
                   style={{
                     fontSize: '12px',
