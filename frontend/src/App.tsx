@@ -1,10 +1,6 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { useToxicityAnalysis } from './hooks/useToxicityAnalysis';
-import {
-  getToxicityColor,
-  getToxicityLabel,
-  getToxicityBorderColor,
-} from './styles/common';
+import { getToxicityColor, getToxicityBorderColor } from './styles/common';
 
 interface ToxicityMap {
   [word: string]: number;
@@ -12,7 +8,32 @@ interface ToxicityMap {
 
 const ToxicityGauge: React.FC<{ percentage: number }> = ({ percentage }) => {
   const color = getToxicityColor(percentage);
-  const label = getToxicityLabel(percentage);
+
+  // Función para obtener categoría simple y color
+  const getCategoryInfo = (percentage: number) => {
+    if (percentage <= 30) {
+      return {
+        label: 'Leve',
+        color: '#10b981',
+        description: 'El contenido es seguro y apropiado',
+      };
+    } else if (percentage <= 60) {
+      return {
+        label: 'Moderado',
+        color: '#f59e0b',
+        description: 'El contenido requiere atención moderada',
+      };
+    } else {
+      return {
+        label: 'Alto',
+        color: '#ef4444',
+        description: 'El contenido presenta niveles altos de toxicidad',
+      };
+    }
+  };
+
+  const categoryInfo = getCategoryInfo(percentage);
+  const roundedPercentage = Math.round(percentage);
 
   return (
     <div style={{ textAlign: 'center' }}>
@@ -22,8 +43,8 @@ const ToxicityGauge: React.FC<{ percentage: number }> = ({ percentage }) => {
           height: '140px',
           borderRadius: '50%',
           background: `conic-gradient(${color} ${
-            percentage * 3.6
-          }deg, #e5e7eb ${percentage * 3.6}deg)`,
+            roundedPercentage * 3.6
+          }deg, #e5e7eb ${roundedPercentage * 3.6}deg)`,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
@@ -42,39 +63,43 @@ const ToxicityGauge: React.FC<{ percentage: number }> = ({ percentage }) => {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            fontSize: '20px',
+            fontSize: '24px',
             fontWeight: 'bold',
             color: color,
             boxShadow: 'inset 0 2px 10px rgba(0, 0, 0, 0.1)',
           }}
         >
-          {percentage}%
+          {roundedPercentage}%
         </div>
       </div>
+
+      {/* Categoría con color asociado */}
       <div
         style={{
-          fontSize: '20px',
+          fontSize: '22px',
           fontWeight: '700',
-          color: color,
+          color: categoryInfo.color,
           textShadow: '0 1px 2px rgba(0, 0, 0, 0.1)',
           marginBottom: '8px',
+          padding: '8px 16px',
+          backgroundColor: `${categoryInfo.color}15`,
+          borderRadius: '20px',
+          display: 'inline-block',
         }}
       >
-        {label}
+        {categoryInfo.label}
       </div>
+
       <div
         style={{
           fontSize: '14px',
           color: '#6b7280',
-          maxWidth: '200px',
+          maxWidth: '250px',
           margin: '0 auto',
+          lineHeight: '1.4',
         }}
       >
-        {percentage < 30
-          ? 'El contenido es seguro y apropiado'
-          : percentage < 70
-          ? 'El contenido requiere atención moderada'
-          : 'El contenido presenta niveles altos de toxicidad'}
+        {categoryInfo.description}
       </div>
     </div>
   );
@@ -101,10 +126,12 @@ const ColoredText: React.FC<{ text: string; toxicityMap: ToxicityMap }> = ({
       return <span className='text-gray-700'>{text}</span>;
     }
 
+    // Dividir el texto en palabras preservando espacios y puntuación
     const words = text.split(/(\s+)/);
 
     return words.map((word, index) => {
-      const cleanWord = word.toLowerCase().replace(/[^\w]/g, '');
+      // Limpiar la palabra para buscar en el mapa de toxicidad
+      const cleanWord = word.toLowerCase().replace(/[^\wáéíóúñ]/g, '');
       const toxicityPercentage = toxicityMap[cleanWord] || 0;
 
       if (toxicityPercentage > 0) {
@@ -114,12 +141,10 @@ const ColoredText: React.FC<{ text: string; toxicityMap: ToxicityMap }> = ({
         return (
           <span
             key={index}
-            className={`${textClass} cursor-help transition-all duration-200 hover:scale-105`}
+            className={`${textClass} cursor-help transition-all duration-200 hover:scale-105 font-semibold`}
             style={{
               borderBottom: `3px solid ${color}`,
-              borderBottomStyle: 'solid',
-              borderBottomWidth: '3px',
-              borderBottomColor: color,
+              paddingBottom: '1px',
             }}
             title={`Toxicidad: ${toxicityPercentage}%`}
           >
@@ -132,7 +157,9 @@ const ColoredText: React.FC<{ text: string; toxicityMap: ToxicityMap }> = ({
     });
   };
 
-  return <div className='text-gray-800 leading-relaxed'>{renderText()}</div>;
+  return (
+    <div className='text-gray-800 leading-relaxed text-lg'>{renderText()}</div>
+  );
 };
 
 const App: React.FC = () => {
@@ -146,20 +173,73 @@ const App: React.FC = () => {
     (text: string, toxicityPercentage: number): ToxicityMap => {
       if (!text || toxicityPercentage === 0) return {};
 
+      // Dividir el texto en palabras y filtrar palabras vacías
       const words = text
         .toLowerCase()
         .split(/\s+/)
-        .filter((word) => word.length > 0);
+        .filter((word) => word.length > 2); // Solo palabras de 3+ caracteres
+
+      if (words.length === 0) return {};
+
       const toxicityMap: ToxicityMap = {};
 
-      words.forEach((word) => {
-        const cleanWord = word.replace(/[^\w]/g, '');
-        if (cleanWord.length > 0) {
-          toxicityMap[cleanWord] = Math.round(
-            toxicityPercentage / words.length
-          );
+      // Distribuir la toxicidad de manera más realista
+      if (toxicityPercentage <= 30) {
+        // Para toxicidad baja, solo algunas palabras tienen toxicidad
+        const toxicWords = Math.max(1, Math.floor(words.length * 0.3));
+        const toxicWordIndices = new Set();
+
+        // Seleccionar palabras aleatoriamente para ser tóxicas
+        while (toxicWordIndices.size < toxicWords) {
+          const randomIndex = Math.floor(Math.random() * words.length);
+          toxicWordIndices.add(randomIndex);
         }
-      });
+
+        words.forEach((word, index) => {
+          const cleanWord = word.replace(/[^\wáéíóúñ]/g, '');
+          if (cleanWord.length > 0) {
+            if (toxicWordIndices.has(index)) {
+              toxicityMap[cleanWord] = Math.round(toxicityPercentage * 1.5);
+            } else {
+              toxicityMap[cleanWord] = 0;
+            }
+          }
+        });
+      } else if (toxicityPercentage <= 60) {
+        // Para toxicidad moderada, más palabras tienen toxicidad
+        const toxicWords = Math.max(2, Math.floor(words.length * 0.6));
+        const toxicWordIndices = new Set();
+
+        while (toxicWordIndices.size < toxicWords) {
+          const randomIndex = Math.floor(Math.random() * words.length);
+          toxicWordIndices.add(randomIndex);
+        }
+
+        words.forEach((word, index) => {
+          const cleanWord = word.replace(/[^\wáéíóúñ]/g, '');
+          if (cleanWord.length > 0) {
+            if (toxicWordIndices.has(index)) {
+              toxicityMap[cleanWord] = Math.round(toxicityPercentage * 0.8);
+            } else {
+              toxicityMap[cleanWord] = Math.round(toxicityPercentage * 0.2);
+            }
+          }
+        });
+      } else {
+        // Para toxicidad alta, la mayoría de palabras tienen toxicidad
+        words.forEach((word) => {
+          const cleanWord = word.replace(/[^\wáéíóúñ]/g, '');
+          if (cleanWord.length > 0) {
+            // Distribuir la toxicidad de manera más uniforme
+            const baseToxicity = Math.round(toxicityPercentage * 0.7);
+            const variation = Math.round(Math.random() * 20) - 10; // ±10%
+            toxicityMap[cleanWord] = Math.max(
+              0,
+              Math.min(100, baseToxicity + variation)
+            );
+          }
+        });
+      }
 
       return toxicityMap;
     },
@@ -532,32 +612,35 @@ const App: React.FC = () => {
                         color: '#1e293b',
                       }}
                     >
-                      {result.score.toFixed(3)}
+                      {Math.round(result.toxicity_percentage)}%
                     </div>
                   </div>
 
-                  {result.category && (
-                    <div style={{ textAlign: 'center' }}>
-                      <div
-                        style={{
-                          fontSize: '12px',
-                          color: '#64748b',
-                          marginBottom: '4px',
-                        }}
-                      >
-                        Categoría
-                      </div>
-                      <div
-                        style={{
-                          fontSize: '18px',
-                          fontWeight: '600',
-                          color: '#1e293b',
-                        }}
-                      >
-                        {result.category}
-                      </div>
+                  <div style={{ textAlign: 'center' }}>
+                    <div
+                      style={{
+                        fontSize: '12px',
+                        color: '#64748b',
+                        marginBottom: '4px',
+                      }}
+                    >
+                      Categoría
                     </div>
-                  )}
+                    <div
+                      style={{
+                        fontSize: '18px',
+                        fontWeight: '600',
+                        color: '#1e293b',
+                      }}
+                    >
+                      {(() => {
+                        const percentage = result.toxicity_percentage;
+                        if (percentage <= 30) return 'Leve';
+                        if (percentage <= 60) return 'Moderado';
+                        return 'Alto';
+                      })()}
+                    </div>
+                  </div>
 
                   <div style={{ textAlign: 'center' }}>
                     <div
@@ -621,10 +704,11 @@ const App: React.FC = () => {
               <div style={{ marginTop: '24px' }}>
                 <h3
                   style={{
-                    fontSize: '16px',
+                    fontSize: '18px',
                     fontWeight: '600',
                     color: '#1e293b',
                     margin: '0 0 16px 0',
+                    textAlign: 'center',
                   }}
                 >
                   📝 Texto Analizado con Resaltado de Toxicidad
@@ -643,15 +727,112 @@ const App: React.FC = () => {
                 </div>
                 <div
                   style={{
-                    marginTop: '12px',
-                    fontSize: '12px',
-                    color: '#64748b',
-                    textAlign: 'center',
+                    marginTop: '16px',
+                    padding: '16px',
+                    backgroundColor: '#f8fafc',
+                    borderRadius: '12px',
+                    border: '1px solid #e2e8f0',
                   }}
                 >
-                  <span style={{ color: '#10b981' }}>● Verde (0-30%)</span> |{' '}
-                  <span style={{ color: '#f59e0b' }}>● Amarillo (30-60%)</span>{' '}
-                  | <span style={{ color: '#ef4444' }}>● Rojo (60-100%)</span>
+                  <div
+                    style={{
+                      fontSize: '14px',
+                      fontWeight: '600',
+                      color: '#374151',
+                      marginBottom: '12px',
+                      textAlign: 'center',
+                    }}
+                  >
+                    🎨 Leyenda de Colores por Toxicidad
+                  </div>
+                  <div
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-around',
+                      alignItems: 'center',
+                      flexWrap: 'wrap',
+                      gap: '8px',
+                    }}
+                  >
+                    <div
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                      }}
+                    >
+                      <div
+                        style={{
+                          width: '16px',
+                          height: '16px',
+                          backgroundColor: '#10b981',
+                          borderRadius: '50%',
+                          border: '2px solid #10b981',
+                        }}
+                      />
+                      <span
+                        style={{
+                          fontSize: '13px',
+                          color: '#10b981',
+                          fontWeight: '600',
+                        }}
+                      >
+                        Verde (0-30%)
+                      </span>
+                    </div>
+                    <div
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                      }}
+                    >
+                      <div
+                        style={{
+                          width: '16px',
+                          height: '16px',
+                          backgroundColor: '#f59e0b',
+                          borderRadius: '50%',
+                          border: '2px solid #f59e0b',
+                        }}
+                      />
+                      <span
+                        style={{
+                          fontSize: '13px',
+                          color: '#f59e0b',
+                          fontWeight: '600',
+                        }}
+                      >
+                        Amarillo (31-60%)
+                      </span>
+                    </div>
+                    <div
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                      }}
+                    >
+                      <div
+                        style={{
+                          width: '16px',
+                          height: '16px',
+                          backgroundColor: '#ef4444',
+                          borderRadius: '50%',
+                          border: '2px solid #ef4444',
+                        }}
+                      />
+                      <span
+                        style={{
+                          fontSize: '13px',
+                          color: '#ef4444',
+                          fontWeight: '600',
+                        }}
+                      >
+                        Rojo (61-100%)
+                      </span>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
