@@ -6,11 +6,16 @@ interface ToxicityMap {
   [word: string]: number;
 }
 
+interface CategoryInfo {
+  label: string;
+  color: string;
+  description: string;
+}
+
 const ToxicityGauge: React.FC<{ percentage: number }> = ({ percentage }) => {
   const color = getToxicityColor(percentage);
 
-  // Función para obtener categoría simple y color
-  const getCategoryInfo = (percentage: number) => {
+  const getCategoryInfo = (percentage: number): CategoryInfo => {
     if (percentage <= 30) {
       return {
         label: 'Safe',
@@ -73,7 +78,6 @@ const ToxicityGauge: React.FC<{ percentage: number }> = ({ percentage }) => {
         </div>
       </div>
 
-      {/* Categoría con color asociado */}
       <div
         style={{
           fontSize: '12px',
@@ -109,12 +113,6 @@ const ColoredText: React.FC<{ text: string; toxicityMap: ToxicityMap }> = ({
   text,
   toxicityMap,
 }) => {
-  const getToxicityColor = (percentage: number): string => {
-    if (percentage <= 30) return 'var(--secondary)'; // Verde
-    if (percentage <= 60) return 'oklch(0.769 0.188 70.08)'; // Amarillo
-    return 'var(--destructive)'; // Rojo
-  };
-
   const getToxicityClass = (percentage: number): string => {
     if (percentage <= 30) return 'text-emerald-600';
     if (percentage <= 60) return 'text-amber-600';
@@ -126,11 +124,9 @@ const ColoredText: React.FC<{ text: string; toxicityMap: ToxicityMap }> = ({
       return <span className='text-foreground'>{text}</span>;
     }
 
-    // Dividir el texto en palabras preservando espacios y puntuación
     const words = text.split(/(\s+)/);
 
     return words.map((word, index) => {
-      // Limpiar la palabra para buscar en el mapa de toxicidad
       const cleanWord = word.toLowerCase().replace(/[^\wáéíóúñ]/g, '');
       const toxicityPercentage = toxicityMap[cleanWord] || 0;
 
@@ -166,12 +162,221 @@ const ColoredText: React.FC<{ text: string; toxicityMap: ToxicityMap }> = ({
   );
 };
 
+const Header: React.FC<{ title: string }> = ({ title }) => (
+  <header
+    style={{
+      backgroundColor: 'var(--card)',
+      borderBottom: '1px solid var(--border)',
+      padding: '16px 0',
+      boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+    }}
+  >
+    <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '0 16px' }}>
+      <div style={{ textAlign: 'center' }}>
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '8px',
+            marginBottom: '8px',
+          }}
+        >
+          <div style={{ fontSize: '24px' }}>🛡️</div>
+          <h1
+            style={{
+              fontSize: '28px',
+              fontWeight: '700',
+              color: 'var(--foreground)',
+              margin: '0',
+            }}
+          >
+            {title}
+          </h1>
+        </div>
+        <p
+          style={{
+            fontSize: '14px',
+            color: 'var(--muted-foreground)',
+            margin: '0',
+            maxWidth: '400px',
+            marginLeft: 'auto',
+            marginRight: 'auto',
+          }}
+        >
+          Professional obscene text detection powered by advanced machine
+          learning algorithms
+        </p>
+      </div>
+    </div>
+  </header>
+);
+
+const Footer: React.FC = () => (
+  <footer
+    style={{
+      backgroundColor: 'var(--card)',
+      borderTop: '1px solid var(--border)',
+      marginTop: 'auto',
+    }}
+  >
+    <div
+      style={{
+        maxWidth: '1400px',
+        margin: '0 auto',
+        padding: '16px',
+        textAlign: 'center',
+        color: 'var(--muted-foreground)',
+        fontSize: '12px',
+      }}
+    >
+      <p>&copy; 2024 ToxiGuard. Professional content moderation tools.</p>
+    </div>
+  </footer>
+);
+
+const TextArea: React.FC<{
+  value: string;
+  onChange: (value: string) => void;
+  onKeyDown: (e: React.KeyboardEvent<HTMLTextAreaElement>) => void;
+  placeholder: string;
+  minHeight?: number;
+  showCharCount?: boolean;
+}> = ({
+  value,
+  onChange,
+  onKeyDown,
+  placeholder,
+  minHeight = 150,
+  showCharCount = true,
+}) => (
+  <div style={{ marginBottom: '24px' }}>
+    <textarea
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      onKeyDown={onKeyDown}
+      placeholder={placeholder}
+      style={{
+        width: '100%',
+        minHeight: `${minHeight}px`,
+        padding: '16px',
+        border: '2px solid var(--border)',
+        borderRadius: 'var(--radius)',
+        fontSize: '16px',
+        fontFamily: 'inherit',
+        resize: 'none',
+        backgroundColor: 'var(--input)',
+        transition: 'all 0.2s ease',
+        boxSizing: 'border-box',
+      }}
+      onFocus={(e) => {
+        e.target.style.borderColor = 'var(--ring)';
+        e.target.style.backgroundColor = 'var(--background)';
+        e.target.style.boxShadow = '0 0 0 3px var(--ring)';
+      }}
+      onBlur={(e) => {
+        e.target.style.borderColor = value.trim()
+          ? 'var(--ring)'
+          : 'var(--border)';
+        e.target.style.backgroundColor = value.trim()
+          ? 'var(--background)'
+          : 'var(--input)';
+        e.target.style.boxShadow = value.trim()
+          ? '0 0 0 3px var(--ring)'
+          : 'none';
+      }}
+    />
+    {showCharCount && value.trim() && (
+      <div
+        style={{
+          marginTop: '8px',
+          fontSize: '14px',
+          color: 'var(--muted-foreground)',
+          textAlign: 'right',
+        }}
+      >
+        {value.length} characters
+      </div>
+    )}
+  </div>
+);
+
+const Button: React.FC<{
+  onClick: () => void;
+  disabled?: boolean;
+  variant?: 'primary' | 'secondary';
+  children: React.ReactNode;
+  ariaLabel?: string;
+}> = ({
+  onClick,
+  disabled = false,
+  variant = 'primary',
+  children,
+  ariaLabel,
+}) => {
+  const baseStyles = {
+    border: 'none',
+    padding: '14px 28px',
+    borderRadius: 'var(--radius)',
+    fontSize: '16px',
+    fontWeight: '600',
+    cursor: disabled ? 'not-allowed' : 'pointer',
+    opacity: disabled ? 0.6 : 1,
+    transition: 'all 0.2s ease',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+  };
+
+  const variantStyles =
+    variant === 'primary'
+      ? {
+          backgroundColor: 'var(--primary)',
+          color: 'var(--primary-foreground)',
+        }
+      : {
+          backgroundColor: 'var(--muted)',
+          color: 'var(--muted-foreground)',
+          border: '1px solid var(--border)',
+        };
+
+  return (
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      aria-label={ariaLabel}
+      style={{ ...baseStyles, ...variantStyles }}
+      onMouseEnter={(e) => {
+        if (!disabled) {
+          if (variant === 'primary') {
+            e.currentTarget.style.backgroundColor =
+              'oklch(0.548 0.15 197.137 / 0.9)';
+          } else {
+            e.currentTarget.style.backgroundColor = 'var(--border)';
+          }
+          e.currentTarget.style.transform = 'translateY(-1px)';
+        }
+      }}
+      onMouseLeave={(e) => {
+        if (!disabled) {
+          if (variant === 'primary') {
+            e.currentTarget.style.backgroundColor = 'var(--primary)';
+          } else {
+            e.currentTarget.style.backgroundColor = 'var(--muted)';
+          }
+          e.currentTarget.style.transform = 'translateY(0)';
+        }
+      }}
+    >
+      {children}
+    </button>
+  );
+};
+
 const App: React.FC = () => {
   const [text, setText] = useState('');
   const [toxicityMap, setToxicityMap] = useState<ToxicityMap>({});
   const [hasAnalyzed, setHasAnalyzed] = useState(false);
-
-  // Guardar temporalmente el último análisis en localStorage
   const [lastAnalysis, setLastAnalysis] = useState(() => {
     const saved = localStorage.getItem('toxiguard_last_analysis');
     return saved ? JSON.parse(saved) : null;
@@ -184,18 +389,15 @@ const App: React.FC = () => {
     (text: string, toxicityPercentage: number): ToxicityMap => {
       if (!text || toxicityPercentage === 0) return {};
 
-      // Optimización: Usar regex más eficiente y cache de palabras
       const words = text
         .toLowerCase()
         .split(/\s+/)
         .filter((word) => word.length > 2);
-
       if (words.length === 0) return {};
 
       const toxicityMap: ToxicityMap = {};
-      const cleanWords = new Map(); // Cache para palabras limpias
+      const cleanWords = new Map();
 
-      // Pre-procesar palabras para evitar recálculos
       words.forEach((word) => {
         const cleanWord = word.replace(/[^\wáéíóúñ]/g, '');
         if (cleanWord.length > 0) {
@@ -203,12 +405,10 @@ const App: React.FC = () => {
         }
       });
 
-      // Distribuir toxicidad de manera más eficiente
       if (toxicityPercentage <= 30) {
         const toxicWords = Math.max(1, Math.floor(words.length * 0.3));
         const toxicIndices = new Set();
 
-        // Selección más eficiente de palabras tóxicas
         for (let i = 0; i < toxicWords; i++) {
           let randomIndex;
           do {
@@ -242,7 +442,6 @@ const App: React.FC = () => {
             : Math.round(toxicityPercentage * 0.2);
         });
       } else {
-        // Para toxicidad alta, distribución más directa
         cleanWords.forEach((cleanWord) => {
           const baseToxicity = Math.round(toxicityPercentage * 0.7);
           const variation = Math.round(Math.random() * 20) - 10;
@@ -264,14 +463,11 @@ const App: React.FC = () => {
     try {
       await analyzeText(text);
       setHasAnalyzed(true);
-      // El resultado se actualiza automáticamente a través del hook useToxicityAnalysis
-      // y se puede acceder a través de la variable `result`
     } catch (error) {
       console.error('Error al analizar texto:', error);
     }
   }, [text, analyzeText]);
 
-  // Generar mapa de toxicidad cuando cambie el resultado
   useEffect(() => {
     if (result && text.trim()) {
       const wordToxicityMap = generateToxicityMap(
@@ -280,7 +476,6 @@ const App: React.FC = () => {
       );
       setToxicityMap(wordToxicityMap);
 
-      // Guardar el análisis en localStorage
       const analysisData = {
         text,
         result,
@@ -309,7 +504,6 @@ const App: React.FC = () => {
     }
   };
 
-  // Si no se ha analizado nada, mostrar solo la página inicial
   if (!hasAnalyzed) {
     return (
       <div
@@ -320,58 +514,8 @@ const App: React.FC = () => {
             'DM Sans, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
         }}
       >
-        {/* Header Compacto */}
-        <header
-          style={{
-            backgroundColor: 'var(--card)',
-            borderBottom: '1px solid var(--border)',
-            padding: '16px 0',
-            boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
-          }}
-        >
-          <div
-            style={{ maxWidth: '1400px', margin: '0 auto', padding: '0 16px' }}
-          >
-            <div style={{ textAlign: 'center' }}>
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '8px',
-                  marginBottom: '8px',
-                }}
-              >
-                <div style={{ fontSize: '24px' }}>🛡️</div>
-                <h1
-                  style={{
-                    fontSize: '28px',
-                    fontWeight: '700',
-                    color: 'var(--foreground)',
-                    margin: '0',
-                  }}
-                >
-                  ToxiGuard
-                </h1>
-              </div>
-              <p
-                style={{
-                  fontSize: '14px',
-                  color: 'var(--muted-foreground)',
-                  margin: '0',
-                  maxWidth: '400px',
-                  marginLeft: 'auto',
-                  marginRight: 'auto',
-                }}
-              >
-                Professional obscene text detection powered by advanced machine
-                learning algorithms
-              </p>
-            </div>
-          </div>
-        </header>
+        <Header title='ToxiGuard' />
 
-        {/* Página Inicial - Solo Caja de Texto */}
         <div
           style={{
             maxWidth: '800px',
@@ -411,91 +555,20 @@ const App: React.FC = () => {
               ⚡ Analyze Your First Text
             </h2>
 
-            <div style={{ marginBottom: '24px' }}>
-              <textarea
-                value={text}
-                onChange={(e) => setText(e.target.value)}
-                onKeyDown={handleKeyDown}
-                placeholder='Enter or paste the text you want to analyze for toxicity... (Press Enter to analyze, Shift+Enter for new line)'
-                style={{
-                  width: '100%',
-                  minHeight: '150px',
-                  padding: '16px',
-                  border: '2px solid var(--border)',
-                  borderRadius: 'var(--radius)',
-                  fontSize: '16px',
-                  fontFamily: 'inherit',
-                  resize: 'none',
-                  backgroundColor: 'var(--input)',
-                  transition: 'all 0.2s ease',
-                  boxSizing: 'border-box',
-                }}
-                onFocus={(e) => {
-                  e.target.style.borderColor = 'var(--ring)';
-                  e.target.style.backgroundColor = 'var(--background)';
-                  e.target.style.boxShadow = '0 0 0 3px var(--ring)';
-                }}
-                onBlur={(e) => {
-                  e.target.style.borderColor = text.trim()
-                    ? 'var(--ring)'
-                    : 'var(--border)';
-                  e.target.style.backgroundColor = text.trim()
-                    ? 'var(--background)'
-                    : 'var(--input)';
-                  e.target.style.boxShadow = text.trim()
-                    ? '0 0 0 3px var(--ring)'
-                    : 'none';
-                }}
-              />
-              {text.trim() && (
-                <div
-                  style={{
-                    marginTop: '8px',
-                    fontSize: '14px',
-                    color: 'var(--muted-foreground)',
-                    textAlign: 'right',
-                  }}
-                >
-                  {text.length} characters
-                </div>
-              )}
-            </div>
+            <TextArea
+              value={text}
+              onChange={setText}
+              onKeyDown={handleKeyDown}
+              placeholder='Enter or paste the text you want to analyze for toxicity... (Press Enter to analyze, Shift+Enter for new line)'
+            />
 
             <div
               style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}
             >
-              <button
+              <Button
                 onClick={handleAnalyze}
                 disabled={loading || !text.trim()}
-                aria-label='Analyze text for toxicity detection'
-                style={{
-                  backgroundColor: 'var(--primary)',
-                  color: 'var(--primary-foreground)',
-                  border: 'none',
-                  padding: '14px 28px',
-                  borderRadius: 'var(--radius)',
-                  fontSize: '16px',
-                  fontWeight: '600',
-                  cursor: loading || !text.trim() ? 'not-allowed' : 'pointer',
-                  opacity: loading || !text.trim() ? 0.6 : 1,
-                  transition: 'all 0.2s ease',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                }}
-                onMouseEnter={(e) => {
-                  if (!loading && text.trim()) {
-                    e.currentTarget.style.backgroundColor =
-                      'oklch(0.548 0.15 197.137 / 0.9)';
-                    e.currentTarget.style.transform = 'translateY(-1px)';
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (!loading && text.trim()) {
-                    e.currentTarget.style.backgroundColor = 'var(--primary)';
-                    e.currentTarget.style.transform = 'translateY(0)';
-                  }
-                }}
+                ariaLabel='Analyze text for toxicity detection'
               >
                 {loading ? (
                   <>
@@ -517,33 +590,15 @@ const App: React.FC = () => {
                     <span>Analyze Text</span>
                   </>
                 )}
-              </button>
+              </Button>
 
-              <button
+              <Button
                 onClick={handleClear}
-                aria-label='Clear text'
-                style={{
-                  backgroundColor: 'var(--muted)',
-                  color: 'var(--muted-foreground)',
-                  border: '1px solid var(--border)',
-                  padding: '14px 28px',
-                  borderRadius: 'var(--radius)',
-                  fontSize: '16px',
-                  fontWeight: '600',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s ease',
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = 'var(--border)';
-                  e.currentTarget.style.transform = 'translateY(-1px)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = 'var(--muted)';
-                  e.currentTarget.style.transform = 'translateY(0)';
-                }}
+                variant='secondary'
+                ariaLabel='Clear text'
               >
                 🗑️ Clear
-              </button>
+              </Button>
             </div>
 
             {error && (
@@ -587,32 +642,11 @@ const App: React.FC = () => {
           </div>
         </div>
 
-        {/* Footer Compacto */}
-        <footer
-          style={{
-            backgroundColor: 'var(--card)',
-            borderTop: '1px solid var(--border)',
-            marginTop: 'auto',
-          }}
-        >
-          <div
-            style={{
-              maxWidth: '1400px',
-              margin: '0 auto',
-              padding: '16px',
-              textAlign: 'center',
-              color: 'var(--muted-foreground)',
-              fontSize: '12px',
-            }}
-          >
-            <p>&copy; 2024 ToxiGuard. Professional content moderation tools.</p>
-          </div>
-        </footer>
+        <Footer />
       </div>
     );
   }
 
-  // Dashboard completo después del primer análisis
   return (
     <div
       style={{
@@ -622,65 +656,9 @@ const App: React.FC = () => {
           'DM Sans, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
       }}
     >
-      {/* Header Compacto */}
-      <header
-        style={{
-          backgroundColor: 'var(--card)',
-          borderBottom: '1px solid var(--border)',
-          padding: '16px 0',
-          boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
-        }}
-      >
-        <div
-          style={{ maxWidth: '1400px', margin: '0 auto', padding: '0 16px' }}
-        >
-          <div style={{ textAlign: 'center' }}>
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '8px',
-                marginBottom: '8px',
-              }}
-            >
-              <div style={{ fontSize: '24px' }}>🛡️</div>
-              <h1
-                style={{
-                  fontSize: '28px',
-                  fontWeight: '700',
-                  color: 'var(--foreground)',
-                  margin: '0',
-                }}
-              >
-                ToxiGuard Dashboard
-              </h1>
-            </div>
-            <p
-              style={{
-                fontSize: '14px',
-                color: 'var(--muted-foreground)',
-                margin: '0',
-                maxWidth: '400px',
-                marginLeft: 'auto',
-                marginRight: 'auto',
-              }}
-            >
-              Professional obscene text detection powered by advanced machine
-              learning algorithms
-            </p>
-          </div>
-        </div>
-      </header>
+      <Header title='ToxiGuard Dashboard' />
 
-      {/* Dashboard Principal */}
-      <div
-        style={{
-          maxWidth: '1400px',
-          margin: '0 auto',
-          padding: '16px',
-        }}
-      >
+      <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '16px' }}>
         {/* Grid de Resultados del Análisis */}
         <div
           style={{
@@ -924,7 +902,6 @@ const App: React.FC = () => {
               </div>
             </div>
 
-            {/* Escala de Colores */}
             <div
               style={{
                 display: 'flex',
@@ -939,7 +916,6 @@ const App: React.FC = () => {
               <span>100%</span>
             </div>
 
-            {/* Leyenda de Colores */}
             <div
               style={{
                 marginTop: '16px',
@@ -969,11 +945,7 @@ const App: React.FC = () => {
                 }}
               >
                 <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '3px',
-                  }}
+                  style={{ display: 'flex', alignItems: 'center', gap: '3px' }}
                 >
                   <div
                     style={{
@@ -995,11 +967,7 @@ const App: React.FC = () => {
                   </span>
                 </div>
                 <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '3px',
-                  }}
+                  style={{ display: 'flex', alignItems: 'center', gap: '3px' }}
                 >
                   <div
                     style={{
@@ -1021,11 +989,7 @@ const App: React.FC = () => {
                   </span>
                 </div>
                 <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '3px',
-                  }}
+                  style={{ display: 'flex', alignItems: 'center', gap: '3px' }}
                 >
                   <div
                     style={{
@@ -1114,89 +1078,20 @@ const App: React.FC = () => {
             ⚡ Analyze New Text
           </h3>
 
-          <div style={{ marginBottom: '16px' }}>
-            <textarea
-              value={text}
-              onChange={(e) => setText(e.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder='Enter or paste new text to analyze... (Press Enter to analyze, Shift+Enter for new line)'
-              style={{
-                width: '100%',
-                minHeight: '100px',
-                padding: '12px',
-                border: '2px solid var(--border)',
-                borderRadius: 'var(--radius)',
-                fontSize: '14px',
-                fontFamily: 'inherit',
-                resize: 'none',
-                backgroundColor: 'var(--input)',
-                transition: 'all 0.2s ease',
-                boxSizing: 'border-box',
-              }}
-              onFocus={(e) => {
-                e.target.style.borderColor = 'var(--ring)';
-                e.target.style.backgroundColor = 'var(--background)';
-                e.target.style.boxShadow = '0 0 0 3px var(--ring)';
-              }}
-              onBlur={(e) => {
-                e.target.style.borderColor = text.trim()
-                  ? 'var(--ring)'
-                  : 'var(--border)';
-                e.target.style.backgroundColor = text.trim()
-                  ? 'var(--background)'
-                  : 'var(--input)';
-                e.target.style.boxShadow = text.trim()
-                  ? '0 0 0 3px var(--ring)'
-                  : 'none';
-              }}
-            />
-            {text.trim() && (
-              <div
-                style={{
-                  marginTop: '6px',
-                  fontSize: '12px',
-                  color: 'var(--muted-foreground)',
-                  textAlign: 'right',
-                }}
-              >
-                {text.length} characters
-              </div>
-            )}
-          </div>
+          <TextArea
+            value={text}
+            onChange={setText}
+            onKeyDown={handleKeyDown}
+            placeholder='Enter or paste new text to analyze... (Press Enter to analyze, Shift+Enter for new line)'
+            minHeight={100}
+            showCharCount={true}
+          />
 
           <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-            <button
+            <Button
               onClick={handleAnalyze}
               disabled={loading || !text.trim()}
-              aria-label='Analyze new text for toxicity detection'
-              style={{
-                backgroundColor: 'var(--primary)',
-                color: 'var(--primary-foreground)',
-                border: 'none',
-                padding: '10px 20px',
-                borderRadius: 'var(--radius)',
-                fontSize: '14px',
-                fontWeight: '600',
-                cursor: loading || !text.trim() ? 'not-allowed' : 'pointer',
-                opacity: loading || !text.trim() ? 0.6 : 1,
-                transition: 'all 0.2s ease',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '6px',
-              }}
-              onMouseEnter={(e) => {
-                if (!loading && text.trim()) {
-                  e.currentTarget.style.backgroundColor =
-                    'oklch(0.548 0.15 197.137 / 0.9)';
-                  e.currentTarget.style.transform = 'translateY(-1px)';
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (!loading && text.trim()) {
-                  e.currentTarget.style.backgroundColor = 'var(--primary)';
-                  e.currentTarget.style.transform = 'translateY(0)';
-                }
-              }}
+              ariaLabel='Analyze new text for toxicity detection'
             >
               {loading ? (
                 <>
@@ -1218,39 +1113,20 @@ const App: React.FC = () => {
                   <span>Analyze</span>
                 </>
               )}
-            </button>
+            </Button>
 
-            <button
+            <Button
               onClick={handleClear}
-              aria-label='Clear text and reset analysis'
-              style={{
-                backgroundColor: 'var(--muted)',
-                color: 'var(--muted-foreground)',
-                border: '1px solid var(--border)',
-                padding: '10px 20px',
-                borderRadius: 'var(--radius)',
-                fontSize: '14px',
-                fontWeight: '600',
-                cursor: 'pointer',
-                transition: 'all 0.2s ease',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = 'var(--border)';
-                e.currentTarget.style.transform = 'translateY(-1px)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = 'var(--muted)';
-                e.currentTarget.style.transform = 'translateY(0)';
-              }}
+              variant='secondary'
+              ariaLabel='Clear text and reset analysis'
             >
               🗑️ Clear & Reset
-            </button>
+            </Button>
 
             {result && (
-              <button
+              <Button
                 onClick={() => {
                   navigator.clipboard.writeText(text);
-                  // Feedback visual temporal
                   const button = document.activeElement as HTMLButtonElement;
                   if (button) {
                     const originalText = button.innerHTML;
@@ -1264,28 +1140,11 @@ const App: React.FC = () => {
                     }, 2000);
                   }
                 }}
-                style={{
-                  backgroundColor: 'var(--muted)',
-                  color: 'var(--muted-foreground)',
-                  border: '1px solid var(--border)',
-                  padding: '10px 20px',
-                  borderRadius: 'var(--radius)',
-                  fontSize: '14px',
-                  fontWeight: '600',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s ease',
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = 'var(--border)';
-                  e.currentTarget.style.transform = 'translateY(-1px)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = 'var(--muted)';
-                  e.currentTarget.style.transform = 'translateY(0)';
-                }}
+                variant='secondary'
+                ariaLabel='Copy text to clipboard'
               >
                 📋 Copy Text
-              </button>
+              </Button>
             )}
           </div>
 
@@ -1330,27 +1189,7 @@ const App: React.FC = () => {
         </div>
       </div>
 
-      {/* Footer Compacto */}
-      <footer
-        style={{
-          backgroundColor: 'var(--card)',
-          borderTop: '1px solid var(--border)',
-          marginTop: '20px',
-        }}
-      >
-        <div
-          style={{
-            maxWidth: '1400px',
-            margin: '0 auto',
-            padding: '16px',
-            textAlign: 'center',
-            color: 'var(--muted-foreground)',
-            fontSize: '12px',
-          }}
-        >
-          <p>&copy; 2024 ToxiGuard. Professional content moderation tools.</p>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 };

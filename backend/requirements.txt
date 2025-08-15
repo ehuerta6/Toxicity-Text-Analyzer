@@ -1,17 +1,16 @@
-# Dependencias principales de FastAPI
+# Core FastAPI dependencies
 fastapi==0.104.1
 uvicorn[standard]==0.24.0
 pydantic==2.5.0
 python-dotenv==1.0.0
 
-# Dependencias para testing
-requests==2.31.0
-
-# Dependencias de Machine Learning
+# Machine Learning dependencies
 scikit-learn==1.7.1
 pandas==2.3.1
 numpy==2.3.2
 spacy==3.8.7
 
-# Modelo de spaCy para inglés
-# Nota: El modelo se descarga con: python -m spacy download en_core_web_sm
+# Development and testing
+requests==2.31.0
+
+# Note: Download spaCy English model with: python -m spacy download en_core_web_sm

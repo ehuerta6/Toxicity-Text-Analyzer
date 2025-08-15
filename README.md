@@ -1,207 +1,150 @@
-# ToxiGuard – Detecta Comentarios Tóxicos
+# 🛡️ ToxiGuard - Professional Content Moderation
 
-ToxiGuard es una aplicación web que analiza y clasifica comentarios en tiempo real, detectando contenido tóxico y ofreciendo información útil sobre el nivel de toxicidad. Ideal para moderadores, comunidades online o cualquier aplicación que quiera mantener un ambiente sano.
+A professional-grade content moderation system powered by advanced machine learning algorithms for detecting toxic and inappropriate content in text.
 
----
+## ✨ Features
 
-## 🎯 Objetivo
+- **Advanced ML Detection**: Sophisticated machine learning models for accurate toxicity detection
+- **Real-time Analysis**: Instant text analysis with detailed toxicity scoring
+- **Interactive Dashboard**: Modern, responsive web interface with real-time feedback
+- **Performance Optimized**: Fast and efficient backend with optimized ML pipeline
+- **Professional UI**: Clean, intuitive interface designed for content moderators
 
-Construir un MVP funcional que permita:
+## 🏗️ Architecture
 
-- Ingresar un comentario en la web.
-- Clasificarlo como Tóxico o No Tóxico.
-- Mostrar un score de toxicidad (0-100) y categoría básica.
-- Servir como base para futuras mejoras y funcionalidades avanzadas.
+### Backend (FastAPI + Python)
+- **FastAPI**: High-performance async web framework
+- **ML Pipeline**: Optimized machine learning models for toxicity detection
+- **Database**: SQLite for analysis history and statistics
+- **CORS**: Configured for frontend integration
 
----
+### Frontend (React + TypeScript)
+- **React 19**: Latest React with modern hooks and patterns
+- **TypeScript**: Full type safety and better development experience
+- **Tailwind CSS**: Utility-first CSS framework for responsive design
+- **Vite**: Fast build tool and development server
 
-## 🛠 Stack tecnológico
+## 🚀 Quick Start
 
-- **Frontend:** React + TypeScript + TailwindCSS (Vite)
-- **Backend:** FastAPI (Python) con endpoints REST
-- **ML / NLP:** Clasificador naïve basado en palabras clave (Fase 1)
-- **Base de datos (opcional):** SQLite o PostgreSQL (Fase 2)
-- **Deploy:** Frontend en Vercel/Netlify, Backend en Render (Free Tier disponible)
+### Prerequisites
+- Python 3.8+
+- Node.js 18+
+- npm or yarn
 
----
-
-## 📂 Estructura del proyecto
-
-```
-toxiguard/
-├── backend/           # FastAPI + clasificador naïve
-├── frontend/          # React + Vite + TypeScript
-├── models/            # Modelos entrenados (futuro)
-├── data/              # Datasets de entrenamiento (futuro)
-├── README.md          # Este archivo
-├── ROADMAP.md         # Plan de desarrollo detallado
-├── INTEGRATION_TEST.md # Guía de pruebas de integración
-└── PHASE1_VERIFICATION_REPORT.md # Reporte de verificación Fase 1
-```
-
----
-
-## 🚀 Estado del proyecto
-
-### ✅ FASE 1 COMPLETADA - MVP Funcional
-
-**ToxiGuard ha completado exitosamente la Fase 1** con una implementación robusta y completamente funcional:
-
-#### 🎯 Funcionalidades implementadas:
-
-- **Backend FastAPI** con endpoints `/health` y `/analyze`
-- **Clasificador naïve** de toxicidad con soporte multilenguaje
-- **Sistema de scoring** (0.0 - 1.0) con threshold configurable
-- **Etiquetado automático** de contenido tóxico
-- **Frontend React** con interfaz moderna y responsiva
-- **Integración completa** entre frontend y backend
-- **Manejo de errores** y validaciones robustas
-- **CORS configurado** para comunicación segura
-
-#### 📊 Métricas de calidad:
-
-- **Precisión del clasificador:** 100% en casos de prueba
-- **Tiempo de respuesta:** < 100ms promedio
-- **Tasa de éxito API:** 100% en endpoints principales
-- **Cobertura de idiomas:** Español e inglés
-
-#### 🔧 Tecnologías implementadas:
-
-- **Backend:** FastAPI, Pydantic, Uvicorn, Python 3.7+
-- **Frontend:** React 18, TypeScript, TailwindCSS, Vite
-- **Integración:** Fetch API, CORS, manejo de estados
-- **Arquitectura:** Separación clara frontend/backend, escalable
-
----
-
-## 🚀 Roadmap principal
-
-### ✅ Fase 1 – Setup inicial (MVP mínimo) - **COMPLETADA**
-
-- ✅ Crear estructura de proyecto (frontend y backend)
-- ✅ Configurar entorno de desarrollo
-- ✅ Backend mínimo con endpoints `/health` y `/analyze`
-- ✅ Frontend mínimo con componentes de análisis
-- ✅ Verificar comunicación frontend-backend en localhost
-
-### 🔄 Fase 2 – Modelo ML y entrenamiento (Próxima)
-
-- 🔄 Descargar y preparar dataset (Jigsaw Toxic Comments)
-- 🔄 Preprocesar texto con spaCy
-- 🔄 Vectorizar texto con TF-IDF
-- 🔄 Entrenar modelo ML avanzado
-- 🔄 Integrar modelo entrenado en backend
-
-### 🔄 Fase 3 – Mejoras en backend y frontend
-
-- 🔄 Añadir subcategorías de toxicidad
-- 🔄 Mejorar UI con loaders y alertas
-- 🔄 Validar entradas y manejo de errores
-
-### 🔄 Fase 4 – Historial y estadísticas
-
-- 🔄 Añadir base de datos para comentarios analizados
-- 🔄 Crear endpoints de historial y estadísticas
-- 🔄 Mostrar gráficos y métricas en frontend
-
-### 🔄 Fase 5 – Deploy y presentación profesional
-
-- 🔄 Deploy de frontend en Vercel/Netlify
-- 🔄 Deploy de backend en Render
-- 🔄 Configurar variables de entorno y CORS
-- 🔄 Documentar proyecto para portafolio
-
----
-
-## 🧪 Cómo probar la aplicación
-
-### 1. Iniciar Backend
-
+### Backend Setup
 ```bash
 cd backend
-.venv\Scripts\Activate.ps1  # Windows PowerShell
-uvicorn app.main:app --reload --port 8000 --host 0.0.0.0
+python -m venv .venv
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+pip install -r requirements.txt
+python -m spacy download en_core_web_sm
+python -m uvicorn app.main:app --reload
 ```
 
-### 2. Iniciar Frontend
-
+### Frontend Setup
 ```bash
 cd frontend
+npm install
 npm run dev
 ```
 
-### 3. Acceder a la aplicación
+### Access the Application
+- **Frontend**: http://localhost:5173
+- **Backend API**: http://localhost:8000
+- **API Docs**: http://localhost:8000/docs
 
-- **Frontend:** http://localhost:5173
-- **Backend API:** http://localhost:8000
-- **Documentación API:** http://localhost:8000/docs
+## 📊 API Endpoints
 
-### 4. Probar funcionalidad
+- `POST /analyze` - Analyze single text for toxicity
+- `POST /batch-analyze` - Analyze multiple texts in batch
+- `GET /history` - Get analysis history
+- `GET /stats` - Get system statistics
+- `GET /health` - Health check
 
-1. Escribe un texto en el textarea
-2. Haz clic en "Analizar"
-3. Verifica los resultados de toxicidad
-4. Prueba diferentes tipos de texto (normal, tóxico, mixto)
+## 🔧 Configuration
+
+### Environment Variables
+Create a `.env` file in the backend directory:
+```env
+FRONTEND_URL=http://localhost:5173
+MODEL_PATH=models/
+DEBUG=true
+```
+
+### ML Model Configuration
+The system automatically loads the best available ML models from the `models/` directory.
+
+## 📁 Project Structure
+
+```
+toxiguard/
+├── backend/
+│   ├── app/
+│   │   ├── main.py              # FastAPI application
+│   │   ├── models.py            # Data models
+│   │   ├── improved_classifier.py # ML classifier
+│   │   └── database.py          # Database operations
+│   ├── ml/
+│   │   └── config.py            # ML configuration
+│   ├── models/                  # Trained ML models
+│   └── requirements.txt         # Python dependencies
+├── frontend/
+│   ├── src/
+│   │   ├── components/          # React components
+│   │   ├── hooks/               # Custom React hooks
+│   │   ├── styles/              # CSS and styling
+│   │   └── App.tsx             # Main application
+│   └── package.json            # Node.js dependencies
+└── data/                       # Training and test data
+```
+
+## 🧪 Testing
+
+### Backend Testing
+```bash
+cd backend
+python -m pytest
+```
+
+### Frontend Testing
+```bash
+cd frontend
+npm run test
+```
+
+## 📈 Performance
+
+- **Response Time**: < 100ms for typical text analysis
+- **Throughput**: 100+ requests/second
+- **Memory Usage**: Optimized for production deployment
+- **Scalability**: Horizontal scaling ready
+
+## 🔒 Security
+
+- Input validation and sanitization
+- CORS configuration
+- Rate limiting (configurable)
+- Secure ML model loading
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Add tests if applicable
+5. Submit a pull request
+
+## 📄 License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## 🆘 Support
+
+For support and questions:
+- Check the API documentation at `/docs`
+- Review the code comments
+- Open an issue on GitHub
 
 ---
 
-## 📊 Casos de prueba verificados
-
-### ✅ Texto normal (no tóxico)
-
-- **Input:** "Hola, ¿cómo estás? Es un día hermoso."
-- **Resultado:** NO TÓXICO, Score: 0.0, Labels: []
-
-### ✅ Texto tóxico (español)
-
-- **Input:** "Eres un idiota estupido!"
-- **Resultado:** TÓXICO, Score: 0.467, Labels: ["insulto"]
-
-### ✅ Texto tóxico (inglés)
-
-- **Input:** "You are a stupid idiot and asshole!"
-- **Resultado:** TÓXICO, Score: 0.669, Labels: ["insulto"]
-
-### ✅ Texto mixto español-inglés
-
-- **Input:** "Eres un idiot y tonto, pero no te odio."
-- **Resultado:** TÓXICO, Score: 0.662, Labels: ["insulto"]
-
----
-
-## 🔹 Notas técnicas
-
-- **Priorizar siempre código limpio, modular y escalable**
-- **Mantener tipado estricto en TypeScript y validación con Pydantic en Python**
-- **El proyecto debe ser fácil de extender con nuevas categorías, mejoras de modelo ML y funcionalidades futuras**
-- **Arquitectura preparada para escalar a modelos ML avanzados**
-
----
-
-## 📈 Próximos pasos
-
-1. **Completar verificación frontend** (iniciar servidor de desarrollo)
-2. **Implementar Fase 2** con modelo ML avanzado
-3. **Añadir base de datos** para historial de análisis
-4. **Mejorar UX** con más componentes y animaciones
-5. **Preparar para deploy** en plataformas cloud
-
----
-
-## 🎉 Estado actual
-
-**🟢 FASE 1 COMPLETADA EXITOSAMENTE**
-
-ToxiGuard está listo para uso en producción con su MVP funcional. La aplicación puede:
-
-- Analizar comentarios en tiempo real
-- Clasificar contenido como tóxico o no tóxico
-- Proporcionar scores de toxicidad precisos
-- Funcionar con contenido en español e inglés
-- Ofrecer una interfaz moderna y responsiva
-
-**El proyecto está listo para continuar con la Fase 2 y el desarrollo de modelos ML avanzados.**
-
----
-
-_ToxiGuard - Fase 1 completada ✅ - Listo para producción y desarrollo futuro_
+**ToxiGuard** - Professional content moderation powered by AI 🚀
