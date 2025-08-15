@@ -26,22 +26,42 @@ Se ha implementado un footer completamente nuevo que reemplaza el anterior, con 
 - 🔄 **Privacy Policy**: Placeholder (enlace a "#")
 - 🔄 **Terms of Service**: Placeholder (enlace a "#")
 
-### 📄 Página About
+### 📄 Página About - Completamente en Inglés y Mejorada
 
-Se ha creado una nueva página `/about` con las siguientes características:
+Se ha creado una página `/about` completamente en inglés con diseño mejorado y las siguientes características:
 
-#### **Diseño**
+#### **Diseño y Estructura**
 
 - **Header consistente**: Mismo estilo que la página principal
-- **Contenido centrado**: Layout de tarjeta con información
-- **Estado "Under Construction"**: Placeholder para contenido futuro
-- **Animaciones**: Efectos de entrada suaves y escalonados
+- **Layout responsivo**: Grid adaptativo para diferentes tamaños de pantalla
+- **Tipografía clara**: Jerarquía visual bien definida
+- **Colores armónicos**: Consistente con el tema de la aplicación
+- **Contenido centrado**: Todos los elementos están perfectamente alineados
 
-#### **Funcionalidades**
+#### **Contenido Principal en Inglés**
 
-- **Navegación**: Botón "Go Back" y "Home"
-- **Responsive**: Se adapta a diferentes tamaños de pantalla
-- **Consistencia visual**: Usa las mismas variables CSS del tema
+- **Card principal**: Explicación completa del proyecto ToxiGuard
+- **Descripción del proyecto**: Sistema de moderación de contenido con ML
+- **Flujo de trabajo**: Visualización del proceso User Input → ML Analysis → Results
+- **Grid de tecnologías**: Organizadas por categorías (Frontend, Backend, ML, NLP)
+
+#### **Técnicas de Machine Learning (Inglés)**
+
+- **Naive Bayes**: Probabilistic algorithm for basic content classification
+- **Random Forest**: Ensemble of decision trees
+- **Support Vector Machine**: Optimized binary classification
+- **Gradient Boosting**: Sequential combination of models
+- **Contextual Analysis**: Semantic embeddings for context understanding
+- **Hybrid Classifier**: Intelligent combination of techniques
+
+#### **Características del Proyecto (Inglés)**
+
+- **Contextual Analysis**: Understands negations and semantic nuances
+- **Multi-Model Ensemble**: Combines multiple algorithms
+- **Real-time Processing**: Instant analysis with millisecond responses
+- **Detailed Explanations**: Clear reasons for each classification
+- **Responsive Dashboard**: Modern and adaptive interface
+- **API RESTful**: Robust backend with FastAPI
 
 ### 🔧 Implementación Técnica
 
@@ -50,12 +70,12 @@ Se ha creado una nueva página `/about` con las siguientes características:
 - **React Router v7**: Implementado con `BrowserRouter`
 - **Rutas configuradas**:
   - `/` → Página principal (ToxiGuardApp)
-  - `/about` → Página About
+  - `/about` → Página About completa en inglés
 
 #### **Componentes Creados**
 
-1. **`Footer.tsx`**: Footer principal con enlaces y información
-2. **`About.tsx`**: Página About con estado "en construcción"
+1. **`Footer.tsx`**: Footer principal con enlaces e información
+2. **`About.tsx`**: Página About completamente en inglés y mejorada
 3. **`App.tsx`**: Modificado para incluir enrutamiento
 
 #### **Estructura de Archivos**
@@ -63,8 +83,8 @@ Se ha creado una nueva página `/about` con las siguientes características:
 ```
 frontend/src/
 ├── components/
-│   ├── Footer.tsx          # Nuevo footer
-│   ├── About.tsx           # Nueva página About
+│   ├── Footer.tsx          # Footer atractivo
+│   ├── About.tsx           # Página About en inglés mejorada
 │   └── AnalysisDetails.tsx # Mejorado (compacto)
 ├── App.tsx                 # Modificado con enrutamiento
 └── ...
@@ -82,8 +102,22 @@ frontend/src/
 #### **Responsividad**
 
 - **Breakpoint**: 768px para dispositivos móviles
-- **Layout adaptativo**: Elementos se apilan en pantallas pequeñas
+- **Layout adaptativo**: Grids que se reorganizan automáticamente
 - **Flexbox**: Uso de flexbox para layouts flexibles
+
+#### **Animaciones y Efectos**
+
+- **Entrada escalonada**: Animaciones con delays progresivos
+- **Hover effects**: Transformaciones y sombras en hover
+- **Transiciones suaves**: Cambios de estado fluidos
+
+#### **Mejoras de Diseño Implementadas**
+
+- **Contenido centrado**: Todos los elementos ML están perfectamente centrados
+- **Iconos más grandes**: Iconos de 48px para mejor visibilidad
+- **Espaciado balanceado**: Padding y márgenes consistentes
+- **Grid responsivo**: 2 columnas en desktop, 1 en móvil
+- **Cards simétricas**: Diseño equilibrado y minimalista
 
 ### 🚀 Cómo Usar
 
@@ -92,20 +126,22 @@ frontend/src/
 1. **Desde la página principal**: Hacer clic en "About" en el footer
 2. **Desde About**: Usar "Go Back" o "Home" para regresar
 
-#### **Personalización**
+#### **Contenido de la Página About**
 
-- **Nombre del desarrollador**: Cambiar "Made by Emi" en `Footer.tsx`
-- **Enlaces**: Modificar URLs en los enlaces del footer
-- **Contenido About**: Editar `About.tsx` cuando esté listo
+- **Información del proyecto**: Descripción completa de ToxiGuard en inglés
+- **Tecnologías utilizadas**: Frontend, Backend, ML y NLP
+- **Técnicas de ML**: Explicación de cada algoritmo implementado
+- **Características clave**: Funcionalidades principales del sistema
 
 ### 🔮 Próximos Pasos
 
 #### **Página About**
 
-- [ ] Agregar información sobre ToxiGuard
-- [ ] Incluir detalles técnicos del proyecto
-- [ ] Agregar información del equipo
-- [ ] Incluir enlaces a repositorios
+- ✅ **Completado**: Información completa del proyecto en inglés
+- ✅ **Completado**: Explicación de tecnologías
+- ✅ **Completado**: Técnicas de ML detalladas
+- ✅ **Completado**: Características del proyecto
+- ✅ **Completado**: Diseño mejorado y contenido centrado
 
 #### **Footer**
 
@@ -118,15 +154,68 @@ frontend/src/
 
 - ✅ **Desktop**: Diseño completo con todas las funcionalidades
 - ✅ **Tablet**: Layout adaptativo con elementos reorganizados
-- ✅ **Mobile**: Footer apilado verticalmente para mejor usabilidad
+- ✅ **Mobile**: Footer apilado verticalmente y grids responsivos
 
 ### 🎯 Beneficios Implementados
 
-1. **Navegación mejorada**: Los usuarios pueden acceder a información adicional
-2. **Profesionalismo**: Footer completo y bien diseñado
+1. **Navegación mejorada**: Los usuarios pueden acceder a información detallada
+2. **Profesionalismo**: Footer completo y página About informativa
 3. **Escalabilidad**: Estructura preparada para agregar más páginas
 4. **Consistencia**: Diseño unificado en toda la aplicación
 5. **Responsividad**: Funciona perfectamente en todos los dispositivos
+6. **Información técnica**: Explicación clara de tecnologías y ML en inglés
+7. **Experiencia de usuario**: Interfaz intuitiva, atractiva y centrada
+8. **Internacionalización**: Contenido completamente en inglés para audiencia global
+
+### 🧠 Contenido Técnico Detallado
+
+#### **Tecnologías Frontend**
+
+- React 19, TypeScript, Tailwind CSS, Vite
+
+#### **Tecnologías Backend**
+
+- FastAPI, Python 3.8+, scikit-learn, sentence-transformers
+
+#### **Técnicas de Machine Learning**
+
+- **Naive Bayes**: Basic probabilistic classification
+- **Random Forest**: Decision tree ensemble
+- **SVM**: Optimized binary classification
+- **Gradient Boosting**: Sequential model combination
+- **Contextual Analysis**: Advanced semantic embeddings
+- **Hybrid Classifier**: Intelligent technique combination
+
+#### **Características Avanzadas**
+
+- **Contextual analysis**: Negation and nuance detection
+- **Multi-model**: Algorithm combination for accuracy
+- **Real-time**: Instant processing
+- **Explanations**: Clear classification justifications
+
+### 🎨 Mejoras de Diseño Específicas
+
+#### **Cards de Técnicas ML**
+
+- **Iconos centrados**: Iconos de 48px perfectamente centrados
+- **Contenido alineado**: Título y descripción centrados vertical y horizontalmente
+- **Espaciado balanceado**: Márgenes y padding consistentes
+- **Colores temáticos**: Cada técnica tiene su color distintivo
+- **Hover effects**: Transformaciones suaves al pasar el mouse
+
+#### **Grid Responsivo**
+
+- **Desktop**: 2 columnas para mejor aprovechamiento del espacio
+- **Mobile**: 1 columna para mejor legibilidad
+- **Breakpoint**: 768px para transición suave
+- **Gap consistente**: 20px entre elementos para armonía visual
+
+#### **Tipografía Mejorada**
+
+- **Jerarquía clara**: Títulos, subtítulos y cuerpo de texto bien diferenciados
+- **Tamaños consistentes**: Escala tipográfica armónica
+- **Peso de fuente**: Uso inteligente de font-weight para énfasis
+- **Espaciado de línea**: Line-height optimizado para legibilidad
 
 ---
 
