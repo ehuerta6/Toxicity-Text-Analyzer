@@ -674,12 +674,12 @@ const App: React.FC = () => {
         <div
           style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))',
             gap: '16px',
             marginBottom: '24px',
           }}
         >
-          {/* Tarjeta de Gauge Principal */}
+          {/* Cuadro Combinado: Toxicity Analysis + Analysis Details */}
           <div
             style={{
               backgroundColor: 'var(--card)',
@@ -687,160 +687,166 @@ const App: React.FC = () => {
               padding: '20px',
               boxShadow: '0 2px 4px rgba(0, 0, 0, 0.05)',
               border: '1px solid var(--border)',
-              textAlign: 'center',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '20px',
             }}
           >
-            <h3
-              style={{
-                fontSize: '16px',
-                fontWeight: '600',
-                color: 'var(--foreground)',
-                margin: '0 0 16px 0',
-              }}
-            >
-              📊 Toxicity Analysis
-            </h3>
-            <ToxicityGauge percentage={result?.toxicity_percentage || 0} />
-          </div>
-
-          {/* Tarjeta de Estadísticas */}
-          <div
-            style={{
-              backgroundColor: 'var(--card)',
-              borderRadius: 'var(--radius)',
-              padding: '20px',
-              boxShadow: '0 2px 4px rgba(0, 0, 0, 0.05)',
-              border: '1px solid var(--border)',
-            }}
-          >
-            <h3
-              style={{
-                fontSize: '16px',
-                fontWeight: '600',
-                color: 'var(--foreground)',
-                margin: '0 0 16px 0',
-                textAlign: 'center',
-              }}
-            >
-              📈 Analysis Details
-            </h3>
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(2, 1fr)',
-                gap: '12px',
-              }}
-            >
-              <div style={{ textAlign: 'center' }}>
-                <div
-                  style={{
-                    fontSize: '10px',
-                    color: 'var(--muted-foreground)',
-                    marginBottom: '4px',
-                  }}
-                >
-                  Score
-                </div>
-                <div
-                  style={{
-                    fontSize: '18px',
-                    fontWeight: '600',
-                    color: 'var(--foreground)',
-                  }}
-                >
-                  {result ? Math.round(result.toxicity_percentage) : 0}%
-                </div>
-              </div>
-
-              <div style={{ textAlign: 'center' }}>
-                <div
-                  style={{
-                    fontSize: '10px',
-                    color: 'var(--muted-foreground)',
-                    marginBottom: '4px',
-                  }}
-                >
-                  Category
-                </div>
-                <div
-                  style={{
-                    fontSize: '18px',
-                    fontWeight: '600',
-                    color: 'var(--foreground)',
-                  }}
-                >
-                  {result
-                    ? (() => {
-                        const percentage = result.toxicity_percentage;
-                        if (percentage <= 30) return 'Safe';
-                        if (percentage <= 60) return 'Moderate';
-                        return 'High Risk';
-                      })()
-                    : 'N/A'}
-                </div>
-              </div>
-
-              <div style={{ textAlign: 'center' }}>
-                <div
-                  style={{
-                    fontSize: '10px',
-                    color: 'var(--muted-foreground)',
-                    marginBottom: '4px',
-                  }}
-                >
-                  Técnica
-                </div>
-                <div
-                  style={{
-                    fontSize: '14px',
-                    fontWeight: '600',
-                    color: 'var(--foreground)',
-                  }}
-                >
-                  {result?.classification_technique || 'N/A'}
-                </div>
-              </div>
-
-              <div style={{ textAlign: 'center' }}>
-                <div
-                  style={{
-                    fontSize: '10px',
-                    color: 'var(--muted-foreground)',
-                    marginBottom: '4px',
-                  }}
-                >
-                  Time
-                </div>
-                <div
-                  style={{
-                    fontSize: '14px',
-                    fontWeight: '600',
-                    color: 'var(--foreground)',
-                  }}
-                >
-                  {result?.response_time_ms || 0}ms
-                </div>
-              </div>
+            {/* Sección de Toxicity Analysis */}
+            <div style={{ textAlign: 'center' }}>
+              <h3
+                style={{
+                  fontSize: '16px',
+                  fontWeight: '600',
+                  color: 'var(--foreground)',
+                  margin: '0 0 16px 0',
+                }}
+              >
+                📊 Toxicity Analysis
+              </h3>
+              <ToxicityGauge percentage={result?.toxicity_percentage || 0} />
             </div>
 
+            {/* Separador visual sutil */}
             <div
               style={{
-                marginTop: '16px',
-                fontSize: '11px',
-                color: 'var(--muted-foreground)',
-                textAlign: 'center',
-                padding: '8px',
-                backgroundColor: 'var(--muted)',
-                borderRadius: 'var(--radius)',
-                border: '1px solid var(--border)',
+                height: '1px',
+                backgroundColor: 'var(--border)',
+                margin: '0',
               }}
-            >
-              Analyzed on{' '}
-              {result ? new Date(result.timestamp).toLocaleString() : 'N/A'}
+            />
+
+            {/* Sección de Analysis Details */}
+            <div>
+              <h3
+                style={{
+                  fontSize: '16px',
+                  fontWeight: '600',
+                  color: 'var(--foreground)',
+                  margin: '0 0 16px 0',
+                  textAlign: 'center',
+                }}
+              >
+                📈 Analysis Details
+              </h3>
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(2, 1fr)',
+                  gap: '12px',
+                }}
+              >
+                <div style={{ textAlign: 'center' }}>
+                  <div
+                    style={{
+                      fontSize: '10px',
+                      color: 'var(--muted-foreground)',
+                      marginBottom: '4px',
+                    }}
+                  >
+                    Score
+                  </div>
+                  <div
+                    style={{
+                      fontSize: '18px',
+                      fontWeight: '600',
+                      color: 'var(--foreground)',
+                    }}
+                  >
+                    {result ? Math.round(result.toxicity_percentage) : 0}%
+                  </div>
+                </div>
+
+                <div style={{ textAlign: 'center' }}>
+                  <div
+                    style={{
+                      fontSize: '10px',
+                      color: 'var(--muted-foreground)',
+                      marginBottom: '4px',
+                    }}
+                  >
+                    Category
+                  </div>
+                  <div
+                    style={{
+                      fontSize: '18px',
+                      fontWeight: '600',
+                      color: 'var(--foreground)',
+                    }}
+                  >
+                    {result
+                      ? (() => {
+                          const percentage = result.toxicity_percentage;
+                          if (percentage <= 30) return 'Safe';
+                          if (percentage <= 60) return 'Moderate';
+                          return 'High Risk';
+                        })()
+                      : 'N/A'}
+                  </div>
+                </div>
+
+                <div style={{ textAlign: 'center' }}>
+                  <div
+                    style={{
+                      fontSize: '10px',
+                      color: 'var(--muted-foreground)',
+                      marginBottom: '4px',
+                    }}
+                  >
+                    Técnica
+                  </div>
+                  <div
+                    style={{
+                      fontSize: '14px',
+                      fontWeight: '600',
+                      color: 'var(--foreground)',
+                    }}
+                  >
+                    {result?.classification_technique || 'N/A'}
+                  </div>
+                </div>
+
+                <div style={{ textAlign: 'center' }}>
+                  <div
+                    style={{
+                      fontSize: '10px',
+                      color: 'var(--muted-foreground)',
+                      marginBottom: '4px',
+                    }}
+                  >
+                    Time
+                  </div>
+                  <div
+                    style={{
+                      fontSize: '14px',
+                      fontWeight: '600',
+                      color: 'var(--foreground)',
+                    }}
+                  >
+                    {result?.response_time_ms || 0}ms
+                  </div>
+                </div>
+              </div>
+
+              <div
+                style={{
+                  marginTop: '16px',
+                  fontSize: '11px',
+                  color: 'var(--muted-foreground)',
+                  textAlign: 'center',
+                  padding: '8px',
+                  backgroundColor: 'var(--muted)',
+                  borderRadius: 'var(--radius)',
+                  border: '1px solid var(--border)',
+                }}
+              >
+                Analyzed on{' '}
+                {result ? new Date(result.timestamp).toLocaleString() : 'N/A'}
+              </div>
             </div>
           </div>
 
-          {/* Tarjeta de Barra de Progreso */}
+          {/* Cuadro de Toxicity Level */}
           <div
             style={{
               backgroundColor: 'var(--card)',
