@@ -141,10 +141,12 @@ const ColoredText: React.FC<{ text: string; toxicityMap: ToxicityMap }> = ({
         return (
           <span
             key={index}
-            className={`${textClass} cursor-help transition-all duration-200 hover:scale-105 font-semibold`}
+            className={`${textClass} cursor-help transition-all duration-300 hover:scale-105 font-semibold`}
             style={{
               borderBottom: `3px solid ${color}`,
               paddingBottom: '1px',
+              animation: 'fadeInWord 0.6s ease-out',
+              animationDelay: `${index * 0.1}s`,
             }}
             title={`Toxicidad: ${toxicityPercentage}%`}
           >
@@ -166,6 +168,12 @@ const App: React.FC = () => {
   const [text, setText] = useState('');
   const [toxicityMap, setToxicityMap] = useState<ToxicityMap>({});
 
+  // Guardar temporalmente el último análisis en localStorage
+  const [lastAnalysis, setLastAnalysis] = useState(() => {
+    const saved = localStorage.getItem('toxiguard_last_analysis');
+    return saved ? JSON.parse(saved) : null;
+  });
+
   const { result, loading, error, analyzeText, clearResult } =
     useToxicityAnalysis();
 
@@ -173,71 +181,72 @@ const App: React.FC = () => {
     (text: string, toxicityPercentage: number): ToxicityMap => {
       if (!text || toxicityPercentage === 0) return {};
 
-      // Dividir el texto en palabras y filtrar palabras vacías
+      // Optimización: Usar regex más eficiente y cache de palabras
       const words = text
         .toLowerCase()
         .split(/\s+/)
-        .filter((word) => word.length > 2); // Solo palabras de 3+ caracteres
+        .filter((word) => word.length > 2);
 
       if (words.length === 0) return {};
 
       const toxicityMap: ToxicityMap = {};
+      const cleanWords = new Map(); // Cache para palabras limpias
 
-      // Distribuir la toxicidad de manera más realista
+      // Pre-procesar palabras para evitar recálculos
+      words.forEach((word) => {
+        const cleanWord = word.replace(/[^\wáéíóúñ]/g, '');
+        if (cleanWord.length > 0) {
+          cleanWords.set(word, cleanWord);
+        }
+      });
+
+      // Distribuir toxicidad de manera más eficiente
       if (toxicityPercentage <= 30) {
-        // Para toxicidad baja, solo algunas palabras tienen toxicidad
         const toxicWords = Math.max(1, Math.floor(words.length * 0.3));
-        const toxicWordIndices = new Set();
+        const toxicIndices = new Set();
 
-        // Seleccionar palabras aleatoriamente para ser tóxicas
-        while (toxicWordIndices.size < toxicWords) {
-          const randomIndex = Math.floor(Math.random() * words.length);
-          toxicWordIndices.add(randomIndex);
+        // Selección más eficiente de palabras tóxicas
+        for (let i = 0; i < toxicWords; i++) {
+          let randomIndex;
+          do {
+            randomIndex = Math.floor(Math.random() * words.length);
+          } while (toxicIndices.has(randomIndex));
+          toxicIndices.add(randomIndex);
         }
 
-        words.forEach((word, index) => {
-          const cleanWord = word.replace(/[^\wáéíóúñ]/g, '');
-          if (cleanWord.length > 0) {
-            if (toxicWordIndices.has(index)) {
-              toxicityMap[cleanWord] = Math.round(toxicityPercentage * 1.5);
-            } else {
-              toxicityMap[cleanWord] = 0;
-            }
-          }
+        cleanWords.forEach((cleanWord, originalWord) => {
+          const index = words.indexOf(originalWord);
+          toxicityMap[cleanWord] = toxicIndices.has(index)
+            ? Math.round(toxicityPercentage * 1.5)
+            : 0;
         });
       } else if (toxicityPercentage <= 60) {
-        // Para toxicidad moderada, más palabras tienen toxicidad
         const toxicWords = Math.max(2, Math.floor(words.length * 0.6));
-        const toxicWordIndices = new Set();
+        const toxicIndices = new Set();
 
-        while (toxicWordIndices.size < toxicWords) {
-          const randomIndex = Math.floor(Math.random() * words.length);
-          toxicWordIndices.add(randomIndex);
+        for (let i = 0; i < toxicWords; i++) {
+          let randomIndex;
+          do {
+            randomIndex = Math.floor(Math.random() * words.length);
+          } while (toxicIndices.has(randomIndex));
+          toxicIndices.add(randomIndex);
         }
 
-        words.forEach((word, index) => {
-          const cleanWord = word.replace(/[^\wáéíóúñ]/g, '');
-          if (cleanWord.length > 0) {
-            if (toxicWordIndices.has(index)) {
-              toxicityMap[cleanWord] = Math.round(toxicityPercentage * 0.8);
-            } else {
-              toxicityMap[cleanWord] = Math.round(toxicityPercentage * 0.2);
-            }
-          }
+        cleanWords.forEach((cleanWord, originalWord) => {
+          const index = words.indexOf(originalWord);
+          toxicityMap[cleanWord] = toxicIndices.has(index)
+            ? Math.round(toxicityPercentage * 0.8)
+            : Math.round(toxicityPercentage * 0.2);
         });
       } else {
-        // Para toxicidad alta, la mayoría de palabras tienen toxicidad
-        words.forEach((word) => {
-          const cleanWord = word.replace(/[^\wáéíóúñ]/g, '');
-          if (cleanWord.length > 0) {
-            // Distribuir la toxicidad de manera más uniforme
-            const baseToxicity = Math.round(toxicityPercentage * 0.7);
-            const variation = Math.round(Math.random() * 20) - 10; // ±10%
-            toxicityMap[cleanWord] = Math.max(
-              0,
-              Math.min(100, baseToxicity + variation)
-            );
-          }
+        // Para toxicidad alta, distribución más directa
+        cleanWords.forEach((cleanWord) => {
+          const baseToxicity = Math.round(toxicityPercentage * 0.7);
+          const variation = Math.round(Math.random() * 20) - 10;
+          toxicityMap[cleanWord] = Math.max(
+            0,
+            Math.min(100, baseToxicity + variation)
+          );
         });
       }
 
@@ -266,6 +275,19 @@ const App: React.FC = () => {
         result.toxicity_percentage
       );
       setToxicityMap(wordToxicityMap);
+
+      // Guardar el análisis en localStorage
+      const analysisData = {
+        text,
+        result,
+        toxicityMap: wordToxicityMap,
+        timestamp: new Date().toISOString(),
+      };
+      setLastAnalysis(analysisData);
+      localStorage.setItem(
+        'toxiguard_last_analysis',
+        JSON.stringify(analysisData)
+      );
     }
   }, [result, text, generateToxicityMap]);
 
@@ -423,6 +445,7 @@ const App: React.FC = () => {
               <button
                 onClick={handleAnalyze}
                 disabled={loading || !text.trim()}
+                aria-label='Analizar texto para detectar toxicidad'
                 style={{
                   backgroundColor: '#3b82f6',
                   color: 'white',
@@ -487,6 +510,7 @@ const App: React.FC = () => {
 
               <button
                 onClick={handleClear}
+                aria-label='Limpiar texto y resultados del análisis'
                 style={{
                   backgroundColor: '#f1f5f9',
                   color: '#475569',
@@ -509,6 +533,48 @@ const App: React.FC = () => {
               >
                 🗑️ Limpiar
               </button>
+
+              {result && (
+                <button
+                  onClick={() => {
+                    navigator.clipboard.writeText(text);
+                    // Feedback visual temporal
+                    const button = document.activeElement as HTMLButtonElement;
+                    if (button) {
+                      const originalText = button.innerHTML;
+                      button.innerHTML = '✅ Copiado!';
+                      button.style.backgroundColor = '#10b981';
+                      button.style.color = 'white';
+                      setTimeout(() => {
+                        button.innerHTML = originalText;
+                        button.style.backgroundColor = '#f1f5f9';
+                        button.style.color = '#475569';
+                      }, 2000);
+                    }
+                  }}
+                  style={{
+                    backgroundColor: '#f1f5f9',
+                    color: '#475569',
+                    border: '1px solid #cbd5e1',
+                    padding: '12px 24px',
+                    borderRadius: '8px',
+                    fontSize: '16px',
+                    fontWeight: '600',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = '#e2e8f0';
+                    e.currentTarget.style.transform = 'translateY(-1px)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = '#f1f5f9';
+                    e.currentTarget.style.transform = 'translateY(0)';
+                  }}
+                >
+                  📋 Copiar Texto
+                </button>
+              )}
             </div>
 
             {error && (
@@ -560,6 +626,7 @@ const App: React.FC = () => {
                 border: '2px solid',
                 borderColor: getToxicityBorderColor(result.toxicity_percentage),
                 transition: 'all 0.3s ease',
+                animation: 'slideInRight 0.5s ease-out',
               }}
             >
               <h2
@@ -576,6 +643,73 @@ const App: React.FC = () => {
 
               <div style={{ marginBottom: '24px' }}>
                 <ToxicityGauge percentage={result.toxicity_percentage} />
+
+                {/* Barra de progreso adicional para toxicidad */}
+                <div style={{ marginTop: '20px' }}>
+                  <div
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      marginBottom: '8px',
+                    }}
+                  >
+                    <span
+                      style={{
+                        fontSize: '14px',
+                        color: '#64748b',
+                        fontWeight: '500',
+                      }}
+                    >
+                      Nivel de Toxicidad
+                    </span>
+                    <span
+                      style={{
+                        fontSize: '14px',
+                        color: '#1e293b',
+                        fontWeight: '600',
+                      }}
+                    >
+                      {Math.round(result.toxicity_percentage)}%
+                    </span>
+                  </div>
+                  <div
+                    style={{
+                      width: '100%',
+                      height: '12px',
+                      backgroundColor: '#e5e7eb',
+                      borderRadius: '6px',
+                      overflow: 'hidden',
+                      position: 'relative',
+                    }}
+                  >
+                    <div
+                      style={{
+                        width: `${result.toxicity_percentage}%`,
+                        height: '100%',
+                        backgroundColor: getToxicityColor(
+                          result.toxicity_percentage
+                        ),
+                        borderRadius: '6px',
+                        transition: 'width 1s ease-out',
+                        animation: 'slideInProgress 1.2s ease-out',
+                      }}
+                    />
+                  </div>
+                  <div
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      marginTop: '6px',
+                      fontSize: '12px',
+                      color: '#9ca3af',
+                    }}
+                  >
+                    <span>0%</span>
+                    <span>50%</span>
+                    <span>100%</span>
+                  </div>
+                </div>
               </div>
 
               {/* Enhanced Results Display */}
@@ -697,6 +831,17 @@ const App: React.FC = () => {
                   }}
                 >
                   Analizado el {new Date(result.timestamp).toLocaleString()}
+                  {lastAnalysis && (
+                    <div
+                      style={{
+                        marginTop: '8px',
+                        fontSize: '12px',
+                        color: '#9ca3af',
+                      }}
+                    >
+                      💾 Análisis guardado temporalmente
+                    </div>
+                  )}
                 </div>
               </div>
 
