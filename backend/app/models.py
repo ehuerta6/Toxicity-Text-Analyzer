@@ -73,6 +73,14 @@ class AnalyzeResponse(BaseModel):
         default_factory=dict,
         description="Explicaciones detalladas de por qué se detectó cada categoría de toxicidad"
     )
+    severity_breakdown: Dict[str, Dict] = Field(
+        default_factory=dict,
+        description="Desglose detallado de la severidad por categoría de toxicidad"
+    )
+    ultra_sensitive_analysis: bool = Field(
+        default=False,
+        description="Indica si se utilizó análisis ultra-sensible"
+    )
 
 class BatchAnalyzeRequest(BaseModel):
     """Modelo para solicitudes de análisis en lote"""

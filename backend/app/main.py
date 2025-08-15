@@ -55,18 +55,24 @@ try:
 except Exception as e:
     logger.warning(f"⚠️ No se pudo inicializar la base de datos: {e}")
 
-# Seleccionar clasificador principal (híbrido con contextual por defecto)
+# Seleccionar clasificador principal (híbrido ultra-sensible por defecto)
 primary_classifier = hybrid_classifier
 logger.info(f"✅ Clasificador principal: {primary_classifier.__class__.__name__}")
 
 @app.on_event("startup")
 async def startup_event():
     """Evento de inicio de la aplicación"""
-    logger.info("🚀 ToxiGuard API iniciando con análisis contextual...")
+    logger.info("🚀 ToxiGuard API iniciando con análisis ultra-sensible...")
     
     # Verificar estado de los clasificadores
     classifier_info = primary_classifier.get_classifier_info()
     logger.info(f"📊 Estado de clasificadores: {classifier_info}")
+    
+    # Verificar disponibilidad del clasificador avanzado
+    if hasattr(primary_classifier, 'advanced_classifier'):
+        logger.info("✅ Clasificador avanzado ultra-sensible disponible")
+        advanced_info = primary_classifier.advanced_classifier.get_classifier_info()
+        logger.info(f"🚨 Clasificador avanzado: {advanced_info}")
     
     # Verificar disponibilidad del clasificador contextual
     if contextual_classifier.embedding_model:
@@ -185,31 +191,51 @@ async def switch_classifier(classifier_type: str = "contextual"):
 
 @app.get("/health")
 async def health_check():
-    """Verificación de salud optimizada con estado contextual"""
+    """Verificación de salud optimizada con estado ultra-sensible"""
     return {
         "status": "healthy",
         "timestamp": datetime.now(),
         "uptime": time.time() - startup_time if startup_time else 0,
-        "classifier": "hybrid_with_contextual",
+        "classifier": "hybrid_ultra_sensitive",
         "database": "connected" if history_db else "disconnected",
-        "contextual_analysis": contextual_classifier.embedding_model is not None
+        "advanced_analysis": True,
+        "contextual_analysis": contextual_classifier.embedding_model is not None,
+        "ultra_sensitive_features": {
+            "severity_weighting": True,
+            "ultra_sensitive_thresholds": True,
+            "repetition_analysis": True
+        }
     }
 
 @app.get("/info")
 async def get_info():
-    """Información del sistema optimizada con capacidades contextuales"""
+    """Información del sistema optimizada con capacidades ultra-sensibles"""
     return {
         "name": "ToxiGuard API",
         "version": "2.1.0",
-        "description": "API optimizada para detección de toxicidad con análisis contextual",
+        "description": "API optimizada para detección de toxicidad con análisis ultra-sensible y contextual",
         "features": [
+            "Análisis ultra-sensible con ponderación de severidad",
             "Análisis contextual con embeddings",
             "Detección de negaciones (ej: 'no eres tonto')",
-            "Clasificador híbrido avanzado",
+            "Clasificador híbrido ultra-sensible avanzado",
             "Análisis por oraciones",
             "Rendimiento optimizado",
-            "Memoria reducida"
+            "Memoria reducida",
+            "Umbrales ultra-sensibles para evitar valores triviales"
         ],
+        "advanced_analysis": {
+            "enabled": True,
+            "ultra_sensitive": True,
+            "severity_weighting": True,
+            "capabilities": [
+                "Análisis ultra-sensible de palabras ofensivas",
+                "Ponderación por severidad de cada palabra",
+                "Detección de amenazas y discriminación",
+                "Umbrales adaptativos ultra-sensibles",
+                "Análisis de repetición y densidad tóxica"
+            ]
+        },
         "contextual_analysis": {
             "enabled": contextual_classifier.embedding_model is not None,
             "model": contextual_classifier.model_name if contextual_classifier.embedding_model else "Not available",
@@ -272,7 +298,9 @@ async def analyze_text(request: AnalyzeRequest):
             timestamp=datetime.now(),
             model_used=analysis_result["model_used"],
             classification_technique=analysis_result.get("classification_technique", "Técnica no especificada"),
-            explanations=analysis_result["details"].get("explanations", {})
+            explanations=analysis_result["details"].get("explanations", {}),
+            severity_breakdown=analysis_result["details"].get("severity_breakdown", {}),
+            ultra_sensitive_analysis=analysis_result["details"].get("ultra_sensitive_analysis", False)
         )
         
         # Guardar en historial si está habilitado

@@ -13,6 +13,15 @@ export interface ToxicityResult {
   model_used: string;
   classification_technique: string;
   explanations: Record<string, string>;
+  severity_breakdown?: Record<
+    string,
+    {
+      avg_severity: number;
+      match_count: number;
+      final_score: number;
+    }
+  >;
+  ultra_sensitive_analysis?: boolean;
 }
 
 interface UseToxicityAnalysisReturn {

@@ -2,6 +2,7 @@ import React, { useState, useCallback, useEffect } from 'react';
 import { useToxicityAnalysis } from './hooks/useToxicityAnalysis';
 import type { ToxicityResult } from './hooks/useToxicityAnalysis';
 import { getToxicityColor } from './styles/common';
+import SeverityBreakdown from './components/SeverityBreakdown';
 
 // Sistema de Estilos Unificado para Consistencia Visual
 const DESIGN_SYSTEM = {
@@ -582,7 +583,18 @@ const App: React.FC = () => {
     useToxicityAnalysis();
 
   const generateToxicityMap = useCallback(
-    (text: string, toxicityPercentage: number): ToxicityMap => {
+    (
+      text: string,
+      toxicityPercentage: number,
+      severityBreakdown?: Record<
+        string,
+        {
+          avg_severity: number;
+          match_count: number;
+          final_score: number;
+        }
+      >
+    ): ToxicityMap => {
       if (!text || toxicityPercentage === 0) return {};
 
       const words = text
@@ -601,51 +613,145 @@ const App: React.FC = () => {
         }
       });
 
-      if (toxicityPercentage <= 30) {
-        const toxicWords = Math.max(1, Math.floor(words.length * 0.3));
-        const toxicIndices = new Set();
+      // Si tenemos breakdown de severidad, usarlo para asignar toxicidad más precisa
+      if (severityBreakdown && Object.keys(severityBreakdown).length > 0) {
+        // Palabras tóxicas comunes con sus niveles de severidad
+        const toxicKeywords = {
+          // Insultos leves
+          tonto: 25,
+          feo: 20,
+          lento: 15,
+          aburrido: 15,
+          stupid: 25,
+          ugly: 20,
+          slow: 15,
+          boring: 15,
 
-        for (let i = 0; i < toxicWords; i++) {
-          let randomIndex;
-          do {
-            randomIndex = Math.floor(Math.random() * words.length);
-          } while (toxicIndices.has(randomIndex));
-          toxicIndices.add(randomIndex);
-        }
+          // Insultos moderados
+          idiota: 60,
+          estupido: 65,
+          imbecil: 70,
+          pendejo: 75,
+          idiot: 60,
+          moron: 70,
+          fool: 65,
+          gilipollas: 80,
 
-        cleanWords.forEach((cleanWord, originalWord) => {
-          const index = words.indexOf(originalWord);
-          toxicityMap[cleanWord] = toxicIndices.has(index)
-            ? Math.round(toxicityPercentage * 1.5)
-            : 0;
-        });
-      } else if (toxicityPercentage <= 60) {
-        const toxicWords = Math.max(2, Math.floor(words.length * 0.6));
-        const toxicIndices = new Set();
+          // Insultos severos
+          cabron: 95,
+          'hijo de puta': 100,
+          puta: 90,
+          perra: 85,
+          zorra: 85,
+          bastardo: 90,
+          malparido: 95,
+          asshole: 90,
+          bitch: 85,
+          whore: 90,
+          bastard: 90,
+          fuck: 80,
+          shit: 75,
+          damn: 70,
+          hell: 70,
 
-        for (let i = 0; i < toxicWords; i++) {
-          let randomIndex;
-          do {
-            randomIndex = Math.floor(Math.random() * words.length);
-          } while (toxicIndices.has(randomIndex));
-          toxicIndices.add(randomIndex);
-        }
+          // Acoso y amenazas
+          matar: 95,
+          morir: 80,
+          odio: 85,
+          destruir: 90,
+          kill: 95,
+          die: 80,
+          hate: 85,
+          destroy: 90,
+          muerte: 85,
+          asesinar: 95,
+          eliminar: 90,
 
-        cleanWords.forEach((cleanWord, originalWord) => {
-          const index = words.indexOf(originalWord);
-          toxicityMap[cleanWord] = toxicIndices.has(index)
-            ? Math.round(toxicityPercentage * 0.8)
-            : Math.round(toxicityPercentage * 0.2);
+          // Discriminación
+          racista: 95,
+          xenofobo: 95,
+          homofobo: 95,
+          machista: 90,
+          racist: 95,
+          xenophobic: 95,
+          homophobic: 95,
+          sexist: 90,
+          nazi: 95,
+          fascista: 95,
+          supremacista: 95,
+        };
+
+        // Asignar toxicidad basada en palabras conocidas
+        cleanWords.forEach((cleanWord) => {
+          const lowerWord = cleanWord.toLowerCase();
+          let maxToxicity = 0;
+
+          // Buscar coincidencias exactas y parciales
+          for (const [keyword, toxicity] of Object.entries(toxicKeywords)) {
+            if (lowerWord.includes(keyword) || keyword.includes(lowerWord)) {
+              maxToxicity = Math.max(maxToxicity, toxicity);
+            }
+          }
+
+          // Si no se encontró palabra tóxica conocida, asignar toxicidad basada en el porcentaje general
+          if (maxToxicity === 0) {
+            if (toxicityPercentage > 70) {
+              maxToxicity = Math.round(toxicityPercentage * 0.3); // Palabras no tóxicas en texto tóxico
+            } else if (toxicityPercentage > 30) {
+              maxToxicity = Math.round(toxicityPercentage * 0.2);
+            }
+          }
+
+          toxicityMap[cleanWord] = maxToxicity;
         });
       } else {
-        cleanWords.forEach((cleanWord) => {
-          const baseToxicity = Math.round(toxicityPercentage * 0.7);
-          const variation = Math.round(Math.random() * 20) - 10;
-          toxicityMap[cleanWord] = Math.max(
-            0,
-            Math.min(100, baseToxicity + variation)
-          );
-        });
+        // Fallback al método anterior si no hay breakdown de severidad
+        if (toxicityPercentage <= 30) {
+          const toxicWords = Math.max(1, Math.floor(words.length * 0.3));
+          const toxicIndices = new Set();
+
+          for (let i = 0; i < toxicWords; i++) {
+            let randomIndex;
+            do {
+              randomIndex = Math.floor(Math.random() * words.length);
+            } while (toxicIndices.has(randomIndex));
+            toxicIndices.add(randomIndex);
+          }
+
+          cleanWords.forEach((cleanWord, originalWord) => {
+            const index = words.indexOf(originalWord);
+            toxicityMap[cleanWord] = toxicIndices.has(index)
+              ? Math.round(toxicityPercentage * 1.5)
+              : 0;
+          });
+        } else if (toxicityPercentage <= 60) {
+          const toxicWords = Math.max(2, Math.floor(words.length * 0.6));
+          const toxicIndices = new Set();
+
+          for (let i = 0; i < toxicWords; i++) {
+            let randomIndex;
+            do {
+              randomIndex = Math.floor(Math.random() * words.length);
+            } while (toxicIndices.has(randomIndex));
+            toxicIndices.add(randomIndex);
+          }
+
+          cleanWords.forEach((cleanWord, originalWord) => {
+            const index = words.indexOf(originalWord);
+            toxicityMap[cleanWord] = toxicIndices.has(index)
+              ? Math.round(toxicityPercentage * 0.8)
+              : Math.round(toxicityPercentage * 0.2);
+          });
+        } else {
+          cleanWords.forEach((cleanWord) => {
+            const baseToxicity = Math.round(toxicityPercentage * 0.7);
+            const variation = Math.round(Math.random() * 20) - 10;
+            toxicityMap[cleanWord] = Math.max(
+              0,
+              Math.min(100, baseToxicity + variation)
+            );
+          });
+        }
       }
 
       return toxicityMap;
@@ -668,7 +774,8 @@ const App: React.FC = () => {
     if (result && text.trim()) {
       const wordToxicityMap = generateToxicityMap(
         text,
-        result.toxicity_percentage
+        result.toxicity_percentage,
+        result.severity_breakdown
       );
       setToxicityMap(wordToxicityMap);
 
@@ -1622,6 +1729,16 @@ const App: React.FC = () => {
             />
           </div>
         </div>
+
+        {/* Análisis de Severidad Ultra-Sensible */}
+        {result &&
+          result.severity_breakdown &&
+          Object.keys(result.severity_breakdown).length > 0 && (
+            <SeverityBreakdown
+              severityBreakdown={result.severity_breakdown}
+              detectedCategories={result.detected_categories}
+            />
+          )}
 
         {/* Nueva Caja de Texto para Análisis Adicionales */}
         <div
