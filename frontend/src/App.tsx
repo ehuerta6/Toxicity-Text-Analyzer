@@ -87,7 +87,7 @@ const DESIGN_SYSTEM = {
     border: 'var(--border)',
     foreground: 'var(--foreground)',
     mutedForeground: 'var(--muted-foreground)',
-    accent: 'oklch(0.769 0.188 70.08)', // Color amarillo consistente
+    accent: 'oklch(0.769 0.188 70.08)', // Consistent yellow color
   },
 
   // Bordes y sombras
@@ -498,6 +498,46 @@ const App: React.FC = () => {
   const { result, loading, error, analyzeText, clearResult } =
     useToxicityAnalysis();
 
+  // Function to get display name for categories
+  const getCategoryDisplayName = (category: string): string => {
+    const categoryNames: Record<string, string> = {
+      insulto_leve: 'Mild Insult',
+      insulto_moderado: 'Moderate Insult',
+      insulto_severo: 'Severe Insult',
+      acoso_directo: 'Direct Harassment',
+      discriminacion: 'Discrimination',
+      amenazas: 'Threats',
+      spam_toxico: 'Toxic Spam',
+    };
+    return categoryNames[category] || category.replace('_', ' ');
+  };
+
+  // Function to translate explanations from Spanish to English
+  const translateExplanation = (explanation: string): string => {
+    if (!explanation) return '';
+
+    // Replace Spanish category names with English equivalents
+    const translated = explanation
+      .replace(/insulto severo/gi, 'severe insult')
+      .replace(/insulto moderado/gi, 'moderate insult')
+      .replace(/insulto leve/gi, 'mild insult')
+      .replace(/acoso directo/gi, 'direct harassment')
+      .replace(/discriminación/gi, 'discrimination')
+      .replace(/amenazas/gi, 'threats')
+      .replace(/spam tóxico/gi, 'toxic spam')
+      .replace(/Detectó/gi, 'Detected')
+      .replace(/por las palabras/gi, 'by the words')
+      .replace(/por palabras como/gi, 'by words like')
+      .replace(/severidad promedio/gi, 'average severity')
+      .replace(/score/gi, 'score')
+      .replace(/NIVEL CRÍTICO/gi, 'CRITICAL LEVEL')
+      .replace(/NIVEL ALTO/gi, 'HIGH LEVEL')
+      .replace(/NIVEL MODERADO/gi, 'MODERATE LEVEL')
+      .replace(/NIVEL BAJO/gi, 'LOW LEVEL');
+
+    return translated;
+  };
+
   const generateToxicityMap = useCallback(
     (
       text: string,
@@ -529,11 +569,11 @@ const App: React.FC = () => {
         }
       });
 
-      // Si tenemos breakdown de severidad, usarlo para asignar toxicidad más precisa
+      // If we have severity breakdown, use it to assign more accurate toxicity
       if (severityBreakdown && Object.keys(severityBreakdown).length > 0) {
-        // Palabras tóxicas comunes con sus niveles de severidad
+        // Common toxic words with their severity levels
         const toxicKeywords = {
-          // Insultos leves
+          // Mild insults
           tonto: 25,
           feo: 20,
           lento: 15,
@@ -543,7 +583,7 @@ const App: React.FC = () => {
           slow: 15,
           boring: 15,
 
-          // Insultos moderados
+          // Moderate insults
           idiota: 60,
           estupido: 65,
           imbecil: 70,
@@ -553,7 +593,7 @@ const App: React.FC = () => {
           fool: 65,
           gilipollas: 80,
 
-          // Insultos severos
+          // Severe insults
           cabron: 95,
           'hijo de puta': 100,
           puta: 90,
@@ -570,7 +610,7 @@ const App: React.FC = () => {
           damn: 70,
           hell: 70,
 
-          // Acoso y amenazas
+          // Harassment and threats
           matar: 95,
           morir: 80,
           odio: 85,
@@ -583,7 +623,7 @@ const App: React.FC = () => {
           asesinar: 95,
           eliminar: 90,
 
-          // Discriminación
+          // Discrimination
           racista: 95,
           xenofobo: 95,
           homofobo: 95,
@@ -597,7 +637,7 @@ const App: React.FC = () => {
           supremacista: 95,
         };
 
-        // Asignar toxicidad basada en palabras conocidas
+        // Assign toxicity based on known words
         cleanWords.forEach((cleanWord) => {
           const lowerWord = cleanWord.toLowerCase();
           let maxToxicity = 0;
@@ -609,10 +649,10 @@ const App: React.FC = () => {
             }
           }
 
-          // Si no se encontró palabra tóxica conocida, asignar toxicidad basada en el porcentaje general
+          // If no known toxic word was found, assign toxicity based on general percentage
           if (maxToxicity === 0) {
             if (toxicityPercentage > 70) {
-              maxToxicity = Math.round(toxicityPercentage * 0.3); // Palabras no tóxicas en texto tóxico
+              maxToxicity = Math.round(toxicityPercentage * 0.3); // Non-toxic words in toxic text
             } else if (toxicityPercentage > 30) {
               maxToxicity = Math.round(toxicityPercentage * 0.2);
             }
@@ -621,7 +661,7 @@ const App: React.FC = () => {
           toxicityMap[cleanWord] = maxToxicity;
         });
       } else {
-        // Fallback al método anterior si no hay breakdown de severidad
+        // Fallback to previous method if no severity breakdown
         if (toxicityPercentage <= 30) {
           const toxicWords = Math.max(1, Math.floor(words.length * 0.3));
           const toxicIndices = new Set();
@@ -682,7 +722,7 @@ const App: React.FC = () => {
       await analyzeText(text);
       setHasAnalyzed(true);
     } catch (error) {
-      console.error('Error al analizar texto:', error);
+      console.error('Error analyzing text:', error);
     }
   }, [text, analyzeText]);
 
@@ -889,7 +929,7 @@ const App: React.FC = () => {
           padding: DESIGN_SYSTEM.spacing.lg,
         }}
       >
-        {/* Grid de Resultados del Análisis */}
+        {/* Analysis Results Grid */}
         <div
           style={{
             display: 'grid',
@@ -898,7 +938,7 @@ const App: React.FC = () => {
             marginBottom: DESIGN_SYSTEM.spacing.xxl,
           }}
         >
-          {/* Cuadro Combinado: Toxicity Analysis + Analysis Details */}
+          {/* Combined Box: Toxicity Analysis + Analysis Details */}
           <div
             style={{
               backgroundColor: DESIGN_SYSTEM.colors.card,
@@ -911,7 +951,7 @@ const App: React.FC = () => {
               gap: DESIGN_SYSTEM.spacing.xl,
             }}
           >
-            {/* Toxicity Analysis centrado */}
+            {/* Centered Toxicity Analysis */}
             <div style={{ textAlign: 'center' }}>
               <h3
                 style={{
@@ -925,7 +965,7 @@ const App: React.FC = () => {
               <ToxicityGauge percentage={result?.toxicity_percentage || 0} />
             </div>
 
-            {/* Separador visual sutil */}
+            {/* Subtle visual separator */}
             <div
               style={{
                 height: '1px',
@@ -934,11 +974,11 @@ const App: React.FC = () => {
               }}
             />
 
-            {/* Analysis Details mejorado */}
+            {/* Enhanced Analysis Details */}
             {result && <AnalysisDetails result={result} />}
           </div>
 
-          {/* Cuadro de Toxicity Level */}
+          {/* Toxicity Level Box */}
           <div
             style={{
               backgroundColor: DESIGN_SYSTEM.colors.card,
@@ -1132,7 +1172,7 @@ const App: React.FC = () => {
               </div>
             </div>
 
-            {/* Sección de Categorías Detectadas con Explicaciones */}
+            {/* Detected Categories Section with Explanations */}
             {result &&
               result.detected_categories &&
               result.detected_categories.length > 0 && (
@@ -1152,7 +1192,7 @@ const App: React.FC = () => {
                       textAlign: 'center',
                     }}
                   >
-                    🏷️ Categorías Detectadas
+                    🏷️ Detected Categories
                   </h4>
 
                   <div
@@ -1181,7 +1221,7 @@ const App: React.FC = () => {
                             textTransform: 'capitalize',
                           }}
                         >
-                          {category.replace('_', ' ')}
+                          {getCategoryDisplayName(category)}
                         </div>
 
                         {result.explanations &&
@@ -1201,7 +1241,10 @@ const App: React.FC = () => {
                                 opacity: 0.8,
                               }}
                             >
-                              💡 {result.explanations[category]}
+                              💡{' '}
+                              {translateExplanation(
+                                result.explanations[category]
+                              )}
                             </div>
                           )}
                       </div>
@@ -1212,7 +1255,7 @@ const App: React.FC = () => {
           </div>
         </div>
 
-        {/* Texto Analizado con Palabras Resaltadas */}
+        {/* Analyzed Text with Highlighted Words */}
         <div
           style={{
             backgroundColor: DESIGN_SYSTEM.colors.card,
@@ -1249,7 +1292,7 @@ const App: React.FC = () => {
           </div>
         </div>
 
-        {/* Análisis de Severidad Ultra-Sensible */}
+        {/* Ultra-Sensitive Severity Analysis */}
         {result &&
           result.severity_breakdown &&
           Object.keys(result.severity_breakdown).length > 0 && (
@@ -1259,7 +1302,7 @@ const App: React.FC = () => {
             />
           )}
 
-        {/* Nueva Caja de Texto para Análisis Adicionales */}
+        {/* New Text Box for Additional Analysis */}
         <div
           style={{
             backgroundColor: DESIGN_SYSTEM.colors.card,

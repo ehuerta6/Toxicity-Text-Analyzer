@@ -11,9 +11,9 @@ interface ColoredTextProps {
 
 const ColoredText: React.FC<ColoredTextProps> = ({ text, toxicityMap }) => {
   const getToxicityColor = (percentage: number): string => {
-    if (percentage <= 30) return '#10b981'; // Verde
-    if (percentage <= 60) return '#f59e0b'; // Amarillo
-    return '#ef4444'; // Rojo
+    if (percentage <= 30) return '#10b981'; // Green
+    if (percentage <= 60) return '#f59e0b'; // Yellow
+    return '#ef4444'; // Red
   };
 
   const getToxicityClass = (percentage: number): string => {
@@ -47,7 +47,7 @@ const ColoredText: React.FC<ColoredTextProps> = ({ text, toxicityMap }) => {
               borderBottomWidth: '3px',
               borderBottomColor: color,
             }}
-            title={`Toxicidad: ${toxicityPercentage}%`}
+                         title={`Toxicity: ${toxicityPercentage}%`}
           >
             {word}
           </span>

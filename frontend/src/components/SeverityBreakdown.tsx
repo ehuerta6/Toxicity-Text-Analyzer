@@ -21,28 +21,28 @@ const SeverityBreakdown: React.FC<SeverityBreakdownProps> = ({
   }
 
   const getSeverityColor = (severity: number): string => {
-    if (severity >= 0.9) return 'var(--destructive)'; // Rojo para severidad crítica
-    if (severity >= 0.7) return 'oklch(0.6 0.2 30)'; // Naranja para severidad alta
-    if (severity >= 0.5) return 'oklch(0.7 0.2 60)'; // Amarillo para severidad moderada
-    return 'oklch(0.8 0.15 120)'; // Verde para severidad baja
+    if (severity >= 0.9) return 'var(--destructive)'; // Red for critical severity
+    if (severity >= 0.7) return 'oklch(0.6 0.2 30)'; // Orange for high severity
+    if (severity >= 0.5) return 'oklch(0.7 0.2 60)'; // Yellow for moderate severity
+    return 'oklch(0.8 0.15 120)'; // Green for low severity
   };
 
   const getSeverityLabel = (severity: number): string => {
-    if (severity >= 0.9) return 'CRÍTICO';
-    if (severity >= 0.7) return 'ALTO';
-    if (severity >= 0.5) return 'MODERADO';
-    return 'BAJO';
+    if (severity >= 0.9) return 'CRITICAL';
+    if (severity >= 0.7) return 'HIGH';
+    if (severity >= 0.5) return 'MODERATE';
+    return 'LOW';
   };
 
   const getCategoryName = (category: string): string => {
     const categoryNames: Record<string, string> = {
-      insulto_leve: 'Insulto Leve',
-      insulto_moderado: 'Insulto Moderado',
-      insulto_severo: 'Insulto Severo',
-      acoso_directo: 'Acoso Directo',
-      discriminacion: 'Discriminación',
-      amenazas: 'Amenazas',
-      spam_toxico: 'Spam Tóxico',
+      insulto_leve: 'Mild Insult',
+      insulto_moderado: 'Moderate Insult',
+      insulto_severo: 'Severe Insult',
+      acoso_directo: 'Direct Harassment',
+      discriminacion: 'Discrimination',
+      amenazas: 'Threats',
+      spam_toxico: 'Toxic Spam',
     };
     return categoryNames[category] || category.replace('_', ' ');
   };
@@ -70,7 +70,7 @@ const SeverityBreakdown: React.FC<SeverityBreakdownProps> = ({
           gap: '8px',
         }}
       >
-        🚨 Análisis de Severidad Ultra-Sensible
+        🚨 Ultra-Sensitive Severity Analysis
       </h4>
 
       <div
@@ -98,7 +98,7 @@ const SeverityBreakdown: React.FC<SeverityBreakdownProps> = ({
                 position: 'relative',
               }}
             >
-              {/* Badge de severidad */}
+              {/* Severity badge */}
               <div
                 style={{
                   position: 'absolute',
@@ -116,7 +116,7 @@ const SeverityBreakdown: React.FC<SeverityBreakdownProps> = ({
                 {severityLabel}
               </div>
 
-              {/* Nombre de la categoría */}
+              {/* Category name */}
               <h5
                 style={{
                   fontSize: '16px',
@@ -129,7 +129,7 @@ const SeverityBreakdown: React.FC<SeverityBreakdownProps> = ({
                 {getCategoryName(category)}
               </h5>
 
-              {/* Métricas de severidad */}
+              {/* Severity metrics */}
               <div
                 style={{
                   display: 'grid',
@@ -146,7 +146,7 @@ const SeverityBreakdown: React.FC<SeverityBreakdownProps> = ({
                       fontWeight: '500',
                     }}
                   >
-                    Severidad
+                    Severity
                   </div>
                   <div
                     style={{
@@ -168,7 +168,7 @@ const SeverityBreakdown: React.FC<SeverityBreakdownProps> = ({
                       fontWeight: '500',
                     }}
                   >
-                    Coincidencias
+                    Matches
                   </div>
                   <div
                     style={{
@@ -182,7 +182,7 @@ const SeverityBreakdown: React.FC<SeverityBreakdownProps> = ({
                 </div>
               </div>
 
-              {/* Score final */}
+              {/* Final score */}
               <div
                 style={{
                   marginTop: '12px',
@@ -201,7 +201,7 @@ const SeverityBreakdown: React.FC<SeverityBreakdownProps> = ({
                     fontWeight: '500',
                   }}
                 >
-                  Score Final
+                  Final Score
                 </div>
                 <div
                   style={{
@@ -214,7 +214,7 @@ const SeverityBreakdown: React.FC<SeverityBreakdownProps> = ({
                 </div>
               </div>
 
-              {/* Barra de progreso de severidad */}
+              {/* Severity progress bar */}
               <div
                 style={{
                   marginTop: '12px',
@@ -235,7 +235,7 @@ const SeverityBreakdown: React.FC<SeverityBreakdownProps> = ({
                       fontWeight: '500',
                     }}
                   >
-                    Nivel de Riesgo
+                    Risk Level
                   </span>
                   <span
                     style={{
@@ -272,7 +272,7 @@ const SeverityBreakdown: React.FC<SeverityBreakdownProps> = ({
         })}
       </div>
 
-      {/* Información adicional */}
+      {/* Additional information */}
       <div
         style={{
           marginTop: '20px',
@@ -290,8 +290,8 @@ const SeverityBreakdown: React.FC<SeverityBreakdownProps> = ({
             fontWeight: '500',
           }}
         >
-          🔍 Este análisis utiliza umbrales ultra-sensibles para detectar
-          incluso niveles bajos de toxicidad
+          🔍 This analysis uses ultra-sensitive thresholds to detect even low
+          levels of toxicity
         </div>
         <div
           style={{
@@ -301,8 +301,7 @@ const SeverityBreakdown: React.FC<SeverityBreakdownProps> = ({
             opacity: 0.8,
           }}
         >
-          Cada palabra tiene un peso de severidad que influye en el resultado
-          global
+          Each word has a severity weight that influences the global result
         </div>
       </div>
     </div>

@@ -14,18 +14,18 @@ export function ToxicityGauge({
   const strokeDasharray = circumference;
   const strokeDashoffset = circumference - (percentage / 100) * circumference;
 
-  // Determinar color basado en el porcentaje
+  // Determine color based on percentage
   const getColor = (percent: number) => {
-    if (percent < 30) return '#10B981'; // Verde - No tóxico
-    if (percent < 70) return '#F59E0B'; // Amarillo - Borderline
-    return '#EF4444'; // Rojo - Tóxico
+    if (percent < 30) return '#10B981'; // Green - Non-toxic
+    if (percent < 70) return '#F59E0B'; // Yellow - Borderline
+    return '#EF4444'; // Red - Toxic
   };
 
-  // Determinar texto de estado
+  // Determine status text
   const getStatusText = (percent: number) => {
-    if (percent < 30) return 'Seguro';
-    if (percent < 70) return 'Cuidado';
-    return 'Tóxico';
+    if (percent < 30) return 'Safe';
+    if (percent < 70) return 'Caution';
+    return 'Toxic';
   };
 
   const color = getColor(percentage);
@@ -34,7 +34,7 @@ export function ToxicityGauge({
   return (
     <div className='flex flex-col items-center'>
       <div className='relative' style={{ width: size, height: size }}>
-        {/* Gauge de fondo */}
+        {/* Background gauge */}
         <svg width={size} height={size} className='transform -rotate-90'>
           <circle
             cx={size / 2}
@@ -44,7 +44,7 @@ export function ToxicityGauge({
             strokeWidth={strokeWidth}
             fill='transparent'
           />
-          {/* Gauge principal */}
+          {/* Main gauge */}
           <circle
             cx={size / 2}
             cy={size / 2}
@@ -62,7 +62,7 @@ export function ToxicityGauge({
           />
         </svg>
 
-        {/* Contenido central */}
+        {/* Central content */}
         <div className='absolute inset-0 flex flex-col items-center justify-center'>
           <div className='text-3xl font-bold' style={{ color }}>
             {Math.round(percentage)}%
@@ -73,14 +73,14 @@ export function ToxicityGauge({
         </div>
       </div>
 
-      {/* Indicador de color */}
+      {/* Color indicator */}
       <div className='flex items-center space-x-2 mt-4'>
         <div
           className='w-3 h-3 rounded-full'
           style={{ backgroundColor: color }}
         />
         <span className='text-sm text-gray-700 font-medium'>
-          Nivel de toxicidad
+          Toxicity Level
         </span>
       </div>
     </div>

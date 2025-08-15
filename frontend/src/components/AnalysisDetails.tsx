@@ -9,15 +9,15 @@ const AnalysisDetails: React.FC<AnalysisDetailsProps> = ({ result }) => {
   const getCategoryColor = (category: string): string => {
     switch (category.toLowerCase()) {
       case 'safe':
-        return 'oklch(0.8 0.15 120)'; // Verde
+        return 'oklch(0.8 0.15 120)'; // Green
       case 'moderate':
-        return 'oklch(0.7 0.2 60)'; // Amarillo
+        return 'oklch(0.7 0.2 60)'; // Yellow
       case 'high_risk':
       case 'high risk':
-        return 'oklch(0.6 0.2 30)'; // Naranja
+        return 'oklch(0.6 0.2 30)'; // Orange
       case 'critical_risk':
       case 'critical risk':
-        return 'var(--destructive)'; // Rojo
+        return 'var(--destructive)'; // Red
       default:
         return 'var(--foreground)';
     }
@@ -59,7 +59,7 @@ const AnalysisDetails: React.FC<AnalysisDetailsProps> = ({ result }) => {
         animation: 'fadeInUp 0.6s ease-out',
       }}
     >
-      {/* Header con icono y título */}
+      {/* Header with icon and title */}
       <div
         style={{
           display: 'flex',
@@ -91,7 +91,7 @@ const AnalysisDetails: React.FC<AnalysisDetailsProps> = ({ result }) => {
         </h3>
       </div>
 
-      {/* Grid de métricas principales */}
+      {/* Main metrics grid */}
       <div
         style={{
           display: 'grid',
@@ -261,7 +261,7 @@ const AnalysisDetails: React.FC<AnalysisDetailsProps> = ({ result }) => {
         </div>
       </div>
 
-      {/* Información técnica en tarjetas horizontales */}
+      {/* Technical information in horizontal cards */}
       <div
         style={{
           display: 'grid',
@@ -376,7 +376,7 @@ const AnalysisDetails: React.FC<AnalysisDetailsProps> = ({ result }) => {
         </div>
       </div>
 
-      {/* Información adicional */}
+      {/* Additional information */}
       <div
         style={{
           backgroundColor: 'var(--muted)',
@@ -415,7 +415,7 @@ const AnalysisDetails: React.FC<AnalysisDetailsProps> = ({ result }) => {
           </div>
         </div>
 
-        {/* Información adicional */}
+        {/* Additional information */}
         <div
           style={{
             display: 'flex',
@@ -435,7 +435,7 @@ const AnalysisDetails: React.FC<AnalysisDetailsProps> = ({ result }) => {
         </div>
       </div>
 
-      {/* Estilos CSS para animaciones */}
+      {/* CSS styles for animations */}
       <style>
         {`
           @keyframes fadeInUp {

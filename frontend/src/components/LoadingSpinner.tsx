@@ -51,10 +51,10 @@ export function LoadingSpinner({
         <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
       </div>
 
-      {/* Información adicional */}
+              {/* Additional information */}
       <div className="text-xs text-gray-400 text-center max-w-xs">
-        <p>Analizando contenido con IA avanzada</p>
-        <p>Detectando patrones de toxicidad</p>
+        <p>Analyzing content with advanced AI</p>
+        <p>Detecting toxicity patterns</p>
       </div>
     </div>
   );
