@@ -1368,8 +1368,10 @@ const App: React.FC = () => {
                       backgroundColor: result
                         ? (() => {
                             const confidence = result.confidence;
-                            if (confidence >= 80) return DESIGN_SYSTEM.colors.secondary;
-                            if (confidence >= 60) return DESIGN_SYSTEM.colors.accent;
+                            if (confidence >= 80)
+                              return DESIGN_SYSTEM.colors.secondary;
+                            if (confidence >= 60)
+                              return DESIGN_SYSTEM.colors.accent;
                             return DESIGN_SYSTEM.colors.destructive;
                           })()
                         : DESIGN_SYSTEM.colors.muted,
@@ -1566,7 +1568,8 @@ const App: React.FC = () => {
                                 lineHeight: '1.4',
                                 marginTop: DESIGN_SYSTEM.spacing.xs,
                                 padding: `${DESIGN_SYSTEM.spacing.xs} ${DESIGN_SYSTEM.spacing.sm}`,
-                                backgroundColor: DESIGN_SYSTEM.colors.background,
+                                backgroundColor:
+                                  DESIGN_SYSTEM.colors.background,
                                 borderRadius: '4px',
                                 border: `${DESIGN_SYSTEM.borders.width} solid ${DESIGN_SYSTEM.colors.border}`,
                                 opacity: 0.8,
@@ -1651,7 +1654,13 @@ const App: React.FC = () => {
             showCharCount={true}
           />
 
-          <div style={{ display: 'flex', gap: DESIGN_SYSTEM.spacing.sm, flexWrap: 'wrap' }}>
+          <div
+            style={{
+              display: 'flex',
+              gap: DESIGN_SYSTEM.spacing.sm,
+              flexWrap: 'wrap',
+            }}
+          >
             <Button
               onClick={handleAnalyze}
               disabled={loading || !text.trim()}
@@ -1725,7 +1734,12 @@ const App: React.FC = () => {
                 ...DESIGN_SYSTEM.typography.caption,
               }}
             >
-              <div style={{ marginBottom: DESIGN_SYSTEM.spacing.xs, fontWeight: '600' }}>
+              <div
+                style={{
+                  marginBottom: DESIGN_SYSTEM.spacing.xs,
+                  fontWeight: '600',
+                }}
+              >
                 ❌ {error}
               </div>
               {error.includes('Failed to fetch') && (
@@ -1736,7 +1750,12 @@ const App: React.FC = () => {
                   }}
                 >
                   <strong>🔧 Solution:</strong>
-                  <ul style={{ marginTop: DESIGN_SYSTEM.spacing.xs, marginLeft: DESIGN_SYSTEM.spacing.lg }}>
+                  <ul
+                    style={{
+                      marginTop: DESIGN_SYSTEM.spacing.xs,
+                      marginLeft: DESIGN_SYSTEM.spacing.lg,
+                    }}
+                  >
                     <li>
                       Verify that the backend is running on
                       http://127.0.0.1:8000
