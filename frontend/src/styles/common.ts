@@ -1,122 +1,122 @@
-// Estilos comunes para la aplicación ToxiGuard
+// Estilos comunes para la aplicación ToxiGuard - Diseño V0
 
 export const commonStyles = {
   // Contenedores principales
   container: {
-    maxWidth: '1200px',
+    maxWidth: '1400px',
     margin: '0 auto',
-    padding: '20px',
+    padding: '32px 24px',
   },
-  
+
   // Tarjetas
   card: {
-    backgroundColor: 'white',
-    borderRadius: '12px',
-    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-    border: '1px solid #e5e7eb',
-    padding: '24px',
+    backgroundColor: 'var(--card)',
+    borderRadius: 'var(--radius)',
+    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.05)',
+    border: '1px solid var(--border)',
+    padding: '32px',
     transition: 'all 0.2s ease-in-out',
   },
-  
+
   // Botones
   button: {
     primary: {
-      backgroundColor: '#3b82f6',
-      color: 'white',
+      backgroundColor: 'var(--primary)',
+      color: 'var(--primary-foreground)',
       border: 'none',
-      borderRadius: '8px',
+      borderRadius: 'var(--radius)',
       padding: '12px 24px',
       fontSize: '16px',
       fontWeight: '600',
       cursor: 'pointer',
       transition: 'all 0.2s ease-in-out',
       ':hover': {
-        backgroundColor: '#2563eb',
+        backgroundColor: 'oklch(0.548 0.15 197.137 / 0.9)',
         transform: 'translateY(-1px)',
-        boxShadow: '0 4px 12px rgba(59, 130, 246, 0.4)',
+        boxShadow: '0 4px 12px rgba(8, 145, 178, 0.4)',
       },
     },
     secondary: {
-      backgroundColor: '#6b7280',
-      color: 'white',
-      border: 'none',
-      borderRadius: '8px',
+      backgroundColor: 'var(--muted)',
+      color: 'var(--muted-foreground)',
+      border: '1px solid var(--border)',
+      borderRadius: 'var(--radius)',
       padding: '12px 24px',
       fontSize: '16px',
       fontWeight: '600',
       cursor: 'pointer',
       transition: 'all 0.2s ease-in-out',
       ':hover': {
-        backgroundColor: '#4b5563',
+        backgroundColor: 'var(--border)',
         transform: 'translateY(-1px)',
-        boxShadow: '0 4px 12px rgba(107, 114, 128, 0.4)',
+        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
       },
     },
     danger: {
-      backgroundColor: '#ef4444',
-      color: 'white',
+      backgroundColor: 'var(--destructive)',
+      color: 'var(--destructive-foreground)',
       border: 'none',
-      borderRadius: '8px',
+      borderRadius: 'var(--radius)',
       padding: '8px 16px',
       fontSize: '14px',
       fontWeight: '500',
       cursor: 'pointer',
       transition: 'all 0.2s ease-in-out',
       ':hover': {
-        backgroundColor: '#dc2626',
+        backgroundColor: 'oklch(0.577 0.245 27.325 / 0.9)',
         transform: 'translateY(-1px)',
-        boxShadow: '0 4px 12px rgba(239, 68, 68, 0.4)',
+        boxShadow: '0 4px 12px rgba(227, 52, 47, 0.4)',
       },
     },
   },
-  
+
   // Inputs
   input: {
     width: '100%',
     padding: '12px 16px',
-    border: '2px solid #e5e7eb',
-    borderRadius: '8px',
+    border: '2px solid var(--border)',
+    borderRadius: 'var(--radius)',
     fontSize: '16px',
     transition: 'all 0.2s ease-in-out',
     ':focus': {
       outline: 'none',
-      borderColor: '#3b82f6',
-      boxShadow: '0 0 0 3px rgba(59, 130, 246, 0.1)',
+      borderColor: 'var(--ring)',
+      boxShadow: '0 0 0 3px var(--ring)',
     },
   },
-  
+
   // Texto
   text: {
     heading: {
       fontSize: '28px',
       fontWeight: '700',
-      color: '#1f2937',
+      color: 'var(--foreground)',
       marginBottom: '16px',
     },
     subheading: {
       fontSize: '20px',
       fontWeight: '600',
-      color: '#374151',
+      color: 'var(--foreground)',
       marginBottom: '12px',
     },
     body: {
       fontSize: '16px',
-      color: '#4b5563',
+      color: 'var(--foreground)',
       lineHeight: '1.6',
     },
     small: {
       fontSize: '14px',
-      color: '#6b7280',
+      color: 'var(--muted-foreground)',
     },
   },
-  
+
   // Colores de toxicidad
   toxicity: {
-    safe: '#10b981',
-    warning: '#f59e0b',
-    toxic: '#ef4444',
+    safe: 'var(--secondary)',
+    warning: 'oklch(0.769 0.188 70.08)', // Amber
+    toxic: 'var(--destructive)',
   },
-  
+
   // Espaciado
   spacing: {
     xs: '4px',
@@ -125,7 +125,7 @@ export const commonStyles = {
     lg: '24px',
     xl: '32px',
   },
-  
+
   // Bordes
   borders: {
     radius: {
@@ -135,14 +135,14 @@ export const commonStyles = {
       xl: '16px',
     },
   },
-  
+
   // Sombras
   shadows: {
     sm: '0 1px 2px rgba(0, 0, 0, 0.05)',
     md: '0 4px 6px rgba(0, 0, 0, 0.1)',
     lg: '0 10px 15px rgba(0, 0, 0, 0.1)',
   },
-  
+
   // Transiciones
   transitions: {
     fast: '0.15s ease-in-out',
@@ -153,27 +153,27 @@ export const commonStyles = {
 
 // Funciones de utilidad para estilos
 export const getToxicityColor = (percentage: number): string => {
-  if (percentage < 30) return commonStyles.toxicity.safe;
-  if (percentage < 70) return commonStyles.toxicity.warning;
-  return commonStyles.toxicity.toxic;
+  if (percentage <= 30) return 'var(--secondary)'; // Verde/Emerald
+  if (percentage <= 60) return 'oklch(0.769 0.188 70.08)'; // Amarillo/Amber
+  return 'var(--destructive)'; // Rojo
 };
 
 export const getToxicityLabel = (percentage: number): string => {
-  if (percentage < 30) return 'Seguro';
-  if (percentage < 70) return 'Advertencia';
-  return 'Tóxico';
+  if (percentage <= 30) return 'Safe';
+  if (percentage <= 60) return 'Moderate';
+  return 'High Risk';
 };
 
 // Función para obtener color de fondo basado en toxicidad
 export const getToxicityBackgroundColor = (percentage: number): string => {
-  if (percentage < 30) return '#f0fdf4';
-  if (percentage < 70) return '#fffbeb';
-  return '#fef2f2';
+  if (percentage <= 30) return 'var(--secondary)';
+  if (percentage <= 60) return 'oklch(0.769 0.188 70.08)';
+  return 'var(--destructive)';
 };
 
 // Función para obtener color de borde basado en toxicidad
 export const getToxicityBorderColor = (percentage: number): string => {
-  if (percentage < 30) return '#bbf7d0';
-  if (percentage < 70) return '#fed7aa';
-  return '#fecaca';
+  if (percentage <= 30) return 'var(--secondary)';
+  if (percentage <= 60) return 'oklch(0.769 0.188 70.08)';
+  return 'var(--destructive)';
 };

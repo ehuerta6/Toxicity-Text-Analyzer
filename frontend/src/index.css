@@ -2,8 +2,48 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Importar fuente Inter para mejor legibilidad */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+/* Importar fuente DM Sans para coincidir con el diseño V0 */
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&display=swap');
+
+/* Variables CSS del diseño V0 */
+:root {
+  /* Updated design tokens to match ToxiGuard design brief */
+  --background: oklch(1 0 0); /* #ffffff - Main background */
+  --foreground: oklch(0.556 0.016 264.052); /* #4b5563 - Primary text */
+  --card: oklch(0.98 0 0); /* #f9fafb - Card background */
+  --card-foreground: oklch(0.556 0.016 264.052); /* #4b5563 - Card text */
+  --popover: oklch(1 0 0); /* #ffffff - Popover background */
+  --popover-foreground: oklch(0.556 0.016 264.052); /* #4b5563 - Popover text */
+  --primary: oklch(0.548 0.15 197.137); /* #0891b2 - Primary cyan */
+  --primary-foreground: oklch(1 0 0); /* #ffffff - Text on primary */
+  --secondary: oklch(0.646 0.222 162.015); /* #10b981 - Secondary emerald */
+  --secondary-foreground: oklch(1 0 0); /* #ffffff - Text on secondary */
+  --muted: oklch(0.98 0 0); /* #f9fafb - Muted background */
+  --muted-foreground: oklch(0.556 0.016 264.052); /* #4b5563 - Muted text */
+  --accent: oklch(0.646 0.222 162.015); /* #10b981 - Accent emerald */
+  --accent-foreground: oklch(1 0 0); /* #ffffff - Text on accent */
+  --destructive: oklch(0.577 0.245 27.325); /* #e3342f - Error color */
+  --destructive-foreground: oklch(1 0 0); /* #ffffff - Text on error */
+  --border: oklch(0.922 0.013 264.052); /* #e2e8f0 - Border color */
+  --input: oklch(1 0 0); /* #ffffff - Input background */
+  --ring: oklch(0.548 0.15 197.137 / 0.5); /* Primary with opacity for focus */
+  --chart-1: oklch(0.548 0.15 197.137); /* #0891b2 - Chart color 1 */
+  --chart-2: oklch(0.646 0.222 162.015); /* #10b981 - Chart color 2 */
+  --chart-3: oklch(0.398 0.07 227.392); /* Chart color 3 */
+  --chart-4: oklch(0.556 0.016 264.052); /* #4b5563 - Chart color 4 */
+  --chart-5: oklch(0.98 0 0); /* #f9fafb - Chart color 5 */
+  --radius: 0.5rem;
+  --sidebar: oklch(1 0 0); /* #ffffff - Sidebar background */
+  --sidebar-foreground: oklch(0.556 0.016 264.052); /* #4b5563 - Sidebar text */
+  --sidebar-primary: oklch(0.98 0 0); /* #f9fafb - Sidebar primary */
+  --sidebar-primary-foreground: oklch(
+    0.556 0.016 264.052
+  ); /* Sidebar primary text */
+  --sidebar-accent: oklch(0.646 0.222 162.015); /* #10b981 - Sidebar accent */
+  --sidebar-accent-foreground: oklch(1 0 0); /* #ffffff - Sidebar accent text */
+  --sidebar-border: oklch(0.922 0.013 264.052); /* #e2e8f0 - Sidebar border */
+  --sidebar-ring: oklch(0.548 0.15 197.137 / 0.5); /* Sidebar focus ring */
+}
 
 /* Estilos base del documento */
 * {
@@ -12,12 +52,12 @@
 
 body {
   margin: 0;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+  font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: #f8fafc;
-  color: #1e293b;
+  background-color: var(--background);
+  color: var(--foreground);
   line-height: 1.6;
 }
 
@@ -135,17 +175,17 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: #f1f5f9;
+  background: var(--muted);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
+  background: var(--border);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+  background: var(--muted-foreground);
 }
 
 /* Estilos para elementos de formulario mejorados */
@@ -159,7 +199,7 @@ select {
 button:focus-visible,
 input:focus-visible,
 textarea:focus-visible {
-  outline: 2px solid #3b82f6;
+  outline: 2px solid var(--ring);
   outline-offset: 2px;
 }
 
@@ -195,35 +235,35 @@ a {
 
 /* Estilos para botones con estados mejorados */
 .btn-primary {
-  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-  color: white;
+  background: var(--primary);
+  color: var(--primary-foreground);
   border: none;
   padding: 12px 24px;
-  border-radius: 8px;
+  border-radius: var(--radius);
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .btn-primary:hover {
-  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  background: oklch(0.548 0.15 197.137 / 0.9);
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+  box-shadow: 0 4px 12px rgba(8, 145, 178, 0.4);
 }
 
 .btn-secondary {
-  background: #f1f5f9;
-  color: #475569;
-  border: 1px solid #cbd5e1;
+  background: var(--muted);
+  color: var(--muted-foreground);
+  border: 1px solid var(--border);
   padding: 12px 24px;
-  border-radius: 8px;
+  border-radius: var(--radius);
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .btn-secondary:hover {
-  background: #e2e8f0;
+  background: var(--border);
   transform: translateY(-1px);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
@@ -274,9 +314,9 @@ a {
 .error-message {
   background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
   border: 1px solid #fecaca;
-  border-radius: 8px;
+  border-radius: var(--radius);
   padding: 16px;
-  color: #dc2626;
+  color: var(--destructive);
   animation: shake 0.5s ease-in-out;
 }
 
@@ -284,9 +324,9 @@ a {
 .success-message {
   background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
   border: 1px solid #bbf7d0;
-  border-radius: 8px;
+  border-radius: var(--radius);
   padding: 16px;
-  color: #16a34a;
+  color: var(--secondary);
   animation: fadeIn 0.3s ease-out;
 }
 
@@ -302,8 +342,8 @@ a {
   bottom: 100%;
   left: 50%;
   transform: translateX(-50%);
-  background: #1e293b;
-  color: white;
+  background: var(--foreground);
+  color: var(--background);
   padding: 8px 12px;
   border-radius: 6px;
   font-size: 12px;
@@ -322,15 +362,15 @@ a {
 
 /* Estilos para el header mejorado */
 .header-gradient {
-  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
-  border-bottom: 1px solid #e2e8f0;
+  background: linear-gradient(135deg, var(--background) 0%, var(--card) 100%);
+  border-bottom: 1px solid var(--border);
 }
 
 /* Estilos para las tarjetas de estadísticas */
 .stats-card {
-  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
+  background: linear-gradient(135deg, var(--card) 0%, var(--muted) 100%);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
   padding: 20px;
   text-align: center;
   transition: all 0.2s ease;
@@ -345,35 +385,35 @@ a {
 .history-table {
   border-collapse: collapse;
   width: 100%;
-  border-radius: 8px;
+  border-radius: var(--radius);
   overflow: hidden;
 }
 
 .history-table th {
-  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  background: linear-gradient(135deg, var(--card) 0%, var(--muted) 100%);
   padding: 16px;
   text-align: left;
   font-weight: 600;
-  color: #475569;
-  border-bottom: 1px solid #e2e8f0;
+  color: var(--muted-foreground);
+  border-bottom: 1px solid var(--border);
 }
 
 .history-table td {
   padding: 16px;
-  border-bottom: 1px solid #f1f5f9;
+  border-bottom: 1px solid var(--muted);
   transition: background-color 0.2s ease;
 }
 
 .history-table tr:hover td {
-  background-color: #f8fafc;
+  background-color: var(--card);
 }
 
 /* Estilos para los gráficos */
 .chart-container {
-  background: white;
-  border-radius: 12px;
+  background: var(--background);
+  border-radius: var(--radius);
   padding: 20px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--border);
   transition: all 0.2s ease;
 }
 
