@@ -3,6 +3,107 @@ import { useToxicityAnalysis } from './hooks/useToxicityAnalysis';
 import type { ToxicityResult } from './hooks/useToxicityAnalysis';
 import { getToxicityColor } from './styles/common';
 
+// Sistema de Estilos Unificado para Consistencia Visual
+const DESIGN_SYSTEM = {
+  // Tipografía
+  typography: {
+    h1: {
+      fontSize: '28px',
+      fontWeight: '700',
+      lineHeight: '1.2',
+      margin: '0 0 8px 0',
+    },
+    h2: {
+      fontSize: '24px',
+      fontWeight: '600',
+      lineHeight: '1.3',
+      margin: '0 0 20px 0',
+    },
+    h3: {
+      fontSize: '18px',
+      fontWeight: '600',
+      lineHeight: '1.4',
+      margin: '0 0 16px 0',
+    },
+    h4: {
+      fontSize: '16px',
+      fontWeight: '600',
+      lineHeight: '1.4',
+      margin: '0 0 12px 0',
+    },
+    body: {
+      fontSize: '16px',
+      fontWeight: '400',
+      lineHeight: '1.5',
+      margin: '0',
+    },
+    caption: {
+      fontSize: '14px',
+      fontWeight: '500',
+      lineHeight: '1.4',
+      margin: '0',
+    },
+    small: {
+      fontSize: '12px',
+      fontWeight: '500',
+      lineHeight: '1.3',
+      margin: '0',
+    },
+    tiny: {
+      fontSize: '11px',
+      fontWeight: '600',
+      lineHeight: '1.2',
+      margin: '0',
+    },
+    micro: {
+      fontSize: '10px',
+      fontWeight: '500',
+      lineHeight: '1.2',
+      margin: '0',
+    },
+  },
+
+  // Espaciado
+  spacing: {
+    xs: '4px',
+    sm: '8px',
+    md: '12px',
+    lg: '16px',
+    xl: '20px',
+    xxl: '24px',
+    xxxl: '32px',
+  },
+
+  // Colores consistentes
+  colors: {
+    primary: 'var(--primary)',
+    secondary: 'var(--secondary)',
+    destructive: 'var(--destructive)',
+    muted: 'var(--muted)',
+    background: 'var(--background)',
+    card: 'var(--card)',
+    border: 'var(--border)',
+    foreground: 'var(--foreground)',
+    mutedForeground: 'var(--muted-foreground)',
+    accent: 'oklch(0.769 0.188 70.08)', // Color amarillo consistente
+  },
+
+  // Bordes y sombras
+  borders: {
+    radius: 'var(--radius)',
+    width: '1px',
+    shadow: '0 2px 4px rgba(0, 0, 0, 0.05)',
+    shadowHover: '0 4px 8px rgba(0, 0, 0, 0.1)',
+  },
+
+  // Transiciones
+  transitions: {
+    fast: 'all 0.2s ease',
+    medium: 'all 0.3s ease',
+    slow: 'all 0.5s ease',
+  },
+};
+
 interface ToxicityMap {
   [word: string]: number;
 }
@@ -20,19 +121,19 @@ const ToxicityGauge: React.FC<{ percentage: number }> = ({ percentage }) => {
     if (percentage <= 30) {
       return {
         label: 'Safe',
-        color: 'var(--secondary)',
+        color: DESIGN_SYSTEM.colors.secondary,
         description: 'Content is safe and appropriate',
       };
     } else if (percentage <= 60) {
       return {
         label: 'Moderate',
-        color: 'oklch(0.769 0.188 70.08)',
+        color: DESIGN_SYSTEM.colors.accent,
         description: 'Content requires moderate attention',
       };
     } else {
       return {
         label: 'High Risk',
-        color: 'var(--destructive)',
+        color: DESIGN_SYSTEM.colors.destructive,
         description: 'Content presents high toxicity levels',
       };
     }
@@ -54,9 +155,9 @@ const ToxicityGauge: React.FC<{ percentage: number }> = ({ percentage }) => {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          margin: '0 auto 8px',
+          margin: `0 auto ${DESIGN_SYSTEM.spacing.sm}`,
           position: 'relative',
-          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
+          boxShadow: DESIGN_SYSTEM.borders.shadowHover,
           border: `2px solid ${color}`,
         }}
       >
@@ -65,12 +166,12 @@ const ToxicityGauge: React.FC<{ percentage: number }> = ({ percentage }) => {
             width: '56px',
             height: '56px',
             borderRadius: '50%',
-            backgroundColor: 'var(--background)',
+            backgroundColor: DESIGN_SYSTEM.colors.background,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            fontSize: '14px',
-            fontWeight: 'bold',
+            ...DESIGN_SYSTEM.typography.caption,
+            fontWeight: '700',
             color: color,
             boxShadow: 'inset 0 1px 4px rgba(0, 0, 0, 0.1)',
           }}
@@ -81,12 +182,12 @@ const ToxicityGauge: React.FC<{ percentage: number }> = ({ percentage }) => {
 
       <div
         style={{
-          fontSize: '12px',
+          ...DESIGN_SYSTEM.typography.small,
           fontWeight: '700',
           color: categoryInfo.color,
           textShadow: '0 1px 2px rgba(0, 0, 0, 0.1)',
-          marginBottom: '4px',
-          padding: '4px 8px',
+          marginBottom: DESIGN_SYSTEM.spacing.xs,
+          padding: `${DESIGN_SYSTEM.spacing.xs} ${DESIGN_SYSTEM.spacing.sm}`,
           backgroundColor: `${categoryInfo.color}15`,
           borderRadius: '12px',
           display: 'inline-block',
@@ -97,8 +198,8 @@ const ToxicityGauge: React.FC<{ percentage: number }> = ({ percentage }) => {
 
       <div
         style={{
-          fontSize: '10px',
-          color: 'var(--muted-foreground)',
+          ...DESIGN_SYSTEM.typography.micro,
+          color: DESIGN_SYSTEM.colors.mutedForeground,
           maxWidth: '120px',
           margin: '0 auto',
           lineHeight: '1.2',
@@ -112,9 +213,9 @@ const ToxicityGauge: React.FC<{ percentage: number }> = ({ percentage }) => {
 
 const ConfidenceGauge: React.FC<{ confidence: number }> = ({ confidence }) => {
   const getConfidenceColor = (confidence: number): string => {
-    if (confidence >= 80) return 'var(--secondary)'; // Verde para alta confianza
-    if (confidence >= 60) return 'oklch(0.769 0.188 70.08)'; // Amarillo para confianza media
-    return 'var(--destructive)'; // Rojo para baja confianza
+    if (confidence >= 80) return DESIGN_SYSTEM.colors.secondary; // Verde para alta confianza
+    if (confidence >= 60) return DESIGN_SYSTEM.colors.accent; // Amarillo para confianza media
+    return DESIGN_SYSTEM.colors.destructive; // Rojo para baja confianza
   };
 
   const getConfidenceLabel = (confidence: number): string => {
@@ -139,9 +240,9 @@ const ConfidenceGauge: React.FC<{ confidence: number }> = ({ confidence }) => {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          margin: '0 auto 8px',
+          margin: `0 auto ${DESIGN_SYSTEM.spacing.sm}`,
           position: 'relative',
-          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
+          boxShadow: DESIGN_SYSTEM.borders.shadowHover,
           border: `2px solid ${color}`,
         }}
       >
@@ -150,12 +251,12 @@ const ConfidenceGauge: React.FC<{ confidence: number }> = ({ confidence }) => {
             width: '56px',
             height: '56px',
             borderRadius: '50%',
-            backgroundColor: 'var(--background)',
+            backgroundColor: DESIGN_SYSTEM.colors.background,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            fontSize: '14px',
-            fontWeight: 'bold',
+            ...DESIGN_SYSTEM.typography.caption,
+            fontWeight: '700',
             color: color,
             boxShadow: 'inset 0 1px 4px rgba(0, 0, 0, 0.1)',
           }}
@@ -166,12 +267,12 @@ const ConfidenceGauge: React.FC<{ confidence: number }> = ({ confidence }) => {
 
       <div
         style={{
-          fontSize: '12px',
+          ...DESIGN_SYSTEM.typography.small,
           fontWeight: '700',
           color: color,
           textShadow: '0 1px 2px rgba(0, 0, 0, 0.1)',
-          marginBottom: '4px',
-          padding: '4px 8px',
+          marginBottom: DESIGN_SYSTEM.spacing.xs,
+          padding: `${DESIGN_SYSTEM.spacing.xs} ${DESIGN_SYSTEM.spacing.sm}`,
           backgroundColor: `${color}15`,
           borderRadius: '12px',
           display: 'inline-block',
@@ -182,8 +283,8 @@ const ConfidenceGauge: React.FC<{ confidence: number }> = ({ confidence }) => {
 
       <div
         style={{
-          fontSize: '10px',
-          color: 'var(--muted-foreground)',
+          ...DESIGN_SYSTEM.typography.micro,
+          color: DESIGN_SYSTEM.colors.mutedForeground,
           maxWidth: '120px',
           margin: '0 auto',
           lineHeight: '1.2',
@@ -251,30 +352,34 @@ const ColoredText: React.FC<{ text: string; toxicityMap: ToxicityMap }> = ({
 const Header: React.FC<{ title: string }> = ({ title }) => (
   <header
     style={{
-      backgroundColor: 'var(--card)',
-      borderBottom: '1px solid var(--border)',
-      padding: '16px 0',
-      boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+      backgroundColor: DESIGN_SYSTEM.colors.card,
+      borderBottom: `${DESIGN_SYSTEM.borders.width} solid ${DESIGN_SYSTEM.colors.border}`,
+      padding: `${DESIGN_SYSTEM.spacing.lg} 0`,
+      boxShadow: DESIGN_SYSTEM.borders.shadow,
     }}
   >
-    <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '0 16px' }}>
+    <div
+      style={{
+        maxWidth: '1400px',
+        margin: '0 auto',
+        padding: `0 ${DESIGN_SYSTEM.spacing.lg}`,
+      }}
+    >
       <div style={{ textAlign: 'center' }}>
         <div
           style={{
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            gap: '8px',
-            marginBottom: '8px',
+            gap: DESIGN_SYSTEM.spacing.sm,
+            marginBottom: DESIGN_SYSTEM.spacing.sm,
           }}
         >
           <div style={{ fontSize: '24px' }}>🛡️</div>
           <h1
             style={{
-              fontSize: '28px',
-              fontWeight: '700',
-              color: 'var(--foreground)',
-              margin: '0',
+              ...DESIGN_SYSTEM.typography.h1,
+              color: DESIGN_SYSTEM.colors.foreground,
             }}
           >
             {title}
@@ -282,12 +387,10 @@ const Header: React.FC<{ title: string }> = ({ title }) => (
         </div>
         <p
           style={{
-            fontSize: '14px',
-            color: 'var(--muted-foreground)',
-            margin: '0',
+            ...DESIGN_SYSTEM.typography.caption,
+            color: DESIGN_SYSTEM.colors.mutedForeground,
             maxWidth: '400px',
-            marginLeft: 'auto',
-            marginRight: 'auto',
+            margin: '0 auto',
           }}
         >
           Professional obscene text detection powered by advanced machine
@@ -301,8 +404,8 @@ const Header: React.FC<{ title: string }> = ({ title }) => (
 const Footer: React.FC = () => (
   <footer
     style={{
-      backgroundColor: 'var(--card)',
-      borderTop: '1px solid var(--border)',
+      backgroundColor: DESIGN_SYSTEM.colors.card,
+      borderTop: `${DESIGN_SYSTEM.borders.width} solid ${DESIGN_SYSTEM.colors.border}`,
       marginTop: 'auto',
     }}
   >
@@ -310,10 +413,12 @@ const Footer: React.FC = () => (
       style={{
         maxWidth: '1400px',
         margin: '0 auto',
-        padding: '16px',
+        padding: DESIGN_SYSTEM.spacing.lg,
         textAlign: 'center',
-        color: 'var(--muted-foreground)',
-        fontSize: '12px',
+        color: DESIGN_SYSTEM.colors.mutedForeground,
+        fontSize: DESIGN_SYSTEM.typography.small.fontSize,
+        fontWeight: DESIGN_SYSTEM.typography.small.fontWeight,
+        lineHeight: DESIGN_SYSTEM.typography.small.lineHeight,
       }}
     >
       <p>&copy; 2024 ToxiGuard. Professional content moderation tools.</p>
@@ -336,7 +441,7 @@ const TextArea: React.FC<{
   minHeight = 150,
   showCharCount = true,
 }) => (
-  <div style={{ marginBottom: '24px' }}>
+  <div style={{ marginBottom: DESIGN_SYSTEM.spacing.xxl }}>
     <textarea
       value={value}
       onChange={(e) => onChange(e.target.value)}
@@ -345,27 +450,27 @@ const TextArea: React.FC<{
       style={{
         width: '100%',
         minHeight: `${minHeight}px`,
-        padding: '16px',
-        border: '2px solid var(--border)',
-        borderRadius: 'var(--radius)',
-        fontSize: '16px',
+        padding: DESIGN_SYSTEM.spacing.lg,
+        border: `2px solid ${DESIGN_SYSTEM.colors.border}`,
+        borderRadius: DESIGN_SYSTEM.borders.radius,
+        ...DESIGN_SYSTEM.typography.body,
         fontFamily: 'inherit',
         resize: 'none',
         backgroundColor: 'var(--input)',
-        transition: 'all 0.2s ease',
+        transition: DESIGN_SYSTEM.transitions.fast,
         boxSizing: 'border-box',
       }}
       onFocus={(e) => {
         e.target.style.borderColor = 'var(--ring)';
-        e.target.style.backgroundColor = 'var(--background)';
+        e.target.style.backgroundColor = DESIGN_SYSTEM.colors.background;
         e.target.style.boxShadow = '0 0 0 3px var(--ring)';
       }}
       onBlur={(e) => {
         e.target.style.borderColor = value.trim()
           ? 'var(--ring)'
-          : 'var(--border)';
+          : DESIGN_SYSTEM.colors.border;
         e.target.style.backgroundColor = value.trim()
-          ? 'var(--background)'
+          ? DESIGN_SYSTEM.colors.background
           : 'var(--input)';
         e.target.style.boxShadow = value.trim()
           ? '0 0 0 3px var(--ring)'
@@ -375,9 +480,9 @@ const TextArea: React.FC<{
     {showCharCount && value.trim() && (
       <div
         style={{
-          marginTop: '8px',
-          fontSize: '14px',
-          color: 'var(--muted-foreground)',
+          marginTop: DESIGN_SYSTEM.spacing.sm,
+          ...DESIGN_SYSTEM.typography.caption,
+          color: DESIGN_SYSTEM.colors.mutedForeground,
           textAlign: 'right',
         }}
       >
@@ -402,16 +507,16 @@ const Button: React.FC<{
 }) => {
   const baseStyles = {
     border: 'none',
-    padding: '14px 28px',
-    borderRadius: 'var(--radius)',
-    fontSize: '16px',
+    padding: `${DESIGN_SYSTEM.spacing.lg} ${DESIGN_SYSTEM.spacing.xxl}`,
+    borderRadius: DESIGN_SYSTEM.borders.radius,
+    ...DESIGN_SYSTEM.typography.body,
     fontWeight: '600',
     cursor: disabled ? 'not-allowed' : 'pointer',
     opacity: disabled ? 0.6 : 1,
-    transition: 'all 0.2s ease',
+    transition: DESIGN_SYSTEM.transitions.fast,
     display: 'flex',
     alignItems: 'center',
-    gap: '8px',
+    gap: DESIGN_SYSTEM.spacing.sm,
   };
 
   const variantStyles =
@@ -754,27 +859,33 @@ const App: React.FC = () => {
     >
       <Header title='ToxiGuard Dashboard' />
 
-      <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '16px' }}>
+      <div
+        style={{
+          maxWidth: '1400px',
+          margin: '0 auto',
+          padding: DESIGN_SYSTEM.spacing.lg,
+        }}
+      >
         {/* Grid de Resultados del Análisis */}
         <div
           style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))',
-            gap: '16px',
-            marginBottom: '24px',
+            gap: DESIGN_SYSTEM.spacing.lg,
+            marginBottom: DESIGN_SYSTEM.spacing.xxl,
           }}
         >
           {/* Cuadro Combinado: Toxicity Analysis + Confidence Analysis + Analysis Details */}
           <div
             style={{
-              backgroundColor: 'var(--card)',
-              borderRadius: 'var(--radius)',
-              padding: '20px',
-              boxShadow: '0 2px 4px rgba(0, 0, 0, 0.05)',
-              border: '1px solid var(--border)',
+              backgroundColor: DESIGN_SYSTEM.colors.card,
+              borderRadius: DESIGN_SYSTEM.borders.radius,
+              padding: DESIGN_SYSTEM.spacing.xl,
+              boxShadow: DESIGN_SYSTEM.borders.shadow,
+              border: `${DESIGN_SYSTEM.borders.width} solid ${DESIGN_SYSTEM.colors.border}`,
               display: 'flex',
               flexDirection: 'column',
-              gap: '20px',
+              gap: DESIGN_SYSTEM.spacing.xl,
             }}
           >
             {/* Fila Superior: Toxicity Analysis y Confidence Analysis en disposición horizontal */}
@@ -782,17 +893,16 @@ const App: React.FC = () => {
               style={{
                 display: 'grid',
                 gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-                gap: '20px',
+                gap: DESIGN_SYSTEM.spacing.xl,
               }}
             >
               {/* Toxicity Analysis */}
               <div style={{ textAlign: 'center' }}>
                 <h3
                   style={{
-                    fontSize: '16px',
-                    fontWeight: '600',
-                    color: 'var(--foreground)',
-                    margin: '0 0 16px 0',
+                    ...DESIGN_SYSTEM.typography.h4,
+                    color: DESIGN_SYSTEM.colors.foreground,
+                    textAlign: 'center',
                   }}
                 >
                   📊 Toxicity Analysis
@@ -804,10 +914,9 @@ const App: React.FC = () => {
               <div style={{ textAlign: 'center' }}>
                 <h3
                   style={{
-                    fontSize: '16px',
-                    fontWeight: '600',
-                    color: 'var(--foreground)',
-                    margin: '0 0 16px 0',
+                    ...DESIGN_SYSTEM.typography.h4,
+                    color: DESIGN_SYSTEM.colors.foreground,
+                    textAlign: 'center',
                   }}
                 >
                   🎯 Confidence Analysis
@@ -820,7 +929,7 @@ const App: React.FC = () => {
             <div
               style={{
                 height: '1px',
-                backgroundColor: 'var(--border)',
+                backgroundColor: DESIGN_SYSTEM.colors.border,
                 margin: '0',
               }}
             />
@@ -829,10 +938,8 @@ const App: React.FC = () => {
             <div>
               <h3
                 style={{
-                  fontSize: '16px',
-                  fontWeight: '600',
-                  color: 'var(--foreground)',
-                  margin: '0 0 16px 0',
+                  ...DESIGN_SYSTEM.typography.h4,
+                  color: DESIGN_SYSTEM.colors.foreground,
                   textAlign: 'center',
                 }}
               >
@@ -842,15 +949,15 @@ const App: React.FC = () => {
                 style={{
                   display: 'grid',
                   gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
-                  gap: '16px',
+                  gap: DESIGN_SYSTEM.spacing.lg,
                 }}
               >
                 <div style={{ textAlign: 'center' }}>
                   <div
                     style={{
-                      fontSize: '12px',
-                      color: 'var(--muted-foreground)',
-                      marginBottom: '8px',
+                      ...DESIGN_SYSTEM.typography.small,
+                      color: DESIGN_SYSTEM.colors.mutedForeground,
+                      marginBottom: DESIGN_SYSTEM.spacing.sm,
                       fontWeight: '500',
                     }}
                   >
@@ -860,7 +967,7 @@ const App: React.FC = () => {
                     style={{
                       fontSize: '24px',
                       fontWeight: '700',
-                      color: 'var(--foreground)',
+                      color: DESIGN_SYSTEM.colors.foreground,
                     }}
                   >
                     {result ? Math.round(result.toxicity_percentage) : 0}%
@@ -870,9 +977,9 @@ const App: React.FC = () => {
                 <div style={{ textAlign: 'center' }}>
                   <div
                     style={{
-                      fontSize: '12px',
-                      color: 'var(--muted-foreground)',
-                      marginBottom: '8px',
+                      ...DESIGN_SYSTEM.typography.small,
+                      color: DESIGN_SYSTEM.colors.mutedForeground,
+                      marginBottom: DESIGN_SYSTEM.spacing.sm,
                       fontWeight: '500',
                     }}
                   >
@@ -882,7 +989,7 @@ const App: React.FC = () => {
                     style={{
                       fontSize: '24px',
                       fontWeight: '700',
-                      color: 'var(--foreground)',
+                      color: DESIGN_SYSTEM.colors.foreground,
                     }}
                   >
                     {result ? Math.round(result.confidence) : 0}%
@@ -892,9 +999,9 @@ const App: React.FC = () => {
                 <div style={{ textAlign: 'center' }}>
                   <div
                     style={{
-                      fontSize: '12px',
-                      color: 'var(--muted-foreground)',
-                      marginBottom: '8px',
+                      ...DESIGN_SYSTEM.typography.small,
+                      color: DESIGN_SYSTEM.colors.mutedForeground,
+                      marginBottom: DESIGN_SYSTEM.spacing.sm,
                       fontWeight: '500',
                     }}
                   >
@@ -902,9 +1009,8 @@ const App: React.FC = () => {
                   </div>
                   <div
                     style={{
-                      fontSize: '18px',
-                      fontWeight: '600',
-                      color: 'var(--foreground)',
+                      ...DESIGN_SYSTEM.typography.h4,
+                      color: DESIGN_SYSTEM.colors.foreground,
                     }}
                   >
                     {result
@@ -921,9 +1027,9 @@ const App: React.FC = () => {
                 <div style={{ textAlign: 'center' }}>
                   <div
                     style={{
-                      fontSize: '12px',
-                      color: 'var(--muted-foreground)',
-                      marginBottom: '8px',
+                      ...DESIGN_SYSTEM.typography.small,
+                      color: DESIGN_SYSTEM.colors.mutedForeground,
+                      marginBottom: DESIGN_SYSTEM.spacing.sm,
                       fontWeight: '500',
                     }}
                   >
@@ -931,9 +1037,9 @@ const App: React.FC = () => {
                   </div>
                   <div
                     style={{
-                      fontSize: '16px',
+                      ...DESIGN_SYSTEM.typography.body,
                       fontWeight: '600',
-                      color: 'var(--foreground)',
+                      color: DESIGN_SYSTEM.colors.foreground,
                     }}
                   >
                     {result?.model_used || 'N/A'}
@@ -943,9 +1049,9 @@ const App: React.FC = () => {
                 <div style={{ textAlign: 'center' }}>
                   <div
                     style={{
-                      fontSize: '12px',
-                      color: 'var(--muted-foreground)',
-                      marginBottom: '8px',
+                      ...DESIGN_SYSTEM.typography.small,
+                      color: DESIGN_SYSTEM.colors.mutedForeground,
+                      marginBottom: DESIGN_SYSTEM.spacing.sm,
                       fontWeight: '500',
                     }}
                   >
@@ -953,9 +1059,9 @@ const App: React.FC = () => {
                   </div>
                   <div
                     style={{
-                      fontSize: '16px',
+                      ...DESIGN_SYSTEM.typography.body,
                       fontWeight: '600',
-                      color: 'var(--foreground)',
+                      color: DESIGN_SYSTEM.colors.foreground,
                     }}
                   >
                     {result?.classification_technique || 'N/A'}
@@ -965,9 +1071,9 @@ const App: React.FC = () => {
                 <div style={{ textAlign: 'center' }}>
                   <div
                     style={{
-                      fontSize: '12px',
-                      color: 'var(--muted-foreground)',
-                      marginBottom: '8px',
+                      ...DESIGN_SYSTEM.typography.small,
+                      color: DESIGN_SYSTEM.colors.mutedForeground,
+                      marginBottom: DESIGN_SYSTEM.spacing.sm,
                       fontWeight: '500',
                     }}
                   >
@@ -975,9 +1081,9 @@ const App: React.FC = () => {
                   </div>
                   <div
                     style={{
-                      fontSize: '16px',
+                      ...DESIGN_SYSTEM.typography.body,
                       fontWeight: '600',
-                      color: 'var(--foreground)',
+                      color: DESIGN_SYSTEM.colors.foreground,
                     }}
                   >
                     {result?.response_time_ms || 0}ms
@@ -987,14 +1093,14 @@ const App: React.FC = () => {
 
               <div
                 style={{
-                  marginTop: '20px',
-                  fontSize: '12px',
-                  color: 'var(--muted-foreground)',
+                  marginTop: DESIGN_SYSTEM.spacing.xl,
+                  ...DESIGN_SYSTEM.typography.small,
+                  color: DESIGN_SYSTEM.colors.mutedForeground,
                   textAlign: 'center',
-                  padding: '12px',
-                  backgroundColor: 'var(--muted)',
-                  borderRadius: 'var(--radius)',
-                  border: '1px solid var(--border)',
+                  padding: DESIGN_SYSTEM.spacing.md,
+                  backgroundColor: DESIGN_SYSTEM.colors.muted,
+                  borderRadius: DESIGN_SYSTEM.borders.radius,
+                  border: `${DESIGN_SYSTEM.borders.width} solid ${DESIGN_SYSTEM.colors.border}`,
                 }}
               >
                 Analyzed on{' '}
@@ -1006,19 +1112,17 @@ const App: React.FC = () => {
           {/* Cuadro de Toxicity Level */}
           <div
             style={{
-              backgroundColor: 'var(--card)',
-              borderRadius: 'var(--radius)',
-              padding: '20px',
-              boxShadow: '0 2px 4px rgba(0, 0, 0, 0.05)',
-              border: '1px solid var(--border)',
+              backgroundColor: DESIGN_SYSTEM.colors.card,
+              borderRadius: DESIGN_SYSTEM.borders.radius,
+              padding: DESIGN_SYSTEM.spacing.xl,
+              boxShadow: DESIGN_SYSTEM.borders.shadow,
+              border: `${DESIGN_SYSTEM.borders.width} solid ${DESIGN_SYSTEM.colors.border}`,
             }}
           >
             <h3
               style={{
-                fontSize: '16px',
-                fontWeight: '600',
-                color: 'var(--foreground)',
-                margin: '0 0 16px 0',
+                ...DESIGN_SYSTEM.typography.h4,
+                color: DESIGN_SYSTEM.colors.foreground,
                 textAlign: 'center',
               }}
             >
@@ -1035,8 +1139,8 @@ const App: React.FC = () => {
               >
                 <span
                   style={{
-                    fontSize: '12px',
-                    color: 'var(--muted-foreground)',
+                    ...DESIGN_SYSTEM.typography.small,
+                    color: DESIGN_SYSTEM.colors.mutedForeground,
                     fontWeight: '500',
                   }}
                 >
@@ -1044,8 +1148,8 @@ const App: React.FC = () => {
                 </span>
                 <span
                   style={{
-                    fontSize: '12px',
-                    color: 'var(--foreground)',
+                    ...DESIGN_SYSTEM.typography.small,
+                    color: DESIGN_SYSTEM.colors.foreground,
                     fontWeight: '600',
                   }}
                 >
@@ -1081,8 +1185,8 @@ const App: React.FC = () => {
                 display: 'flex',
                 justifyContent: 'space-between',
                 alignItems: 'center',
-                fontSize: '10px',
-                color: 'var(--muted-foreground)',
+                ...DESIGN_SYSTEM.typography.micro,
+                color: DESIGN_SYSTEM.colors.mutedForeground,
               }}
             >
               <span>0%</span>
@@ -1092,19 +1196,19 @@ const App: React.FC = () => {
 
             <div
               style={{
-                marginTop: '16px',
-                padding: '12px',
-                backgroundColor: 'var(--muted)',
-                borderRadius: 'var(--radius)',
-                border: '1px solid var(--border)',
+                marginTop: DESIGN_SYSTEM.spacing.lg,
+                padding: DESIGN_SYSTEM.spacing.md,
+                backgroundColor: DESIGN_SYSTEM.colors.muted,
+                borderRadius: DESIGN_SYSTEM.borders.radius,
+                border: `${DESIGN_SYSTEM.borders.width} solid ${DESIGN_SYSTEM.colors.border}`,
               }}
             >
               <div
                 style={{
-                  fontSize: '11px',
+                  ...DESIGN_SYSTEM.typography.tiny,
                   fontWeight: '600',
-                  color: 'var(--foreground)',
-                  marginBottom: '8px',
+                  color: DESIGN_SYSTEM.colors.foreground,
+                  marginBottom: DESIGN_SYSTEM.spacing.sm,
                   textAlign: 'center',
                 }}
               >
@@ -1119,21 +1223,25 @@ const App: React.FC = () => {
                 }}
               >
                 <div
-                  style={{ display: 'flex', alignItems: 'center', gap: '3px' }}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: DESIGN_SYSTEM.spacing.xs,
+                  }}
                 >
                   <div
                     style={{
                       width: '10px',
                       height: '10px',
-                      backgroundColor: 'var(--secondary)',
+                      backgroundColor: DESIGN_SYSTEM.colors.secondary,
                       borderRadius: '50%',
-                      border: '1px solid var(--secondary)',
+                      border: `${DESIGN_SYSTEM.borders.width} solid ${DESIGN_SYSTEM.colors.secondary}`,
                     }}
                   />
                   <span
                     style={{
-                      fontSize: '9px',
-                      color: 'var(--secondary)',
+                      ...DESIGN_SYSTEM.typography.micro,
+                      color: DESIGN_SYSTEM.colors.secondary,
                       fontWeight: '600',
                     }}
                   >
@@ -1141,21 +1249,25 @@ const App: React.FC = () => {
                   </span>
                 </div>
                 <div
-                  style={{ display: 'flex', alignItems: 'center', gap: '3px' }}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: DESIGN_SYSTEM.spacing.xs,
+                  }}
                 >
                   <div
                     style={{
                       width: '10px',
                       height: '10px',
-                      backgroundColor: 'oklch(0.769 0.188 70.08)',
+                      backgroundColor: DESIGN_SYSTEM.colors.accent,
                       borderRadius: '50%',
-                      border: '1px solid oklch(0.769 0.188 70.08)',
+                      border: `${DESIGN_SYSTEM.borders.width} solid ${DESIGN_SYSTEM.colors.accent}`,
                     }}
                   />
                   <span
                     style={{
-                      fontSize: '9px',
-                      color: 'oklch(0.769 0.188 70.08)',
+                      ...DESIGN_SYSTEM.typography.micro,
+                      color: DESIGN_SYSTEM.colors.accent,
                       fontWeight: '600',
                     }}
                   >
@@ -1163,21 +1275,25 @@ const App: React.FC = () => {
                   </span>
                 </div>
                 <div
-                  style={{ display: 'flex', alignItems: 'center', gap: '3px' }}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: DESIGN_SYSTEM.spacing.xs,
+                  }}
                 >
                   <div
                     style={{
                       width: '10px',
                       height: '10px',
-                      backgroundColor: 'var(--destructive)',
+                      backgroundColor: DESIGN_SYSTEM.colors.destructive,
                       borderRadius: '50%',
-                      border: '1px solid var(--destructive)',
+                      border: `${DESIGN_SYSTEM.borders.width} solid ${DESIGN_SYSTEM.colors.destructive}`,
                     }}
                   />
                   <span
                     style={{
-                      fontSize: '9px',
-                      color: 'var(--destructive)',
+                      ...DESIGN_SYSTEM.typography.micro,
+                      color: DESIGN_SYSTEM.colors.destructive,
                       fontWeight: '600',
                     }}
                   >
