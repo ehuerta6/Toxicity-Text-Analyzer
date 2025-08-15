@@ -5,7 +5,7 @@
 /* Importar fuente DM Sans para coincidir con el diseño V0 */
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&display=swap');
 
-/* Variables CSS del diseño V0 */
+/* Variables CSS del diseño V0 - Optimizadas para layout compacto */
 :root {
   /* Updated design tokens to match ToxiGuard design brief */
   --background: oklch(1 0 0); /* #ffffff - Main background */
@@ -43,6 +43,14 @@
   --sidebar-accent-foreground: oklch(1 0 0); /* #ffffff - Sidebar accent text */
   --sidebar-border: oklch(0.922 0.013 264.052); /* #e2e8f0 - Sidebar border */
   --sidebar-ring: oklch(0.548 0.15 197.137 / 0.5); /* Sidebar focus ring */
+
+  /* Espaciado optimizado para layout compacto */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 12px;
+  --spacing-lg: 16px;
+  --spacing-xl: 20px;
+  --spacing-2xl: 24px;
 }
 
 /* Estilos base del documento */
@@ -58,7 +66,9 @@ body {
   -moz-osx-font-smoothing: grayscale;
   background-color: var(--background);
   color: var(--foreground);
-  line-height: 1.6;
+  line-height: 1.5;
+  /* Optimizar para pantallas más pequeñas */
+  font-size: 14px;
 }
 
 /* Animaciones personalizadas */
@@ -170,18 +180,18 @@ body {
 
 /* Mejoras en scrollbar para mejor UX */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
   background: var(--muted);
-  border-radius: 4px;
+  border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb {
   background: var(--border);
-  border-radius: 4px;
+  border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
@@ -238,11 +248,12 @@ a {
   background: var(--primary);
   color: var(--primary-foreground);
   border: none;
-  padding: 12px 24px;
+  padding: 10px 20px;
   border-radius: var(--radius);
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
+  font-size: 14px;
 }
 
 .btn-primary:hover {
@@ -255,11 +266,12 @@ a {
   background: var(--muted);
   color: var(--muted-foreground);
   border: 1px solid var(--border);
-  padding: 12px 24px;
+  padding: 10px 20px;
   border-radius: var(--radius);
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
+  font-size: 14px;
 }
 
 .btn-secondary:hover {
@@ -271,15 +283,15 @@ a {
 /* Estilos para el layout grid responsivo */
 .grid-layout {
   display: grid;
-  gap: 24px;
+  gap: 16px;
 }
 
 .grid-layout-2 {
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
 }
 
 .grid-layout-3 {
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
 }
 
 /* Media queries para responsividad mejorada */
@@ -289,7 +301,7 @@ a {
   }
 
   .grid-layout-3 {
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   }
 }
 
@@ -302,8 +314,8 @@ a {
 /* Estilos para estados de carga mejorados */
 .loading-spinner {
   display: inline-block;
-  width: 20px;
-  height: 20px;
+  width: 16px;
+  height: 16px;
   border: 2px solid transparent;
   border-top: 2px solid currentColor;
   border-radius: 50%;
@@ -315,9 +327,10 @@ a {
   background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
   border: 1px solid #fecaca;
   border-radius: var(--radius);
-  padding: 16px;
+  padding: 12px;
   color: var(--destructive);
   animation: shake 0.5s ease-in-out;
+  font-size: 13px;
 }
 
 /* Estilos para mensajes de éxito */
@@ -325,9 +338,10 @@ a {
   background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
   border: 1px solid #bbf7d0;
   border-radius: var(--radius);
-  padding: 16px;
+  padding: 12px;
   color: var(--secondary);
   animation: fadeIn 0.3s ease-out;
+  font-size: 13px;
 }
 
 /* Estilos para tooltips personalizados */
@@ -344,9 +358,9 @@ a {
   transform: translateX(-50%);
   background: var(--foreground);
   color: var(--background);
-  padding: 8px 12px;
-  border-radius: 6px;
-  font-size: 12px;
+  padding: 6px 10px;
+  border-radius: 4px;
+  font-size: 11px;
   white-space: nowrap;
   opacity: 0;
   visibility: hidden;
@@ -371,7 +385,7 @@ a {
   background: linear-gradient(135deg, var(--card) 0%, var(--muted) 100%);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 20px;
+  padding: 16px;
   text-align: center;
   transition: all 0.2s ease;
 }
@@ -391,17 +405,19 @@ a {
 
 .history-table th {
   background: linear-gradient(135deg, var(--card) 0%, var(--muted) 100%);
-  padding: 16px;
+  padding: 12px;
   text-align: left;
   font-weight: 600;
   color: var(--muted-foreground);
   border-bottom: 1px solid var(--border);
+  font-size: 13px;
 }
 
 .history-table td {
-  padding: 16px;
+  padding: 12px;
   border-bottom: 1px solid var(--muted);
   transition: background-color 0.2s ease;
+  font-size: 13px;
 }
 
 .history-table tr:hover td {
@@ -412,7 +428,7 @@ a {
 .chart-container {
   background: var(--background);
   border-radius: var(--radius);
-  padding: 20px;
+  padding: 16px;
   border: 1px solid var(--border);
   transition: all 0.2s ease;
 }

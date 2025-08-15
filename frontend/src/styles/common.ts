@@ -1,32 +1,32 @@
-// Estilos comunes para la aplicación ToxiGuard - Diseño V0
+// Estilos comunes para la aplicación ToxiGuard - Diseño V0 Compacto
 
 export const commonStyles = {
-  // Contenedores principales
+  // Contenedores principales - Optimizados para layout compacto
   container: {
     maxWidth: '1400px',
     margin: '0 auto',
-    padding: '32px 24px',
+    padding: '20px 16px',
   },
-
-  // Tarjetas
+  
+  // Tarjetas - Espaciado reducido
   card: {
     backgroundColor: 'var(--card)',
     borderRadius: 'var(--radius)',
-    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.05)',
+    boxShadow: '0 2px 4px rgba(0, 0, 0, 0.05)',
     border: '1px solid var(--border)',
-    padding: '32px',
+    padding: '20px',
     transition: 'all 0.2s ease-in-out',
   },
-
-  // Botones
+  
+  // Botones - Tamaños optimizados
   button: {
     primary: {
       backgroundColor: 'var(--primary)',
       color: 'var(--primary-foreground)',
       border: 'none',
       borderRadius: 'var(--radius)',
-      padding: '12px 24px',
-      fontSize: '16px',
+      padding: '10px 20px',
+      fontSize: '14px',
       fontWeight: '600',
       cursor: 'pointer',
       transition: 'all 0.2s ease-in-out',
@@ -41,8 +41,8 @@ export const commonStyles = {
       color: 'var(--muted-foreground)',
       border: '1px solid var(--border)',
       borderRadius: 'var(--radius)',
-      padding: '12px 24px',
-      fontSize: '16px',
+      padding: '10px 20px',
+      fontSize: '14px',
       fontWeight: '600',
       cursor: 'pointer',
       transition: 'all 0.2s ease-in-out',
@@ -58,7 +58,7 @@ export const commonStyles = {
       border: 'none',
       borderRadius: 'var(--radius)',
       padding: '8px 16px',
-      fontSize: '14px',
+      fontSize: '13px',
       fontWeight: '500',
       cursor: 'pointer',
       transition: 'all 0.2s ease-in-out',
@@ -69,14 +69,14 @@ export const commonStyles = {
       },
     },
   },
-
-  // Inputs
+  
+  // Inputs - Tamaños optimizados
   input: {
     width: '100%',
-    padding: '12px 16px',
+    padding: '10px 14px',
     border: '2px solid var(--border)',
     borderRadius: 'var(--radius)',
-    fontSize: '16px',
+    fontSize: '14px',
     transition: 'all 0.2s ease-in-out',
     ':focus': {
       outline: 'none',
@@ -84,65 +84,66 @@ export const commonStyles = {
       boxShadow: '0 0 0 3px var(--ring)',
     },
   },
-
-  // Texto
+  
+  // Texto - Tamaños optimizados para layout compacto
   text: {
     heading: {
-      fontSize: '28px',
+      fontSize: '24px',
       fontWeight: '700',
-      color: 'var(--foreground)',
-      marginBottom: '16px',
-    },
-    subheading: {
-      fontSize: '20px',
-      fontWeight: '600',
       color: 'var(--foreground)',
       marginBottom: '12px',
     },
-    body: {
-      fontSize: '16px',
+    subheading: {
+      fontSize: '18px',
+      fontWeight: '600',
       color: 'var(--foreground)',
-      lineHeight: '1.6',
+      marginBottom: '10px',
+    },
+    body: {
+      fontSize: '14px',
+      color: 'var(--foreground)',
+      lineHeight: '1.5',
     },
     small: {
-      fontSize: '14px',
+      fontSize: '12px',
       color: 'var(--muted-foreground)',
     },
   },
-
+  
   // Colores de toxicidad
   toxicity: {
     safe: 'var(--secondary)',
     warning: 'oklch(0.769 0.188 70.08)', // Amber
     toxic: 'var(--destructive)',
   },
-
-  // Espaciado
+  
+  // Espaciado optimizado para layout compacto
   spacing: {
     xs: '4px',
-    sm: '8px',
-    md: '16px',
-    lg: '24px',
-    xl: '32px',
+    sm: '6px',
+    md: '10px',
+    lg: '14px',
+    xl: '18px',
+    '2xl': '20px',
   },
-
+  
   // Bordes
   borders: {
     radius: {
       sm: '4px',
-      md: '8px',
-      lg: '12px',
-      xl: '16px',
+      md: '6px',
+      lg: '8px',
+      xl: '10px',
     },
   },
-
+  
   // Sombras
   shadows: {
     sm: '0 1px 2px rgba(0, 0, 0, 0.05)',
-    md: '0 4px 6px rgba(0, 0, 0, 0.1)',
-    lg: '0 10px 15px rgba(0, 0, 0, 0.1)',
+    md: '0 2px 4px rgba(0, 0, 0, 0.08)',
+    lg: '0 4px 8px rgba(0, 0, 0, 0.1)',
   },
-
+  
   // Transiciones
   transitions: {
     fast: '0.15s ease-in-out',
