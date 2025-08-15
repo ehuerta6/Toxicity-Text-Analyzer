@@ -153,7 +153,7 @@ const AnalysisDetails: React.FC<AnalysisDetailsProps> = ({ result }) => {
           </div>
         </div>
 
-        {/* Confidence */}
+        {/* Category */}
         <div
           style={{
             backgroundColor: 'var(--muted)',
@@ -179,59 +179,6 @@ const AnalysisDetails: React.FC<AnalysisDetailsProps> = ({ result }) => {
               fontSize: '32px',
               marginBottom: '8px',
               animation: 'bounceIn 0.8s ease-out 0.1s both',
-            }}
-          >
-            🎲
-          </div>
-          <div
-            style={{
-              fontSize: '14px',
-              color: 'var(--muted-foreground)',
-              marginBottom: '8px',
-              fontWeight: '500',
-              textTransform: 'uppercase',
-              letterSpacing: '0.5px',
-            }}
-          >
-            Confidence
-          </div>
-          <div
-            style={{
-              fontSize: '28px',
-              fontWeight: '700',
-              color: 'var(--foreground)',
-            }}
-          >
-            {Math.round(result.confidence * 100)}%
-          </div>
-        </div>
-
-        {/* Category */}
-        <div
-          style={{
-            backgroundColor: 'var(--muted)',
-            borderRadius: '12px',
-            padding: '16px',
-            textAlign: 'center',
-            border: '2px solid transparent',
-            transition: 'all 0.3s ease',
-            cursor: 'default',
-            animation: 'slideInLeft 0.5s ease-out 0.2s both',
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.borderColor = 'var(--primary)';
-            e.currentTarget.style.transform = 'translateY(-2px)';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.borderColor = 'transparent';
-            e.currentTarget.style.transform = 'translateY(0)';
-          }}
-        >
-          <div
-            style={{
-              fontSize: '32px',
-              marginBottom: '8px',
-              animation: 'bounceIn 0.8s ease-out 0.2s both',
             }}
           >
             {getCategoryIcon(result.toxicity_category)}
@@ -270,7 +217,7 @@ const AnalysisDetails: React.FC<AnalysisDetailsProps> = ({ result }) => {
             border: '2px solid transparent',
             transition: 'all 0.3s ease',
             cursor: 'default',
-            animation: 'slideInLeft 0.5s ease-out 0.3s both',
+            animation: 'slideInLeft 0.5s ease-out 0.2s both',
           }}
           onMouseEnter={(e) => {
             e.currentTarget.style.borderColor = 'var(--primary)';
@@ -285,7 +232,7 @@ const AnalysisDetails: React.FC<AnalysisDetailsProps> = ({ result }) => {
             style={{
               fontSize: '32px',
               marginBottom: '8px',
-              animation: 'bounceIn 0.8s ease-out 0.3s both',
+              animation: 'bounceIn 0.8s ease-out 0.2s both',
             }}
           >
             ⏱️
@@ -331,7 +278,7 @@ const AnalysisDetails: React.FC<AnalysisDetailsProps> = ({ result }) => {
             padding: '16px',
             border: '1px solid var(--border)',
             transition: 'all 0.2s ease',
-            animation: 'slideInUp 0.6s ease-out 0.4s both',
+            animation: 'slideInUp 0.6s ease-out 0.3s both',
           }}
           onMouseEnter={(e) => {
             e.currentTarget.style.backgroundColor = 'var(--muted)';
@@ -383,7 +330,7 @@ const AnalysisDetails: React.FC<AnalysisDetailsProps> = ({ result }) => {
             padding: '16px',
             border: '1px solid var(--border)',
             transition: 'all 0.2s ease',
-            animation: 'slideInUp 0.6s ease-out 0.5s both',
+            animation: 'slideInUp 0.6s ease-out 0.4s both',
           }}
           onMouseEnter={(e) => {
             e.currentTarget.style.backgroundColor = 'var(--muted)';
@@ -437,7 +384,7 @@ const AnalysisDetails: React.FC<AnalysisDetailsProps> = ({ result }) => {
           padding: '16px',
           textAlign: 'center',
           border: '1px solid var(--border)',
-          animation: 'slideInUp 0.6s ease-out 0.6s both',
+          animation: 'slideInUp 0.6s ease-out 0.5s both',
         }}
       >
         <div
@@ -467,7 +414,7 @@ const AnalysisDetails: React.FC<AnalysisDetailsProps> = ({ result }) => {
             })}
           </div>
         </div>
-        
+
         {/* Información adicional */}
         <div
           style={{

@@ -213,91 +213,6 @@ const ToxicityGauge: React.FC<{ percentage: number }> = ({ percentage }) => {
   );
 };
 
-const ConfidenceGauge: React.FC<{ confidence: number }> = ({ confidence }) => {
-  const getConfidenceColor = (confidence: number): string => {
-    if (confidence >= 80) return DESIGN_SYSTEM.colors.secondary; // Verde para alta confianza
-    if (confidence >= 60) return DESIGN_SYSTEM.colors.accent; // Amarillo para confianza media
-    return DESIGN_SYSTEM.colors.destructive; // Rojo para baja confianza
-  };
-
-  const getConfidenceLabel = (confidence: number): string => {
-    if (confidence >= 80) return 'Alto';
-    if (confidence >= 60) return 'Medio';
-    return 'Bajo';
-  };
-
-  const color = getConfidenceColor(confidence);
-  const roundedConfidence = Math.round(confidence);
-
-  return (
-    <div style={{ textAlign: 'center' }}>
-      <div
-        style={{
-          width: '80px',
-          height: '80px',
-          borderRadius: '50%',
-          background: `conic-gradient(${color} ${
-            roundedConfidence * 3.6
-          }deg, var(--muted) ${roundedConfidence * 3.6}deg)`,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          margin: `0 auto ${DESIGN_SYSTEM.spacing.sm}`,
-          position: 'relative',
-          boxShadow: DESIGN_SYSTEM.borders.shadowHover,
-          border: `2px solid ${color}`,
-        }}
-      >
-        <div
-          style={{
-            width: '56px',
-            height: '56px',
-            borderRadius: '50%',
-            backgroundColor: DESIGN_SYSTEM.colors.background,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            ...DESIGN_SYSTEM.typography.caption,
-            fontWeight: '700',
-            color: color,
-            boxShadow: 'inset 0 1px 4px rgba(0, 0, 0, 0.1)',
-          }}
-        >
-          {roundedConfidence}%
-        </div>
-      </div>
-
-      <div
-        style={{
-          ...DESIGN_SYSTEM.typography.small,
-          fontWeight: '700',
-          color: color,
-          textShadow: '0 1px 2px rgba(0, 0, 0, 0.1)',
-          marginBottom: DESIGN_SYSTEM.spacing.xs,
-          padding: `${DESIGN_SYSTEM.spacing.xs} ${DESIGN_SYSTEM.spacing.sm}`,
-          backgroundColor: `${color}15`,
-          borderRadius: '12px',
-          display: 'inline-block',
-        }}
-      >
-        {getConfidenceLabel(confidence)}
-      </div>
-
-      <div
-        style={{
-          ...DESIGN_SYSTEM.typography.micro,
-          color: DESIGN_SYSTEM.colors.mutedForeground,
-          maxWidth: '120px',
-          margin: '0 auto',
-          lineHeight: '1.2',
-        }}
-      >
-        Model Confidence Level
-      </div>
-    </div>
-  );
-};
-
 const ColoredText: React.FC<{ text: string; toxicityMap: ToxicityMap }> = ({
   text,
   toxicityMap,
@@ -983,7 +898,7 @@ const App: React.FC = () => {
             marginBottom: DESIGN_SYSTEM.spacing.xxl,
           }}
         >
-          {/* Cuadro Combinado: Toxicity Analysis + Confidence Analysis + Analysis Details */}
+          {/* Cuadro Combinado: Toxicity Analysis + Analysis Details */}
           <div
             style={{
               backgroundColor: DESIGN_SYSTEM.colors.card,
@@ -996,41 +911,18 @@ const App: React.FC = () => {
               gap: DESIGN_SYSTEM.spacing.xl,
             }}
           >
-            {/* Fila Superior: Toxicity Analysis y Confidence Analysis en disposición horizontal */}
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-                gap: DESIGN_SYSTEM.spacing.xl,
-              }}
-            >
-              {/* Toxicity Analysis */}
-              <div style={{ textAlign: 'center' }}>
-                <h3
-                  style={{
-                    ...DESIGN_SYSTEM.typography.h4,
-                    color: DESIGN_SYSTEM.colors.foreground,
-                    textAlign: 'center',
-                  }}
-                >
-                  📊 Toxicity Analysis
-                </h3>
-                <ToxicityGauge percentage={result?.toxicity_percentage || 0} />
-              </div>
-
-              {/* Confidence Analysis */}
-              <div style={{ textAlign: 'center' }}>
-                <h3
-                  style={{
-                    ...DESIGN_SYSTEM.typography.h4,
-                    color: DESIGN_SYSTEM.colors.foreground,
-                    textAlign: 'center',
-                  }}
-                >
-                  🎯 Confidence Analysis
-                </h3>
-                <ConfidenceGauge confidence={result?.confidence || 0} />
-              </div>
+            {/* Toxicity Analysis centrado */}
+            <div style={{ textAlign: 'center' }}>
+              <h3
+                style={{
+                  ...DESIGN_SYSTEM.typography.h4,
+                  color: DESIGN_SYSTEM.colors.foreground,
+                  textAlign: 'center',
+                }}
+              >
+                📊 Toxicity Analysis
+              </h3>
+              <ToxicityGauge percentage={result?.toxicity_percentage || 0} />
             </div>
 
             {/* Separador visual sutil */}
@@ -1236,209 +1128,6 @@ const App: React.FC = () => {
                   >
                     High Risk
                   </span>
-                </div>
-              </div>
-            </div>
-
-            {/* Sección de Confidence Analysis debajo del Toxicity Level */}
-            <div
-              style={{
-                marginTop: DESIGN_SYSTEM.spacing.lg,
-                padding: DESIGN_SYSTEM.spacing.lg,
-                backgroundColor: DESIGN_SYSTEM.colors.card,
-                borderRadius: DESIGN_SYSTEM.borders.radius,
-                border: `${DESIGN_SYSTEM.borders.width} solid ${DESIGN_SYSTEM.colors.border}`,
-              }}
-            >
-              <h4
-                style={{
-                  ...DESIGN_SYSTEM.typography.h4,
-                  color: DESIGN_SYSTEM.colors.foreground,
-                  textAlign: 'center',
-                }}
-              >
-                🎯 Confidence Analysis
-              </h4>
-
-              <div style={{ marginBottom: DESIGN_SYSTEM.spacing.md }}>
-                <div
-                  style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    marginBottom: DESIGN_SYSTEM.spacing.sm,
-                  }}
-                >
-                  <span
-                    style={{
-                      ...DESIGN_SYSTEM.typography.small,
-                      color: DESIGN_SYSTEM.colors.mutedForeground,
-                      fontWeight: '500',
-                    }}
-                  >
-                    Confidence Level
-                  </span>
-                  <span
-                    style={{
-                      ...DESIGN_SYSTEM.typography.small,
-                      color: DESIGN_SYSTEM.colors.foreground,
-                      fontWeight: '600',
-                    }}
-                  >
-                    {result ? Math.round(result.confidence) : 0}%
-                  </span>
-                </div>
-                <div
-                  style={{
-                    width: '100%',
-                    height: '12px',
-                    backgroundColor: DESIGN_SYSTEM.colors.muted,
-                    borderRadius: '6px',
-                    overflow: 'hidden',
-                    position: 'relative',
-                  }}
-                >
-                  <div
-                    style={{
-                      width: `${result?.confidence || 0}%`,
-                      height: '100%',
-                      backgroundColor: result
-                        ? (() => {
-                            const confidence = result.confidence;
-                            if (confidence >= 80)
-                              return DESIGN_SYSTEM.colors.secondary;
-                            if (confidence >= 60)
-                              return DESIGN_SYSTEM.colors.accent;
-                            return DESIGN_SYSTEM.colors.destructive;
-                          })()
-                        : DESIGN_SYSTEM.colors.muted,
-                      borderRadius: '6px',
-                      transition: 'width 1s ease-out',
-                    }}
-                  />
-                </div>
-              </div>
-
-              <div
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  ...DESIGN_SYSTEM.typography.micro,
-                  color: DESIGN_SYSTEM.colors.mutedForeground,
-                  marginBottom: DESIGN_SYSTEM.spacing.md,
-                }}
-              >
-                <span>0%</span>
-                <span>50%</span>
-                <span>100%</span>
-              </div>
-
-              <div
-                style={{
-                  padding: DESIGN_SYSTEM.spacing.md,
-                  backgroundColor: DESIGN_SYSTEM.colors.muted,
-                  borderRadius: DESIGN_SYSTEM.borders.radius,
-                  border: `${DESIGN_SYSTEM.borders.width} solid ${DESIGN_SYSTEM.colors.border}`,
-                }}
-              >
-                <div
-                  style={{
-                    ...DESIGN_SYSTEM.typography.tiny,
-                    fontWeight: '600',
-                    color: DESIGN_SYSTEM.colors.foreground,
-                    marginBottom: DESIGN_SYSTEM.spacing.sm,
-                    textAlign: 'center',
-                  }}
-                >
-                  🎨 Confidence Color Legend
-                </div>
-                <div
-                  style={{
-                    display: 'flex',
-                    justifyContent: 'space-around',
-                    alignItems: 'center',
-                    gap: DESIGN_SYSTEM.spacing.xs,
-                  }}
-                >
-                  <div
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: DESIGN_SYSTEM.spacing.xs,
-                    }}
-                  >
-                    <div
-                      style={{
-                        width: '10px',
-                        height: '10px',
-                        backgroundColor: DESIGN_SYSTEM.colors.secondary,
-                        borderRadius: '50%',
-                        border: `${DESIGN_SYSTEM.borders.width} solid ${DESIGN_SYSTEM.colors.secondary}`,
-                      }}
-                    />
-                    <span
-                      style={{
-                        ...DESIGN_SYSTEM.typography.micro,
-                        color: DESIGN_SYSTEM.colors.secondary,
-                        fontWeight: '600',
-                      }}
-                    >
-                      Alto
-                    </span>
-                  </div>
-                  <div
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: DESIGN_SYSTEM.spacing.xs,
-                    }}
-                  >
-                    <div
-                      style={{
-                        width: '10px',
-                        height: '10px',
-                        backgroundColor: DESIGN_SYSTEM.colors.accent,
-                        borderRadius: '50%',
-                        border: `${DESIGN_SYSTEM.borders.width} solid ${DESIGN_SYSTEM.colors.accent}`,
-                      }}
-                    />
-                    <span
-                      style={{
-                        ...DESIGN_SYSTEM.typography.micro,
-                        color: DESIGN_SYSTEM.colors.accent,
-                        fontWeight: '600',
-                      }}
-                    >
-                      Medio
-                    </span>
-                  </div>
-                  <div
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: DESIGN_SYSTEM.spacing.xs,
-                    }}
-                  >
-                    <div
-                      style={{
-                        width: '10px',
-                        height: '10px',
-                        backgroundColor: DESIGN_SYSTEM.colors.destructive,
-                        borderRadius: '50%',
-                        border: `${DESIGN_SYSTEM.borders.width} solid ${DESIGN_SYSTEM.colors.destructive}`,
-                      }}
-                    />
-                    <span
-                      style={{
-                        ...DESIGN_SYSTEM.typography.micro,
-                        color: DESIGN_SYSTEM.colors.destructive,
-                        fontWeight: '600',
-                      }}
-                    >
-                      Bajo
-                    </span>
-                  </div>
                 </div>
               </div>
             </div>
