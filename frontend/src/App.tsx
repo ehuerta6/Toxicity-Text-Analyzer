@@ -378,7 +378,6 @@ const App: React.FC = () => {
   const [text, setText] = useState('');
   const [toxicityMap, setToxicityMap] = useState<Record<string, number>>({});
   const [hasAnalyzed, setHasAnalyzed] = useState(false);
-  const [showExplanations, setShowExplanations] = useState(false);
   const [lastAnalysis, setLastAnalysis] = useState<{
     text: string;
     result: ToxicityResult;
@@ -611,37 +610,6 @@ const App: React.FC = () => {
               >
                 🗑️ Clear
               </Button>
-
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  padding: '8px 12px',
-                  backgroundColor: 'var(--muted)',
-                  borderRadius: 'var(--radius)',
-                  border: '1px solid var(--border)',
-                }}
-              >
-                <input
-                  type='checkbox'
-                  id='show-explanations'
-                  checked={showExplanations}
-                  onChange={(e) => setShowExplanations(e.target.checked)}
-                  style={{ cursor: 'pointer' }}
-                />
-                <label
-                  htmlFor='show-explanations'
-                  style={{
-                    fontSize: '14px',
-                    color: 'var(--foreground)',
-                    cursor: 'pointer',
-                    userSelect: 'none',
-                  }}
-                >
-                  💡 Mostrar explicaciones
-                </label>
-              </div>
             </div>
 
             {error && (
@@ -1110,8 +1078,7 @@ const App: React.FC = () => {
                           {category.replace('_', ' ')}
                         </div>
 
-                        {showExplanations &&
-                          result.explanations &&
+                        {result.explanations &&
                           result.explanations[category] && (
                             <div
                               style={{
@@ -1119,6 +1086,12 @@ const App: React.FC = () => {
                                 color: 'var(--muted-foreground)',
                                 fontStyle: 'italic',
                                 lineHeight: '1.4',
+                                marginTop: '4px',
+                                padding: '4px 8px',
+                                backgroundColor: 'var(--background)',
+                                borderRadius: '4px',
+                                border: '1px solid var(--border)',
+                                opacity: 0.8,
                               }}
                             >
                               💡 {result.explanations[category]}
@@ -1127,21 +1100,6 @@ const App: React.FC = () => {
                       </div>
                     ))}
                   </div>
-
-                  {!showExplanations && (
-                    <div
-                      style={{
-                        marginTop: '12px',
-                        fontSize: '11px',
-                        color: 'var(--muted-foreground)',
-                        textAlign: 'center',
-                        fontStyle: 'italic',
-                      }}
-                    >
-                      💡 Activa "Mostrar explicaciones" para ver por qué se
-                      detectó cada categoría
-                    </div>
-                  )}
                 </div>
               )}
           </div>

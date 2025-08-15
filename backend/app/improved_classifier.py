@@ -213,6 +213,13 @@ class OptimizedToxicityClassifier:
         elif context_score > 0.4:
             explanation += " (contexto moderado)"
         
+        # Asegurar que la explicación tenga al menos 4 palabras para claridad
+        if len(explanation.split()) < 4:
+            if "contexto" not in explanation:
+                explanation += " en el texto analizado"
+            if "por" not in explanation:
+                explanation = f"Se identificó {readable_category} en el contenido"
+        
         return explanation
     
     def _determine_toxicity_level(self, score: float, context_score: float, word_count: int) -> Tuple[bool, str, float]:

@@ -212,6 +212,10 @@ class MLToxicityClassifier:
             else:
                 explanation = f"Modelo ML detectó {readable_category} con confianza baja ({toxicity_percentage:.1f}%)"
             
+            # Asegurar que la explicación tenga al menos 4 palabras para claridad
+            if len(explanation.split()) < 4:
+                explanation += " en el análisis del texto"
+            
             explanations[category] = explanation
         
         return explanations
