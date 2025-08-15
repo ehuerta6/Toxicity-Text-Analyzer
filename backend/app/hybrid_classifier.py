@@ -1,30 +1,35 @@
 """
 🎯 Clasificador Híbrido de Toxicidad - ToxiGuard
-Combina el mejor modelo de ML (Linear SVM) con clasificador basado en reglas como fallback
+Combina el clasificador contextual con embeddings, modelo de ML y clasificador basado en reglas
 """
 
 import logging
 from typing import Dict, List
 from .ml_classifier import ml_classifier
 from .improved_classifier import optimized_classifier
+from .contextual_classifier import contextual_classifier
 
 # Configurar logging
 logger = logging.getLogger(__name__)
 
 class HybridToxicityClassifier:
-    """Clasificador híbrido que combina ML y reglas"""
+    """Clasificador híbrido que combina contextual, ML y reglas"""
     
     def __init__(self):
+        self.contextual_classifier = contextual_classifier
         self.ml_classifier = ml_classifier
         self.rule_classifier = optimized_classifier
-        self.use_ml_as_primary = True
-        self.classification_technique = "Híbrido (ML + Reglas)"
         
-        logger.info("✅ Clasificador híbrido inicializado")
+        # Orden de prioridad: contextual > ML > reglas
+        self.classifier_priority = ["contextual", "ml", "rules"]
+        self.current_primary = "contextual"
+        self.classification_technique = "Híbrido (Contextual + ML + Reglas)"
+        
+        logger.info("✅ Clasificador híbrido mejorado inicializado")
     
     def analyze_text(self, text: str) -> Dict:
         """
-        Análisis híbrido de toxicidad
+        Análisis híbrido de toxicidad con prioridad contextual
         
         Args:
             text: Texto a analizar
@@ -36,14 +41,25 @@ class HybridToxicityClassifier:
             return self._get_default_response()
         
         try:
-            # Intentar usar el modelo ML primero
-            if self.use_ml_as_primary and self.ml_classifier.is_loaded:
+            # Intentar usar el clasificador contextual primero (nuevo)
+            if self.current_primary == "contextual" and self.contextual_classifier.embedding_model:
+                logger.debug("🧠 Usando clasificador contextual para análisis")
+                result = self.contextual_classifier.analyze_text(text)
+                
+                # Verificar que el resultado sea válido
+                if result and result.get("toxicity_percentage") is not None:
+                    result["classification_technique"] = f"Híbrido - {result.get('classification_technique', 'Contextual')}"
+                    return result
+                else:
+                    logger.warning("⚠️ Clasificador contextual devolvió resultado inválido, usando fallback")
+            
+            # Intentar usar el modelo ML como segundo fallback
+            if self.current_primary in ["ml", "contextual"] and self.ml_classifier.is_loaded:
                 logger.debug("🔬 Usando modelo ML para análisis")
                 result = self.ml_classifier.analyze_text(text)
                 
                 # Verificar que el resultado sea válido
                 if result and result.get("toxicity_percentage") is not None:
-                    # Actualizar técnica de clasificación para reflejar que se usó ML
                     result["classification_technique"] = f"Híbrido - {result.get('classification_technique', 'ML')}"
                     return result
                 else:
@@ -85,7 +101,7 @@ class HybridToxicityClassifier:
             return self._get_default_response()
     
     def _get_default_response(self) -> Dict:
-        """Respuesta por defecto cuando ambos clasificadores fallan"""
+        """Respuesta por defecto cuando todos los clasificadores fallan"""
         return {
             "is_toxic": False,
             "toxicity_percentage": 0.0,
@@ -131,9 +147,16 @@ class HybridToxicityClassifier:
         return results
     
     def get_classifier_info(self) -> Dict:
-        """Obtiene información de ambos clasificadores"""
+        """Obtiene información de todos los clasificadores"""
         return {
             "primary_classifier": {
+                "type": "Contextual (Embeddings)",
+                "technique": self.contextual_classifier.classification_technique,
+                "is_available": self.contextual_classifier.embedding_model is not None,
+                "embedding_model": self.contextual_classifier.model_name,
+                "context_analysis": True
+            },
+            "secondary_classifier": {
                 "type": "ML (Linear SVM)",
                 "technique": ml_classifier.classification_technique if hasattr(ml_classifier, 'classification_technique') else "Machine Learning",
                 "is_available": self.ml_classifier.is_loaded,
@@ -145,14 +168,23 @@ class HybridToxicityClassifier:
                 "is_available": True,
                 "description": "Clasificador basado en keywords y patrones"
             },
-            "hybrid_mode": "ML primary + Rules fallback",
-            "current_technique": self.classification_technique
+            "hybrid_mode": "Contextual primary + ML secondary + Rules fallback",
+            "current_technique": self.classification_technique,
+            "contextual_features": {
+                "sentence_analysis": True,
+                "embedding_similarity": True,
+                "context_awareness": True,
+                "negation_detection": True
+            }
         }
     
-    def set_primary_classifier(self, use_ml: bool = True):
+    def set_primary_classifier(self, classifier_type: str = "contextual"):
         """Cambia el clasificador principal"""
-        self.use_ml_as_primary = use_ml
-        logger.info(f"🔄 Clasificador principal cambiado a: {'ML' if use_ml else 'Rules'}")
+        if classifier_type in ["contextual", "ml", "rules"]:
+            self.current_primary = classifier_type
+            logger.info(f"🔄 Clasificador principal cambiado a: {classifier_type}")
+        else:
+            logger.warning(f"⚠️ Tipo de clasificador no válido: {classifier_type}")
 
-# Instancia global del clasificador híbrido
+# Instancia global del clasificador híbrido mejorado
 hybrid_classifier = HybridToxicityClassifier()

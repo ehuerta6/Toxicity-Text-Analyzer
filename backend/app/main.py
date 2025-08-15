@@ -1,6 +1,6 @@
 """
-🚀 ToxiGuard API - Backend Optimizado
-API para detección de comentarios tóxicos usando Machine Learning optimizado
+🚀 ToxiGuard API - Backend Optimizado con Análisis Contextual
+API para detección de comentarios tóxicos usando Machine Learning optimizado y análisis contextual
 """
 
 from fastapi import FastAPI, HTTPException, Request
@@ -17,6 +17,7 @@ import os
 from .improved_classifier import optimized_classifier
 from .ml_classifier import ml_classifier
 from .hybrid_classifier import hybrid_classifier
+from .contextual_classifier import contextual_classifier
 from .models import AnalyzeRequest, AnalyzeResponse, BatchAnalyzeRequest, BatchAnalyzeResponse
 from .database import AnalysisHistoryDB
 
@@ -27,8 +28,8 @@ logger = logging.getLogger(__name__)
 # Inicializar FastAPI
 app = FastAPI(
     title="ToxiGuard API",
-    description="API profesional para detección de toxicidad en texto usando ML avanzado",
-    version="2.0.0",
+    description="API profesional para detección de toxicidad en texto usando ML avanzado y análisis contextual con embeddings",
+    version="2.1.0",
     docs_url="/docs",
     redoc_url="/redoc"
 )
@@ -54,18 +55,24 @@ try:
 except Exception as e:
     logger.warning(f"⚠️ No se pudo inicializar la base de datos: {e}")
 
-# Seleccionar clasificador principal (híbrido por defecto)
+# Seleccionar clasificador principal (híbrido con contextual por defecto)
 primary_classifier = hybrid_classifier
 logger.info(f"✅ Clasificador principal: {primary_classifier.__class__.__name__}")
 
 @app.on_event("startup")
 async def startup_event():
     """Evento de inicio de la aplicación"""
-    logger.info("🚀 ToxiGuard API iniciando...")
+    logger.info("🚀 ToxiGuard API iniciando con análisis contextual...")
     
     # Verificar estado de los clasificadores
     classifier_info = primary_classifier.get_classifier_info()
     logger.info(f"📊 Estado de clasificadores: {classifier_info}")
+    
+    # Verificar disponibilidad del clasificador contextual
+    if contextual_classifier.embedding_model:
+        logger.info("✅ Clasificador contextual con embeddings disponible")
+    else:
+        logger.warning("⚠️ Clasificador contextual no disponible, usando fallback")
     
     logger.info("✅ ToxiGuard API lista para recibir solicitudes")
 
@@ -105,28 +112,41 @@ async def general_exception_handler(request: Request, exc: Exception):
 
 @app.get("/")
 async def root():
-    """Endpoint raíz optimizado"""
+    """Endpoint raíz optimizado con información contextual"""
     return {
-        "message": "ToxiGuard API - Backend Optimizado",
-        "version": "2.0.0",
+        "message": "ToxiGuard API - Backend Optimizado con Análisis Contextual",
+        "version": "2.1.0",
         "status": "operational",
         "uptime": time.time() - startup_time if startup_time else 0,
-        "start_time": app_start_time.isoformat() if app_start_time else None
+        "start_time": app_start_time.isoformat() if app_start_time else None,
+        "features": [
+            "Análisis contextual con embeddings",
+            "Detección de negaciones y contexto",
+            "Clasificación híbrida avanzada",
+            "Análisis por oraciones"
+        ]
     }
 
 @app.get("/classifier-info")
 async def get_classifier_info():
     """
-    Obtener información del clasificador actual
+    Obtener información del clasificador actual con detalles contextuales
     
     Returns:
-        Información detallada del clasificador
+        Información detallada del clasificador incluyendo capacidades contextuales
     """
     try:
         info = primary_classifier.get_classifier_info()
         return {
             "classifier_type": primary_classifier.__class__.__name__,
             "info": info,
+            "contextual_features": {
+                "sentence_analysis": True,
+                "embedding_similarity": contextual_classifier.embedding_model is not None,
+                "context_awareness": True,
+                "negation_detection": True,
+                "embedding_model": contextual_classifier.model_name if contextual_classifier.embedding_model else "Not available"
+            },
             "timestamp": datetime.now()
         }
     except Exception as e:
@@ -134,22 +154,23 @@ async def get_classifier_info():
         raise HTTPException(status_code=500, detail=f"Error interno: {str(e)}")
 
 @app.post("/switch-classifier")
-async def switch_classifier(use_ml: bool = True):
+async def switch_classifier(classifier_type: str = "contextual"):
     """
-    Cambiar entre clasificador ML y basado en reglas
+    Cambiar entre clasificadores disponibles
     
     Args:
-        use_ml: True para usar ML como principal, False para reglas
+        classifier_type: "contextual", "ml", o "rules"
         
     Returns:
         Confirmación del cambio
     """
     try:
         if hasattr(primary_classifier, 'set_primary_classifier'):
-            primary_classifier.set_primary_classifier(use_ml)
+            primary_classifier.set_primary_classifier(classifier_type)
             return {
-                "message": f"Clasificador cambiado a: {'ML' if use_ml else 'Rules'}",
-                "current_mode": "ML primary" if use_ml else "Rules primary",
+                "message": f"Clasificador cambiado a: {classifier_type}",
+                "current_mode": f"{classifier_type} primary",
+                "available_classifiers": ["contextual", "ml", "rules"],
                 "timestamp": datetime.now()
             }
         else:
@@ -164,28 +185,41 @@ async def switch_classifier(use_ml: bool = True):
 
 @app.get("/health")
 async def health_check():
-    """Verificación de salud optimizada"""
+    """Verificación de salud optimizada con estado contextual"""
     return {
         "status": "healthy",
         "timestamp": datetime.now(),
         "uptime": time.time() - startup_time if startup_time else 0,
-        "classifier": "optimized",
-        "database": "connected" if history_db else "disconnected"
+        "classifier": "hybrid_with_contextual",
+        "database": "connected" if history_db else "disconnected",
+        "contextual_analysis": contextual_classifier.embedding_model is not None
     }
 
 @app.get("/info")
 async def get_info():
-    """Información del sistema optimizada"""
+    """Información del sistema optimizada con capacidades contextuales"""
     return {
         "name": "ToxiGuard API",
-        "version": "2.0.0",
-        "description": "API optimizada para detección de toxicidad",
+        "version": "2.1.0",
+        "description": "API optimizada para detección de toxicidad con análisis contextual",
         "features": [
-            "Clasificador optimizado",
-            "Análisis contextual mejorado",
+            "Análisis contextual con embeddings",
+            "Detección de negaciones (ej: 'no eres tonto')",
+            "Clasificador híbrido avanzado",
+            "Análisis por oraciones",
             "Rendimiento optimizado",
             "Memoria reducida"
         ],
+        "contextual_analysis": {
+            "enabled": contextual_classifier.embedding_model is not None,
+            "model": contextual_classifier.model_name if contextual_classifier.embedding_model else "Not available",
+            "capabilities": [
+                "Análisis de contexto completo",
+                "Detección de negaciones",
+                "Similitud semántica",
+                "Análisis por oraciones"
+            ]
+        },
         "endpoints": [
             "/",
             "/health",
@@ -193,20 +227,22 @@ async def get_info():
             "/analyze",
             "/batch-analyze",
             "/history",
-            "/stats"
+            "/stats",
+            "/classifier-info",
+            "/switch-classifier"
         ]
     }
 
 @app.post("/analyze", response_model=AnalyzeResponse)
 async def analyze_text(request: AnalyzeRequest):
     """
-    Análisis optimizado de toxicidad de texto
+    Análisis optimizado de toxicidad de texto con análisis contextual
     
     Args:
         request: Solicitud de análisis
         
     Returns:
-        Respuesta con análisis de toxicidad optimizado
+        Respuesta con análisis de toxicidad optimizado y contextual
     """
     start_time = time.time()
     
@@ -217,7 +253,7 @@ async def analyze_text(request: AnalyzeRequest):
         if len(request.text) > 10000:
             raise ValueError("El texto excede el límite de 10,000 caracteres")
         
-        # Análisis optimizado usando el clasificador mejorado
+        # Análisis optimizado usando el clasificador mejorado con contextual
         analysis_result = primary_classifier.analyze_text(request.text)
         
         # Calcular tiempo de respuesta
@@ -246,7 +282,7 @@ async def analyze_text(request: AnalyzeRequest):
             except Exception as e:
                 logger.warning(f"No se pudo guardar en historial: {e}")
         
-        logger.info(f"Análisis completado en {response_time}ms - Toxicidad: {analysis_result['toxicity_percentage']}%")
+        logger.info(f"Análisis contextual completado en {response_time}ms - Toxicidad: {analysis_result['toxicity_percentage']}%")
         return response
         
     except ValueError as e:
