@@ -1,9 +1,12 @@
 import React, { useState, useCallback, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { useToxicityAnalysis } from './hooks/useToxicityAnalysis';
 import type { ToxicityResult } from './hooks/useToxicityAnalysis';
 import { getToxicityColor } from './styles/common';
 import SeverityBreakdown from './components/SeverityBreakdown';
 import AnalysisDetails from './components/AnalysisDetails';
+import Footer from './components/Footer';
+import About from './components/About';
 
 // Sistema de Estilos Unificado para Consistencia Visual
 const DESIGN_SYSTEM = {
@@ -318,31 +321,6 @@ const Header: React.FC<{ title: string }> = ({ title }) => (
   </header>
 );
 
-const Footer: React.FC = () => (
-  <footer
-    style={{
-      backgroundColor: DESIGN_SYSTEM.colors.card,
-      borderTop: `${DESIGN_SYSTEM.borders.width} solid ${DESIGN_SYSTEM.colors.border}`,
-      marginTop: 'auto',
-    }}
-  >
-    <div
-      style={{
-        maxWidth: '1400px',
-        margin: '0 auto',
-        padding: DESIGN_SYSTEM.spacing.lg,
-        textAlign: 'center',
-        color: DESIGN_SYSTEM.colors.mutedForeground,
-        fontSize: DESIGN_SYSTEM.typography.small.fontSize,
-        fontWeight: DESIGN_SYSTEM.typography.small.fontWeight,
-        lineHeight: DESIGN_SYSTEM.typography.small.lineHeight,
-      }}
-    >
-      <p>&copy; 2024 ToxiGuard. Professional content moderation tools.</p>
-    </div>
-  </footer>
-);
-
 const TextArea: React.FC<{
   value: string;
   onChange: (value: string) => void;
@@ -481,7 +459,7 @@ const Button: React.FC<{
   );
 };
 
-const App: React.FC = () => {
+const ToxiGuardApp: React.FC = () => {
   const [text, setText] = useState('');
   const [toxicityMap, setToxicityMap] = useState<Record<string, number>>({});
   const [hasAnalyzed, setHasAnalyzed] = useState(false);
@@ -1453,6 +1431,28 @@ const App: React.FC = () => {
 
       <Footer />
     </div>
+  );
+};
+
+const App: React.FC = () => {
+  return (
+    <Router>
+      <div
+        style={{
+          minHeight: '100vh',
+          backgroundColor: 'var(--background)',
+          fontFamily:
+            'DM Sans, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+          display: 'flex',
+          flexDirection: 'column',
+        }}
+      >
+        <Routes>
+          <Route path='/' element={<ToxiGuardApp />} />
+          <Route path='/about' element={<About />} />
+        </Routes>
+      </div>
+    </Router>
   );
 };
 
