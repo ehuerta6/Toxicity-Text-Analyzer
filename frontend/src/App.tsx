@@ -16,7 +16,6 @@ import {
   commonStyles,
   getToxicityColor,
   getToxicityLabel,
-  getToxicityBackgroundColor,
   getToxicityBorderColor,
 } from './styles/common';
 
@@ -284,68 +283,133 @@ const App: React.FC = () => {
   };
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#f9fafb' }}>
-      <div style={commonStyles.container}>
-        {/* Header */}
-        <header style={{ textAlign: 'center', marginBottom: '32px' }}>
-          <h1 style={commonStyles.text.heading}>🛡️ ToxiGuard</h1>
-          <p style={commonStyles.text.body}>
+    <div
+      style={{
+        minHeight: '100vh',
+        backgroundColor: '#f8fafc',
+        fontFamily:
+          'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+      }}
+    >
+      {/* Header */}
+      <header
+        style={{
+          backgroundColor: 'white',
+          borderBottom: '1px solid #e2e8f0',
+          padding: '24px 0',
+          boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+        }}
+      >
+        <div
+          style={{ maxWidth: '1400px', margin: '0 auto', padding: '0 24px' }}
+        >
+          <h1
+            style={{
+              fontSize: '28px',
+              fontWeight: '700',
+              color: '#1e293b',
+              textAlign: 'center',
+              margin: '0',
+            }}
+          >
+            🛡️ ToxiGuard – Analiza texto
+          </h1>
+          <p
+            style={{
+              fontSize: '16px',
+              color: '#64748b',
+              textAlign: 'center',
+              margin: '8px 0 0 0',
+            }}
+          >
             Detección inteligente de contenido tóxico usando Machine Learning
           </p>
-        </header>
+        </div>
+      </header>
 
-        {/* Main Content Grid */}
+      {/* Main Content Container */}
+      <div
+        style={{
+          maxWidth: '1400px',
+          margin: '0 auto',
+          padding: '32px 24px',
+          display: 'grid',
+          gridTemplateColumns: '1fr',
+          gap: '32px',
+        }}
+      >
+        {/* Main Grid Layout */}
         <div
           style={{
             display: 'grid',
             gridTemplateColumns: result ? '1fr 1fr' : '1fr',
-            gap: '24px',
-            marginBottom: '32px',
+            gap: '32px',
+            alignItems: 'start',
           }}
         >
-          {/* Input Form */}
-          <div style={commonStyles.card}>
-            <h2 style={commonStyles.text.subheading}>📝 Analizar Texto</h2>
-            <div style={{ marginBottom: '16px' }}>
+          {/* Input Form - Left Column */}
+          <div
+            style={{
+              backgroundColor: 'white',
+              borderRadius: '16px',
+              padding: '32px',
+              boxShadow: '0 4px 6px rgba(0, 0, 0, 0.05)',
+              border: '1px solid #e2e8f0',
+            }}
+          >
+            <h2
+              style={{
+                fontSize: '20px',
+                fontWeight: '600',
+                color: '#1e293b',
+                margin: '0 0 24px 0',
+              }}
+            >
+              📝 Analizar Texto
+            </h2>
+
+            <div style={{ marginBottom: '20px' }}>
               <textarea
                 value={inputText}
                 onChange={(e) => setInputText(e.target.value)}
                 placeholder='Ingresa el texto que quieres analizar...'
                 style={{
-                  ...commonStyles.input,
-                  minHeight: '120px',
-                  resize: 'vertical',
+                  width: '100%',
+                  minHeight: '160px',
+                  padding: '16px',
+                  border: '2px solid #e2e8f0',
+                  borderRadius: '12px',
+                  fontSize: '16px',
                   fontFamily: 'inherit',
+                  resize: 'vertical',
                   backgroundColor: '#fafafa',
-                  borderColor: inputText.trim() ? '#3b82f6' : '#e5e7eb',
-                  boxShadow: inputText.trim()
-                    ? '0 0 0 3px rgba(59, 130, 246, 0.1)'
-                    : 'none',
+                  transition: 'all 0.2s ease',
+                  boxSizing: 'border-box',
                 }}
                 onFocus={(e) => {
                   e.target.style.borderColor = '#3b82f6';
+                  e.target.style.backgroundColor = 'white';
                   e.target.style.boxShadow =
                     '0 0 0 3px rgba(59, 130, 246, 0.1)';
-                  e.target.style.backgroundColor = 'white';
                 }}
                 onBlur={(e) => {
                   e.target.style.borderColor = inputText.trim()
                     ? '#3b82f6'
-                    : '#e5e7eb';
-                  e.target.style.boxShadow = inputText.trim()
-                    ? '0 0 0 3px rgba(59, 130, 246, 0.1)'
-                    : 'none';
+                    : '#e2e8f0';
                   e.target.style.backgroundColor = inputText.trim()
                     ? 'white'
                     : '#fafafa';
+                  e.target.style.boxShadow = inputText.trim()
+                    ? '0 0 0 3px rgba(59, 130, 246, 0.1)'
+                    : 'none';
                 }}
               />
               {inputText.trim() && (
                 <div
                   style={{
                     marginTop: '8px',
-                    fontSize: '12px',
-                    color: '#6b7280',
+                    fontSize: '14px',
+                    color: '#64748b',
                     textAlign: 'right',
                   }}
                 >
@@ -353,33 +417,37 @@ const App: React.FC = () => {
                 </div>
               )}
             </div>
+
             <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
               <button
                 onClick={handleAnalyze}
                 disabled={loading || !inputText.trim()}
                 style={{
-                  ...commonStyles.button.primary,
+                  backgroundColor: '#3b82f6',
+                  color: 'white',
+                  border: 'none',
+                  padding: '12px 24px',
+                  borderRadius: '8px',
+                  fontSize: '16px',
+                  fontWeight: '600',
+                  cursor:
+                    loading || !inputText.trim() ? 'not-allowed' : 'pointer',
                   opacity: loading || !inputText.trim() ? 0.6 : 1,
-                  position: 'relative',
-                  transform:
-                    loading || !inputText.trim() ? 'none' : 'translateY(0)',
-                  boxShadow:
-                    loading || !inputText.trim()
-                      ? 'none'
-                      : '0 4px 6px rgba(0, 0, 0, 0.1)',
+                  transition: 'all 0.2s ease',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
                 }}
                 onMouseEnter={(e) => {
                   if (!loading && inputText.trim()) {
-                    e.currentTarget.style.transform = 'translateY(-2px)';
-                    e.currentTarget.style.boxShadow =
-                      '0 6px 20px rgba(59, 130, 246, 0.3)';
+                    e.currentTarget.style.backgroundColor = '#2563eb';
+                    e.currentTarget.style.transform = 'translateY(-1px)';
                   }
                 }}
                 onMouseLeave={(e) => {
                   if (!loading && inputText.trim()) {
+                    e.currentTarget.style.backgroundColor = '#3b82f6';
                     e.currentTarget.style.transform = 'translateY(0)';
-                    e.currentTarget.style.boxShadow =
-                      '0 4px 6px rgba(0, 0, 0, 0.1)';
                   }
                 }}
               >
@@ -387,14 +455,12 @@ const App: React.FC = () => {
                   <>
                     <div
                       style={{
-                        display: 'inline-block',
                         width: '16px',
                         height: '16px',
                         border: '2px solid transparent',
                         borderTop: '2px solid white',
                         borderRadius: '50%',
                         animation: 'spin 1s linear infinite',
-                        marginRight: '8px',
                       }}
                     />
                     Analizando...
@@ -403,32 +469,38 @@ const App: React.FC = () => {
                   '🔍 Analizar'
                 )}
               </button>
+
               <button
                 onClick={handleClear}
                 style={{
-                  ...commonStyles.button.secondary,
-                  transform: 'translateY(0)',
-                  boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+                  backgroundColor: '#f1f5f9',
+                  color: '#475569',
+                  border: '1px solid #cbd5e1',
+                  padding: '12px 24px',
+                  borderRadius: '8px',
+                  fontSize: '16px',
+                  fontWeight: '600',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = 'translateY(-2px)';
-                  e.currentTarget.style.boxShadow =
-                    '0 6px 20px rgba(107, 114, 128, 0.3)';
+                  e.currentTarget.style.backgroundColor = '#e2e8f0';
+                  e.currentTarget.style.transform = 'translateY(-1px)';
                 }}
                 onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = '#f1f5f9';
                   e.currentTarget.style.transform = 'translateY(0)';
-                  e.currentTarget.style.boxShadow =
-                    '0 4px 6px rgba(0, 0, 0, 0.1)';
                 }}
               >
                 🗑️ Limpiar
               </button>
             </div>
+
             {error && (
               <div
                 style={{
-                  marginTop: '16px',
-                  color: commonStyles.toxicity.toxic,
+                  marginTop: '20px',
+                  color: '#dc2626',
                   padding: '16px',
                   backgroundColor: '#fef2f2',
                   borderRadius: '8px',
@@ -462,21 +534,31 @@ const App: React.FC = () => {
             )}
           </div>
 
-          {/* Results */}
+          {/* Results - Right Column */}
           {result && (
             <div
               style={{
-                ...commonStyles.card,
-                backgroundColor: getToxicityBackgroundColor(
-                  result.toxicity_percentage
-                ),
+                backgroundColor: 'white',
+                borderRadius: '16px',
+                padding: '32px',
+                boxShadow: '0 4px 6px rgba(0, 0, 0, 0.05)',
+                border: '2px solid',
                 borderColor: getToxicityBorderColor(result.toxicity_percentage),
-                borderWidth: '2px',
+                transition: 'all 0.3s ease',
               }}
             >
-              <h2 style={commonStyles.text.subheading}>
+              <h2
+                style={{
+                  fontSize: '20px',
+                  fontWeight: '600',
+                  color: '#1e293b',
+                  margin: '0 0 24px 0',
+                  textAlign: 'center',
+                }}
+              >
                 📊 Resultados del Análisis
               </h2>
+
               <div style={{ marginBottom: '24px' }}>
                 <ToxicityGauge percentage={result.toxicity_percentage} />
               </div>
@@ -484,26 +566,25 @@ const App: React.FC = () => {
               {/* Enhanced Results Display */}
               <div
                 style={{
-                  backgroundColor: 'white',
-                  padding: '16px',
-                  borderRadius: '8px',
+                  backgroundColor: '#f8fafc',
+                  padding: '20px',
+                  borderRadius: '12px',
                   border: '1px solid #e2e8f0',
-                  boxShadow: '0 2px 4px rgba(0, 0, 0, 0.05)',
                 }}
               >
                 <div
                   style={{
                     display: 'grid',
                     gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))',
-                    gap: '12px',
-                    marginBottom: '16px',
+                    gap: '16px',
+                    marginBottom: '20px',
                   }}
                 >
                   <div style={{ textAlign: 'center' }}>
                     <div
                       style={{
                         fontSize: '12px',
-                        color: '#6b7280',
+                        color: '#64748b',
                         marginBottom: '4px',
                       }}
                     >
@@ -513,18 +594,19 @@ const App: React.FC = () => {
                       style={{
                         fontSize: '18px',
                         fontWeight: '600',
-                        color: '#1f2937',
+                        color: '#1e293b',
                       }}
                     >
                       {result.score.toFixed(3)}
                     </div>
                   </div>
+
                   {result.category && (
                     <div style={{ textAlign: 'center' }}>
                       <div
                         style={{
                           fontSize: '12px',
-                          color: '#6b7280',
+                          color: '#64748b',
                           marginBottom: '4px',
                         }}
                       >
@@ -534,18 +616,19 @@ const App: React.FC = () => {
                         style={{
                           fontSize: '18px',
                           fontWeight: '600',
-                          color: '#1f2937',
+                          color: '#1e293b',
                         }}
                       >
                         {result.category}
                       </div>
                     </div>
                   )}
+
                   <div style={{ textAlign: 'center' }}>
                     <div
                       style={{
                         fontSize: '12px',
-                        color: '#6b7280',
+                        color: '#64748b',
                         marginBottom: '4px',
                       }}
                     >
@@ -555,17 +638,18 @@ const App: React.FC = () => {
                       style={{
                         fontSize: '18px',
                         fontWeight: '600',
-                        color: '#1f2937',
+                        color: '#1e293b',
                       }}
                     >
                       {result.model_used}
                     </div>
                   </div>
+
                   <div style={{ textAlign: 'center' }}>
                     <div
                       style={{
                         fontSize: '12px',
-                        color: '#6b7280',
+                        color: '#64748b',
                         marginBottom: '4px',
                       }}
                     >
@@ -575,7 +659,7 @@ const App: React.FC = () => {
                       style={{
                         fontSize: '18px',
                         fontWeight: '600',
-                        color: '#1f2937',
+                        color: '#1e293b',
                       }}
                     >
                       {result.response_time_ms}ms
@@ -586,12 +670,12 @@ const App: React.FC = () => {
                 <div
                   style={{
                     fontSize: '14px',
-                    color: '#6b7280',
+                    color: '#64748b',
                     textAlign: 'center',
-                    padding: '8px',
-                    backgroundColor: '#f8fafc',
-                    borderRadius: '6px',
-                    border: '1px solid #e5e7eb',
+                    padding: '12px',
+                    backgroundColor: '#f1f5f9',
+                    borderRadius: '8px',
+                    border: '1px solid #e2e8f0',
                   }}
                 >
                   Analizado el {new Date(result.timestamp).toLocaleString()}
@@ -601,43 +685,54 @@ const App: React.FC = () => {
           )}
         </div>
 
-        {/* History and Charts Toggle */}
-        <div style={{ textAlign: 'center', marginBottom: '24px' }}>
+        {/* Control Buttons */}
+        <div style={{ textAlign: 'center' }}>
           <button
             onClick={() => setShowHistory(!showHistory)}
             style={{
-              ...commonStyles.button.secondary,
+              backgroundColor: '#f1f5f9',
+              color: '#475569',
+              border: '1px solid #cbd5e1',
+              padding: '12px 24px',
+              borderRadius: '8px',
+              fontSize: '16px',
+              fontWeight: '600',
+              cursor: 'pointer',
               marginRight: '12px',
-              transform: 'translateY(0)',
-              boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+              transition: 'all 0.2s ease',
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.transform = 'translateY(-2px)';
-              e.currentTarget.style.boxShadow =
-                '0 6px 20px rgba(107, 114, 128, 0.3)';
+              e.currentTarget.style.backgroundColor = '#e2e8f0';
+              e.currentTarget.style.transform = 'translateY(-1px)';
             }}
             onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = '#f1f5f9';
               e.currentTarget.style.transform = 'translateY(0)';
-              e.currentTarget.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1)';
             }}
           >
             {showHistory ? '📊 Ocultar Historial' : '📚 Mostrar Historial'}
           </button>
+
           <button
             onClick={() => setShowCharts(!showCharts)}
             style={{
-              ...commonStyles.button.secondary,
-              transform: 'translateY(0)',
-              boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+              backgroundColor: '#f1f5f9',
+              color: '#475569',
+              border: '1px solid #cbd5e1',
+              padding: '12px 24px',
+              borderRadius: '8px',
+              fontSize: '16px',
+              fontWeight: '600',
+              cursor: 'pointer',
+              transition: 'all 0.2s ease',
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.transform = 'translateY(-2px)';
-              e.currentTarget.style.boxShadow =
-                '0 6px 20px rgba(107, 114, 128, 0.3)';
+              e.currentTarget.style.backgroundColor = '#e2e8f0';
+              e.currentTarget.style.transform = 'translateY(-1px)';
             }}
             onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = '#f1f5f9';
               e.currentTarget.style.transform = 'translateY(0)';
-              e.currentTarget.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1)';
             }}
           >
             {showCharts ? '📈 Ocultar Gráficos' : '📈 Mostrar Gráficos'}
@@ -646,7 +741,15 @@ const App: React.FC = () => {
 
         {/* History Section */}
         {showHistory && (
-          <div style={commonStyles.card}>
+          <div
+            style={{
+              backgroundColor: 'white',
+              borderRadius: '16px',
+              padding: '32px',
+              boxShadow: '0 4px 6px rgba(0, 0, 0, 0.05)',
+              border: '1px solid #e2e8f0',
+            }}
+          >
             <div
               style={{
                 display: 'flex',
@@ -655,25 +758,36 @@ const App: React.FC = () => {
                 marginBottom: '24px',
               }}
             >
-              <h2 style={commonStyles.text.subheading}>
+              <h2
+                style={{
+                  fontSize: '20px',
+                  fontWeight: '600',
+                  color: '#1e293b',
+                  margin: '0',
+                }}
+              >
                 📚 Historial de Análisis
               </h2>
               <button
                 onClick={clearHistory}
                 style={{
-                  ...commonStyles.button.danger,
-                  transform: 'translateY(0)',
-                  boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+                  backgroundColor: '#fef2f2',
+                  color: '#dc2626',
+                  border: '1px solid #fecaca',
+                  padding: '8px 16px',
+                  borderRadius: '6px',
+                  fontSize: '14px',
+                  fontWeight: '600',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = 'translateY(-2px)';
-                  e.currentTarget.style.boxShadow =
-                    '0 6px 20px rgba(239, 68, 68, 0.3)';
+                  e.currentTarget.style.backgroundColor = '#fee2e2';
+                  e.currentTarget.style.transform = 'translateY(-1px)';
                 }}
                 onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = '#fef2f2';
                   e.currentTarget.style.transform = 'translateY(0)';
-                  e.currentTarget.style.boxShadow =
-                    '0 4px 6px rgba(0, 0, 0, 0.1)';
                 }}
               >
                 🗑️ Limpiar Todo
@@ -685,91 +799,102 @@ const App: React.FC = () => {
                 style={{
                   display: 'grid',
                   gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
-                  gap: '16px',
+                  gap: '20px',
                   marginBottom: '24px',
                 }}
               >
                 <div
                   style={{
                     textAlign: 'center',
-                    padding: '16px',
-                    backgroundColor: '#f3f4f6',
-                    borderRadius: '8px',
+                    padding: '20px',
+                    backgroundColor: '#f0f9ff',
+                    borderRadius: '12px',
+                    border: '1px solid #bae6fd',
                   }}
                 >
                   <div
                     style={{
                       fontSize: '24px',
                       fontWeight: 'bold',
-                      color: '#3b82f6',
+                      color: '#0369a1',
+                      marginBottom: '8px',
                     }}
                   >
                     {stats.total_analyses}
                   </div>
-                  <div style={{ fontSize: '14px', color: '#6b7280' }}>
+                  <div style={{ fontSize: '14px', color: '#64748b' }}>
                     Total
                   </div>
                 </div>
+
                 <div
                   style={{
                     textAlign: 'center',
-                    padding: '16px',
-                    backgroundColor: '#f3f4f6',
-                    borderRadius: '8px',
+                    padding: '20px',
+                    backgroundColor: '#f0fdf4',
+                    borderRadius: '12px',
+                    border: '1px solid #bbf7d0',
                   }}
                 >
                   <div
                     style={{
                       fontSize: '24px',
                       fontWeight: 'bold',
-                      color: commonStyles.toxicity.safe,
+                      color: '#16a34a',
+                      marginBottom: '8px',
                     }}
                   >
                     {stats.safe_count}
                   </div>
-                  <div style={{ fontSize: '14px', color: '#6b7280' }}>
+                  <div style={{ fontSize: '14px', color: '#64748b' }}>
                     Seguros
                   </div>
                 </div>
+
                 <div
                   style={{
                     textAlign: 'center',
-                    padding: '16px',
-                    backgroundColor: '#f3f4f6',
-                    borderRadius: '8px',
+                    padding: '20px',
+                    backgroundColor: '#fef2f2',
+                    borderRadius: '12px',
+                    border: '1px solid #fecaca',
                   }}
                 >
                   <div
                     style={{
                       fontSize: '24px',
                       fontWeight: 'bold',
-                      color: commonStyles.toxicity.toxic,
+                      color: '#dc2626',
+                      marginBottom: '8px',
                     }}
                   >
                     {stats.toxic_count}
                   </div>
-                  <div style={{ fontSize: '14px', color: '#6b7280' }}>
+                  <div style={{ fontSize: '14px', color: '#64748b' }}>
                     Tóxicos
                   </div>
                 </div>
+
                 <div
                   style={{
                     textAlign: 'center',
-                    padding: '16px',
-                    backgroundColor: '#f3f4f6',
-                    borderRadius: '8px',
+                    padding: '20px',
+                    backgroundColor: '#faf5ff',
+                    borderRadius: '12px',
+                    border: '1px solid #ddd6fe',
                   }}
                 >
                   <div
                     style={{
                       fontSize: '24px',
                       fontWeight: 'bold',
-                      color: '#8b5cf6',
+                      color: '#7c3aed',
+                      marginBottom: '8px',
                     }}
                   >
                     {stats.average_score?.toFixed(2) || '0.00'}
                   </div>
-                  <div style={{ fontSize: '14px', color: '#6b7280' }}>
+                  <div style={{ fontSize: '14px', color: '#64748b' }}>
                     Score Promedio
                   </div>
                 </div>
@@ -778,54 +903,82 @@ const App: React.FC = () => {
 
             {historyLoading ? (
               <div style={{ textAlign: 'center', padding: '40px' }}>
-                ⏳ Cargando historial...
+                <div
+                  style={{
+                    display: 'inline-block',
+                    width: '32px',
+                    height: '32px',
+                    border: '3px solid #e2e8f0',
+                    borderTop: '3px solid #3b82f6',
+                    borderRadius: '50%',
+                    animation: 'spin 1s linear infinite',
+                  }}
+                />
+                <div style={{ marginTop: '16px', color: '#64748b' }}>
+                  ⏳ Cargando historial...
+                </div>
               </div>
             ) : history.length > 0 ? (
               <div style={{ overflowX: 'auto' }}>
                 <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                   <thead>
-                    <tr style={{ backgroundColor: '#f9fafb' }}>
+                    <tr style={{ backgroundColor: '#f8fafc' }}>
                       <th
                         style={{
-                          padding: '12px',
+                          padding: '16px',
                           textAlign: 'left',
-                          borderBottom: '1px solid #e5e7eb',
+                          borderBottom: '1px solid #e2e8f0',
+                          fontSize: '14px',
+                          fontWeight: '600',
+                          color: '#475569',
                         }}
                       >
                         Texto
                       </th>
                       <th
                         style={{
-                          padding: '12px',
+                          padding: '16px',
                           textAlign: 'center',
-                          borderBottom: '1px solid #e5e7eb',
+                          borderBottom: '1px solid #e2e8f0',
+                          fontSize: '14px',
+                          fontWeight: '600',
+                          color: '#475569',
                         }}
                       >
                         Tóxico
                       </th>
                       <th
                         style={{
-                          padding: '12px',
+                          padding: '16px',
                           textAlign: 'center',
-                          borderBottom: '1px solid #e5e7eb',
+                          borderBottom: '1px solid #e2e8f0',
+                          fontSize: '14px',
+                          fontWeight: '600',
+                          color: '#475569',
                         }}
                       >
                         Score
                       </th>
                       <th
                         style={{
-                          padding: '12px',
+                          padding: '16px',
                           textAlign: 'center',
-                          borderBottom: '1px solid #e5e7eb',
+                          borderBottom: '1px solid #e2e8f0',
+                          fontSize: '14px',
+                          fontWeight: '600',
+                          color: '#475569',
                         }}
                       >
                         Fecha
                       </th>
                       <th
                         style={{
-                          padding: '12px',
+                          padding: '16px',
                           textAlign: 'center',
-                          borderBottom: '1px solid #e5e7eb',
+                          borderBottom: '1px solid #e2e8f0',
+                          fontSize: '14px',
+                          fontWeight: '600',
+                          color: '#475569',
                         }}
                       >
                         Acciones
@@ -836,24 +989,26 @@ const App: React.FC = () => {
                     {history.map((item) => (
                       <tr
                         key={item.id}
-                        style={{ borderBottom: '1px solid #f3f4f6' }}
+                        style={{ borderBottom: '1px solid #f1f5f9' }}
                       >
-                        <td style={{ padding: '12px', maxWidth: '300px' }}>
+                        <td style={{ padding: '16px', maxWidth: '300px' }}>
                           <div
                             style={{
                               overflow: 'hidden',
                               textOverflow: 'ellipsis',
                               whiteSpace: 'nowrap',
+                              fontSize: '14px',
+                              color: '#1e293b',
                             }}
                           >
                             {item.text}
                           </div>
                         </td>
-                        <td style={{ padding: '12px', textAlign: 'center' }}>
+                        <td style={{ padding: '16px', textAlign: 'center' }}>
                           <span
                             style={{
-                              padding: '4px 8px',
-                              borderRadius: '4px',
+                              padding: '6px 12px',
+                              borderRadius: '6px',
                               fontSize: '12px',
                               fontWeight: '600',
                               backgroundColor: item.result.toxic
@@ -865,38 +1020,49 @@ const App: React.FC = () => {
                             {item.result.toxic ? '🚨 Tóxico' : '✅ Seguro'}
                           </span>
                         </td>
-                        <td style={{ padding: '12px', textAlign: 'center' }}>
+                        <td
+                          style={{
+                            padding: '16px',
+                            textAlign: 'center',
+                            fontSize: '14px',
+                            color: '#1e293b',
+                            fontWeight: '500',
+                          }}
+                        >
                           {item.result.toxicity_percentage}%
                         </td>
                         <td
                           style={{
-                            padding: '12px',
+                            padding: '16px',
                             textAlign: 'center',
                             fontSize: '14px',
+                            color: '#64748b',
                           }}
                         >
                           {new Date(item.timestamp).toLocaleDateString()}
                         </td>
-                        <td style={{ padding: '12px', textAlign: 'center' }}>
+                        <td style={{ padding: '16px', textAlign: 'center' }}>
                           <button
                             onClick={() => deleteItem(item.id)}
                             style={{
-                              ...commonStyles.button.danger,
-                              padding: '6px 12px',
+                              backgroundColor: '#fef2f2',
+                              color: '#dc2626',
+                              border: '1px solid #fecaca',
+                              padding: '8px 12px',
+                              borderRadius: '6px',
                               fontSize: '12px',
-                              transform: 'translateY(0)',
-                              boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+                              fontWeight: '600',
+                              cursor: 'pointer',
+                              transition: 'all 0.2s ease',
                             }}
                             onMouseEnter={(e) => {
+                              e.currentTarget.style.backgroundColor = '#fee2e2';
                               e.currentTarget.style.transform =
                                 'translateY(-1px)';
-                              e.currentTarget.style.boxShadow =
-                                '0 4px 12px rgba(239, 68, 68, 0.3)';
                             }}
                             onMouseLeave={(e) => {
+                              e.currentTarget.style.backgroundColor = '#fef2f2';
                               e.currentTarget.style.transform = 'translateY(0)';
-                              e.currentTarget.style.boxShadow =
-                                '0 2px 4px rgba(0, 0, 0, 0.1)';
                             }}
                           >
                             🗑️
@@ -912,7 +1078,7 @@ const App: React.FC = () => {
                 style={{
                   textAlign: 'center',
                   padding: '40px',
-                  color: '#6b7280',
+                  color: '#64748b',
                 }}
               >
                 📝 No hay análisis en el historial
@@ -923,13 +1089,31 @@ const App: React.FC = () => {
 
         {/* Charts Section */}
         {showCharts && (
-          <div style={commonStyles.card}>
-            <h2 style={commonStyles.text.subheading}>📊 Visualizaciones</h2>
+          <div
+            style={{
+              backgroundColor: 'white',
+              borderRadius: '16px',
+              padding: '32px',
+              boxShadow: '0 4px 6px rgba(0, 0, 0, 0.05)',
+              border: '1px solid #e2e8f0',
+            }}
+          >
+            <h2
+              style={{
+                fontSize: '20px',
+                fontWeight: '600',
+                color: '#1e293b',
+                margin: '0 0 24px 0',
+              }}
+            >
+              📊 Visualizaciones
+            </h2>
+
             <div
               style={{
                 display: 'grid',
                 gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-                gap: '24px',
+                gap: '32px',
                 marginTop: '24px',
               }}
             >
@@ -937,8 +1121,9 @@ const App: React.FC = () => {
                 <div>
                   <h3
                     style={{
-                      ...commonStyles.text.subheading,
                       fontSize: '18px',
+                      fontWeight: '600',
+                      color: '#1e293b',
                       marginBottom: '16px',
                     }}
                   >
@@ -955,8 +1140,9 @@ const App: React.FC = () => {
                   <div>
                     <h3
                       style={{
-                        ...commonStyles.text.subheading,
                         fontSize: '18px',
+                        fontWeight: '600',
+                        color: '#1e293b',
                         marginBottom: '16px',
                       }}
                     >
@@ -970,8 +1156,9 @@ const App: React.FC = () => {
                   <div>
                     <h3
                       style={{
-                        ...commonStyles.text.subheading,
                         fontSize: '18px',
+                        fontWeight: '600',
+                        color: '#1e293b',
                         marginBottom: '16px',
                       }}
                     >
