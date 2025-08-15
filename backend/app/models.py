@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field, validator
-from typing import List, Optional
+from typing import List, Optional, Dict
 from datetime import datetime
 
 class AnalyzeRequest(BaseModel):
@@ -68,6 +68,10 @@ class AnalyzeResponse(BaseModel):
     classification_technique: str = Field(
         ...,
         description="Técnica de clasificación utilizada (ej: Naïve Bayes, Random Forest, SVM, etc.)"
+    )
+    explanations: Dict[str, str] = Field(
+        default_factory=dict,
+        description="Explicaciones detalladas de por qué se detectó cada categoría de toxicidad"
     )
 
 class BatchAnalyzeRequest(BaseModel):

@@ -76,7 +76,8 @@ class HybridToxicityClassifier:
                     "detected_categories": rule_result.get("details", {}).get("detected_categories", []),
                     "text_length": rule_result.get("details", {}).get("text_length", 0),
                     "word_count": rule_result.get("details", {}).get("word_count", 0),
-                    "context_score": rule_result.get("details", {}).get("context_score", 0.0)
+                    "context_score": rule_result.get("details", {}).get("context_score", 0.0),
+                    "explanations": rule_result.get("details", {}).get("explanations", {})
                 }
             }
         except Exception as e:
@@ -97,7 +98,8 @@ class HybridToxicityClassifier:
                 "detected_categories": [],
                 "text_length": 0,
                 "word_count": 0,
-                "context_score": 0.0
+                "context_score": 0.0,
+                "explanations": {}
             }
         }
     
@@ -116,7 +118,8 @@ class HybridToxicityClassifier:
                     "confidence": result["confidence"],
                     "detected_categories": result["details"]["detected_categories"],
                     "word_count": result["details"]["word_count"],
-                    "classification_technique": result["classification_technique"]
+                    "classification_technique": result["classification_technique"],
+                    "explanations": result["details"].get("explanations", {})
                 })
             except Exception as e:
                 logger.error(f"Error analizando texto en lote: {e}")

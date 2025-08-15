@@ -235,7 +235,8 @@ async def analyze_text(request: AnalyzeRequest):
             response_time_ms=response_time,
             timestamp=datetime.now(),
             model_used=analysis_result["model_used"],
-            classification_technique=analysis_result.get("classification_technique", "Técnica no especificada")
+            classification_technique=analysis_result.get("classification_technique", "Técnica no especificada"),
+            explanations=analysis_result["details"].get("explanations", {})
         )
         
         # Guardar en historial si está habilitado
@@ -295,7 +296,8 @@ async def batch_analyze_texts(request: BatchAnalyzeRequest):
                     "is_toxic": analysis_result["is_toxic"],
                     "detected_categories": analysis_result["details"]["detected_categories"],
                     "word_count": analysis_result["details"]["word_count"],
-                    "classification_technique": analysis_result.get("classification_technique", "Técnica no especificada")
+                    "classification_technique": analysis_result.get("classification_technique", "Técnica no especificada"),
+                    "explanations": analysis_result["details"].get("explanations", {})
                 })
                 total_toxicity += analysis_result["toxicity_percentage"]
             except Exception as e:

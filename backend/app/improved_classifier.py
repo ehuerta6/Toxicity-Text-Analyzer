@@ -110,7 +110,7 @@ class OptimizedToxicityClassifier:
         preprocessed_data = advanced_preprocessor.preprocess_text(text)
         
         # Análisis de toxicidad optimizado
-        toxicity_score, detected_categories, word_count = self._calculate_toxicity_score(
+        toxicity_score, detected_categories, word_count, explanations = self._calculate_toxicity_score(
             preprocessed_data["cleaned_text"],
             preprocessed_data["word_count"],
             preprocessed_data["context_score"]
@@ -138,14 +138,16 @@ class OptimizedToxicityClassifier:
                 "detected_categories": detected_categories,
                 "text_length": len(text),
                 "word_count": word_count,
-                "context_score": round(preprocessed_data["context_score"], 3)
+                "context_score": round(preprocessed_data["context_score"], 3),
+                "explanations": explanations
             }
         }
     
-    def _calculate_toxicity_score(self, cleaned_text: str, word_count: int, context_score: float) -> Tuple[float, List[str], int]:
-        """Calcula el score de toxicidad de manera optimizada"""
+    def _calculate_toxicity_score(self, cleaned_text: str, word_count: int, context_score: float) -> Tuple[float, List[str], int, Dict[str, str]]:
+        """Calcula el score de toxicidad de manera optimizada con explicaciones"""
         total_score = 0.0
         detected_categories = []
+        explanations = {}
         
         # Análisis por categoría optimizado
         for category_name, category_info in self.toxicity_categories.items():
@@ -167,12 +169,51 @@ class OptimizedToxicityClassifier:
                 
                 total_score += score
                 detected_categories.append(category_name)
+                
+                # Generar explicación para esta categoría
+                explanation = self._generate_explanation(category_name, matches, word_count, context_score)
+                explanations[category_name] = explanation
         
         # Normalización del score
         if word_count > 0:
             total_score = min(1.0, total_score * (word_count ** 0.5))
         
-        return total_score, detected_categories, word_count
+        return total_score, detected_categories, word_count, explanations
+    
+    def _generate_explanation(self, category_name: str, matches: List[str], word_count: int, context_score: float) -> str:
+        """Genera una explicación detallada de por qué se detectó una categoría"""
+        
+        # Mapeo de nombres de categorías a español
+        category_names = {
+            "insulto_leve": "insulto leve",
+            "insulto_moderado": "insulto moderado", 
+            "insulto_severo": "insulto severo",
+            "acoso": "acoso",
+            "discriminacion": "discriminación",
+            "spam": "spam"
+        }
+        
+        # Obtener nombre legible de la categoría
+        readable_category = category_names.get(category_name, category_name)
+        
+        # Crear explicación basada en las palabras encontradas
+        if len(matches) == 1:
+            explanation = f"Detectó {readable_category} por la palabra '{matches[0]}'"
+        else:
+            # Mostrar solo las primeras 3 palabras para no saturar
+            shown_matches = matches[:3]
+            if len(matches) > 3:
+                explanation = f"Detectó {readable_category} por palabras como '{', '.join(shown_matches)}' y {len(matches) - 3} más"
+            else:
+                explanation = f"Detectó {readable_category} por las palabras '{', '.join(shown_matches)}'"
+        
+        # Agregar contexto si es relevante
+        if context_score > 0.7:
+            explanation += " (contexto agresivo)"
+        elif context_score > 0.4:
+            explanation += " (contexto moderado)"
+        
+        return explanation
     
     def _determine_toxicity_level(self, score: float, context_score: float, word_count: int) -> Tuple[bool, str, float]:
         """Determina el nivel de toxicidad de manera optimizada"""
@@ -217,7 +258,8 @@ class OptimizedToxicityClassifier:
             "toxicity_category": result["toxicity_level"],
             "toxicity_percentage": result["toxicity_percentage"],
             "confidence": result["confidence"],
-            "classification_technique": result["classification_technique"]
+            "classification_technique": result["classification_technique"],
+            "explanations": result["details"].get("explanations", {})
         }
     
     def _calculate_confidence(self, score: float, word_count: int, category_count: int) -> float:
@@ -247,7 +289,8 @@ class OptimizedToxicityClassifier:
                     "toxicity_category": result["toxicity_level"],
                     "toxicity_percentage": result["toxicity_percentage"],
                     "confidence": result["confidence"],
-                    "classification_technique": result["classification_technique"]
+                    "classification_technique": result["classification_technique"],
+                    "explanations": result["details"].get("explanations", {})
                 })
             except Exception as e:
                 logger.error(f"Error analizando texto: {e}")

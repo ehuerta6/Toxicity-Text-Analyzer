@@ -42,12 +42,13 @@ def test_analyze_endpoint():
                 print(f"  • detected_categories: {data.get('detected_categories')}")
                 print(f"  • word_count: {data.get('word_count')}")
                 print(f"  • response_time_ms: {data.get('response_time_ms')}ms")
+                print(f"  • explanations: {data.get('explanations', 'No disponible')}")
                 
                 # Verificar campos requeridos
                 required_fields = [
                     'text', 'is_toxic', 'toxicity_percentage', 'toxicity_category',
                     'confidence', 'detected_categories', 'word_count', 'response_time_ms',
-                    'timestamp', 'model_used', 'classification_technique'
+                    'timestamp', 'model_used', 'classification_technique', 'explanations'
                 ]
                 
                 missing_fields = [field for field in required_fields if field not in data]

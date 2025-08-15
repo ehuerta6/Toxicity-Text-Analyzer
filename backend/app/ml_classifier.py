@@ -124,6 +124,12 @@ class MLToxicityClassifier:
             # Determinar categoría
             toxicity_level = self._determine_toxicity_level(toxicity_percentage)
             
+            # Obtener categorías detectadas
+            detected_categories = self._get_detected_categories(toxicity_percentage)
+            
+            # Generar explicaciones
+            explanations = self._generate_explanations(text, toxicity_percentage, detected_categories)
+            
             # Calcular tiempo de respuesta
             response_time = (time.time() - start_time) * 1000
             
@@ -136,11 +142,12 @@ class MLToxicityClassifier:
                 "classification_technique": self.classification_technique,
                 "details": {
                     "toxicity_score": round(toxicity_percentage / 100, 4),
-                    "detected_categories": self._get_detected_categories(toxicity_percentage),
+                    "detected_categories": detected_categories,
                     "text_length": len(text),
                     "word_count": len(text.split()),
                     "prediction_confidence": round(confidence, 3),
-                    "response_time_ms": round(response_time, 2)
+                    "response_time_ms": round(response_time, 2),
+                    "explanations": explanations
                 }
             }
             
@@ -182,6 +189,33 @@ class MLToxicityClassifier:
         
         return categories
     
+    def _generate_explanations(self, text: str, toxicity_percentage: float, detected_categories: List[str]) -> Dict[str, str]:
+        """Genera explicaciones para las categorías detectadas por el modelo ML"""
+        explanations = {}
+        
+        # Mapeo de nombres de categorías a español
+        category_names = {
+            "insulto_leve": "insulto leve",
+            "insulto_moderado": "insulto moderado", 
+            "insultos_severo": "insulto severo",
+            "acoso": "acoso",
+            "discriminacion": "discriminación"
+        }
+        
+        for category in detected_categories:
+            readable_category = category_names.get(category, category)
+            
+            if toxicity_percentage > 80:
+                explanation = f"Modelo ML detectó {readable_category} con alta confianza ({toxicity_percentage:.1f}%)"
+            elif toxicity_percentage > 60:
+                explanation = f"Modelo ML detectó {readable_category} con confianza moderada ({toxicity_percentage:.1f}%)"
+            else:
+                explanation = f"Modelo ML detectó {readable_category} con confianza baja ({toxicity_percentage:.1f}%)"
+            
+            explanations[category] = explanation
+        
+        return explanations
+    
     def _get_default_response(self) -> Dict:
         """Respuesta por defecto cuando el modelo no está disponible"""
         return {
@@ -197,7 +231,8 @@ class MLToxicityClassifier:
                 "text_length": 0,
                 "word_count": 0,
                 "prediction_confidence": 0.0,
-                "response_time_ms": 0.0
+                "response_time_ms": 0.0,
+                "explanations": {}
             }
         }
     
@@ -231,7 +266,8 @@ class MLToxicityClassifier:
                     "toxicity_level": result["toxicity_level"],
                     "confidence": result["confidence"],
                     "detected_categories": result["details"]["detected_categories"],
-                    "word_count": result["details"]["word_count"]
+                    "word_count": result["details"]["word_count"],
+                    "explanations": result["details"].get("explanations", {})
                 })
             except Exception as e:
                 logger.error(f"Error analizando texto en lote: {e}")

@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 
-interface ToxicityResult {
+export interface ToxicityResult {
   text: string;
   is_toxic: boolean;
   toxicity_percentage: number;
@@ -12,6 +12,7 @@ interface ToxicityResult {
   timestamp: string;
   model_used: string;
   classification_technique: string;
+  explanations: Record<string, string>;
 }
 
 interface UseToxicityAnalysisReturn {

@@ -1,5 +1,6 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { useToxicityAnalysis } from './hooks/useToxicityAnalysis';
+import type { ToxicityResult } from './hooks/useToxicityAnalysis';
 import { getToxicityColor } from './styles/common';
 
 interface ToxicityMap {
@@ -375,9 +376,15 @@ const Button: React.FC<{
 
 const App: React.FC = () => {
   const [text, setText] = useState('');
-  const [toxicityMap, setToxicityMap] = useState<ToxicityMap>({});
+  const [toxicityMap, setToxicityMap] = useState<Record<string, number>>({});
   const [hasAnalyzed, setHasAnalyzed] = useState(false);
-  const [lastAnalysis, setLastAnalysis] = useState(() => {
+  const [showExplanations, setShowExplanations] = useState(false);
+  const [lastAnalysis, setLastAnalysis] = useState<{
+    text: string;
+    result: ToxicityResult;
+    toxicityMap: Record<string, number>;
+    timestamp: string;
+  } | null>(() => {
     const saved = localStorage.getItem('toxiguard_last_analysis');
     return saved ? JSON.parse(saved) : null;
   });
@@ -563,7 +570,12 @@ const App: React.FC = () => {
             />
 
             <div
-              style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}
+              style={{
+                display: 'flex',
+                gap: '12px',
+                justifyContent: 'center',
+                alignItems: 'center',
+              }}
             >
               <Button
                 onClick={handleAnalyze}
@@ -599,6 +611,37 @@ const App: React.FC = () => {
               >
                 🗑️ Clear
               </Button>
+
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  padding: '8px 12px',
+                  backgroundColor: 'var(--muted)',
+                  borderRadius: 'var(--radius)',
+                  border: '1px solid var(--border)',
+                }}
+              >
+                <input
+                  type='checkbox'
+                  id='show-explanations'
+                  checked={showExplanations}
+                  onChange={(e) => setShowExplanations(e.target.checked)}
+                  style={{ cursor: 'pointer' }}
+                />
+                <label
+                  htmlFor='show-explanations'
+                  style={{
+                    fontSize: '14px',
+                    color: 'var(--foreground)',
+                    cursor: 'pointer',
+                    userSelect: 'none',
+                  }}
+                >
+                  💡 Mostrar explicaciones
+                </label>
+              </div>
             </div>
 
             {error && (
@@ -1012,6 +1055,95 @@ const App: React.FC = () => {
                 </div>
               </div>
             </div>
+
+            {/* Sección de Categorías Detectadas con Explicaciones */}
+            {result &&
+              result.detected_categories &&
+              result.detected_categories.length > 0 && (
+                <div
+                  style={{
+                    marginTop: '16px',
+                    padding: '16px',
+                    backgroundColor: 'var(--card)',
+                    borderRadius: 'var(--radius)',
+                    border: '1px solid var(--border)',
+                  }}
+                >
+                  <h4
+                    style={{
+                      fontSize: '14px',
+                      fontWeight: '600',
+                      color: 'var(--foreground)',
+                      margin: '0 0 12px 0',
+                      textAlign: 'center',
+                    }}
+                  >
+                    🏷️ Categorías Detectadas
+                  </h4>
+
+                  <div
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '8px',
+                    }}
+                  >
+                    {result.detected_categories.map((category, index) => (
+                      <div
+                        key={index}
+                        style={{
+                          padding: '8px 12px',
+                          backgroundColor: 'var(--muted)',
+                          borderRadius: 'var(--radius)',
+                          border: '1px solid var(--border)',
+                        }}
+                      >
+                        <div
+                          style={{
+                            fontSize: '12px',
+                            fontWeight: '600',
+                            color: 'var(--foreground)',
+                            marginBottom: '4px',
+                            textTransform: 'capitalize',
+                          }}
+                        >
+                          {category.replace('_', ' ')}
+                        </div>
+
+                        {showExplanations &&
+                          result.explanations &&
+                          result.explanations[category] && (
+                            <div
+                              style={{
+                                fontSize: '11px',
+                                color: 'var(--muted-foreground)',
+                                fontStyle: 'italic',
+                                lineHeight: '1.4',
+                              }}
+                            >
+                              💡 {result.explanations[category]}
+                            </div>
+                          )}
+                      </div>
+                    ))}
+                  </div>
+
+                  {!showExplanations && (
+                    <div
+                      style={{
+                        marginTop: '12px',
+                        fontSize: '11px',
+                        color: 'var(--muted-foreground)',
+                        textAlign: 'center',
+                        fontStyle: 'italic',
+                      }}
+                    >
+                      💡 Activa "Mostrar explicaciones" para ver por qué se
+                      detectó cada categoría
+                    </div>
+                  )}
+                </div>
+              )}
           </div>
         </div>
 
