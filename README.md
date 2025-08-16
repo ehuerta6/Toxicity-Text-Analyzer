@@ -238,7 +238,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 👥 Authors
 
-- **Emi** - Initial work - [Emi](https://github.com/emi)
+- **Emi** - Initial work - [Emi](https://github.com/ehuerta6)
 
 ## 🙏 Acknowledgments
 
