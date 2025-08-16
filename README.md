@@ -1,211 +1,252 @@
-# ToxiGuard - Advanced Toxicity Detection System
+# 🛡️ ToxiGuard - Advanced Toxicity Detection System
 
-A comprehensive, production-ready system for detecting toxic content in text using advanced machine learning algorithms and contextual analysis.
+A sophisticated web application that analyzes text content for toxicity using advanced Machine Learning techniques, providing real-time analysis with detailed insights and explanations.
 
-## 🚀 Features
+## 📸 Project Screenshots
 
-- **Advanced ML Classification**: Multiple algorithms including SVM, Random Forest, Naive Bayes, and Logistic Regression
-- **Contextual Analysis**: Embedding-based analysis with sentence transformers for better context understanding
-- **Hybrid Classification**: Combines rule-based, ML, and contextual approaches for optimal accuracy
-- **Ultra-Sensitive Detection**: Advanced toxicity detection with severity weighting and repetition analysis
-- **Real-time API**: FastAPI backend with comprehensive endpoints
-- **Modern Frontend**: React-based dashboard with real-time analysis and visualization
-- **Production Ready**: Clean, modular codebase with comprehensive error handling
+### Main Interface
 
-## 🏗️ Architecture
+![ToxiGuard Main Interface](docs/images/toxiguard-main-interface.png)
+_Clean, modern interface for text input and analysis_
 
-```
-toxiguard/
-├── backend/                 # FastAPI backend server
-│   ├── app/                # Core application modules
-│   │   ├── main.py         # FastAPI application with endpoints
-│   │   ├── models.py       # Pydantic data models
-│   │   ├── database.py     # SQLite database for analysis history
-│   │   ├── hybrid_classifier.py      # Main hybrid classifier
-│   │   ├── advanced_toxicity_classifier.py  # Ultra-sensitive classifier
-│   │   ├── contextual_classifier.py  # Contextual analysis with embeddings
-│   │   ├── improved_classifier.py    # Rule-based classifier
-│   │   ├── ml_classifier.py          # ML-based classifier
-│   │   ├── ml_models.py              # ML model management
-│   │   ├── model_trainer.py          # Model training utilities
-│   │   ├── weight_optimizer.py       # Weight optimization system
-│   │   ├── advanced_preprocessor.py  # Text preprocessing
-│   │   └── services.py               # Legacy services (maintained for compatibility)
-│   ├── ml/                 # ML utilities and configuration
-│   │   ├── config.py       # ML configuration
-│   │   └── model_evaluator.py  # Model evaluation utilities
-│   ├── models/             # Trained ML models
-│   ├── requirements.txt    # Python dependencies
-│   └── README.md           # Backend documentation
-├── frontend/               # React frontend application
-│   ├── src/                # Source code
-│   │   ├── components/     # React components
-│   │   ├── hooks/          # Custom React hooks
-│   │   ├── lib/            # Utility libraries
-│   │   └── styles/         # Styling and design system
-│   ├── package.json        # Node.js dependencies
-│   └── README.md           # Frontend documentation
-├── data/                   # Training and test datasets
-└── README.md               # This file
-```
+### Analysis Results Dashboard
 
-## 🔧 Backend Features
+![ToxiGuard Analysis Results](docs/images/toxiguard-analysis-results.png)
+_Detailed toxicity analysis with real-time scoring and category breakdown_
 
-### Core Classifiers
+## 🎯 Project Purpose
 
-- **Hybrid Classifier**: Combines all approaches with intelligent fallback
-- **Advanced Toxicity Classifier**: Ultra-sensitive detection with severity weighting
-- **Contextual Classifier**: Embedding-based analysis using sentence-transformers
-- **ML Classifier**: Support for multiple ML algorithms
-- **Improved Classifier**: Rule-based approach with context awareness
+ToxiGuard is designed to help content moderators, educators, and researchers identify potentially harmful content in text. The system uses multiple ML classifiers and contextual analysis to provide accurate toxicity assessments with detailed explanations of the detection process.
 
-### API Endpoints
+### Key Features
 
-- `POST /analyze` - Analyze text for toxicity
-- `POST /batch-analyze` - Analyze multiple texts
-- `GET /classifier-info` - Get classifier information
-- `POST /switch-classifier` - Switch between classifiers
-- `GET /history` - Get analysis history
-- `GET /stats` - Get system statistics
-
-### Advanced Features
-
-- **Contextual Analysis**: Detects negations and context (e.g., "not stupid" vs "stupid")
-- **Severity Weighting**: Different weights for different types of toxicity
-- **Repetition Analysis**: Detects repeated toxic content
-- **Multi-language Support**: English and Spanish text analysis
-- **Real-time Processing**: Optimized for low-latency responses
-
-## 🎨 Frontend Features
-
-### User Interface
-
-- **Modern Design**: Clean, responsive interface with Tailwind CSS
-- **Real-time Analysis**: Instant toxicity detection with visual feedback
-- **Interactive Dashboard**: Comprehensive analysis results with explanations
-- **Toxicity Visualization**: Color-coded text highlighting and gauge displays
-- **Responsive Layout**: Works on desktop and mobile devices
-
-### Analysis Features
-
-- **Text Highlighting**: Toxic words are highlighted with color coding
-- **Severity Breakdown**: Detailed breakdown of toxicity by category
-- **Explanation System**: Clear explanations for why content was flagged
-- **Category Detection**: Identifies specific types of toxicity
-- **Confidence Scoring**: Shows confidence level for each analysis
+- **Real-time Text Analysis**: Instant toxicity detection with highlighted keywords
+- **Multi-Model ML System**: Ensemble of classifiers for improved accuracy
+- **Contextual Analysis**: Understanding of negations and context
+- **Detailed Explanations**: Clear breakdown of why content was flagged
+- **Responsive Design**: Works seamlessly on desktop, tablet, and mobile
+- **Professional UI/UX**: Clean, modern interface with consistent design system
 
 ## 🚀 Quick Start
 
-### Backend Setup
+### Prerequisites
+
+- **Node.js** 18+ and **npm** 9+
+- **Python** 3.8+ and **pip**
+- **Git**
+
+### One-Command Setup
 
 ```bash
-cd backend
-python -m venv .venv
-source .venv/bin/activate  # On Windows: .venv\Scripts\activate
-pip install -r requirements.txt
-uvicorn app.main:app --reload --port 8000
+# Clone and setup the entire project
+git clone <repository-url> && cd toxiguard && npm run setup
 ```
 
-### Frontend Setup
+### Manual Setup
 
 ```bash
+# 1. Clone the repository
+git clone <repository-url>
+cd toxiguard
+
+# 2. Install frontend dependencies
 cd frontend
 npm install
+
+# 3. Install backend dependencies
+cd ../backend
+pip install -r requirements.txt
+
+# 4. Start both services
 npm run dev
 ```
 
-### Access Points
-
-- **Backend API**: http://localhost:8000
-- **API Documentation**: http://localhost:8000/docs
-- **Frontend**: http://localhost:5173
-
-## 📊 Model Performance
-
-The system includes multiple pre-trained models:
-
-- **Linear SVM**: High accuracy for general toxicity detection
-- **Random Forest**: Robust performance with complex patterns
-- **Naive Bayes**: Fast classification with good baseline performance
-- **Logistic Regression**: Balanced accuracy and interpretability
-
-## 🔍 Analysis Examples
-
-### Contextual Understanding
-
-- **"You are stupid"** → High toxicity (85%)
-- **"You are not stupid"** → Low toxicity (15%) - Context detected
-- **"I hate you"** → High toxicity (90%)
-- **"I don't hate you"** → Low toxicity (10%) - Negation detected
-
-### Multi-category Detection
-
-- **Insults**: Mild, moderate, and severe levels
-- **Harassment**: Direct threats and intimidation
-- **Discrimination**: Racism, sexism, homophobia
-- **Spam**: Toxic promotional content
-
-## 🛠️ Development
-
-### Code Quality
-
-- **Clean Architecture**: Modular, maintainable code structure
-- **Type Hints**: Full Python type annotation support
-- **Error Handling**: Comprehensive error handling and logging
-- **Testing**: Built-in testing utilities and examples
-- **Documentation**: Detailed docstrings and comments
-
-### Performance Optimizations
-
-- **Caching**: Intelligent caching of model predictions
-- **Async Processing**: Non-blocking API responses
-- **Memory Management**: Efficient memory usage for large texts
-- **Batch Processing**: Optimized for multiple text analysis
-
-## 📈 Production Deployment
-
-### Requirements
-
-- Python 3.8+
-- Node.js 18+
-- 4GB+ RAM (for ML models)
-- Fast storage for model files
-
-### Environment Variables
+### Running Locally
 
 ```bash
-FRONTEND_URL=http://localhost:5173
-HOST=0.0.0.0
-PORT=8000
-DATABASE_URL=sqlite:///analysis_history.db
+# Terminal 1: Start backend (FastAPI)
+cd backend
+uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+
+# Terminal 2: Start frontend (React + Vite)
+cd frontend
+npm run dev
 ```
 
-### Scaling Considerations
+The application will be available at:
 
-- **Load Balancing**: Multiple backend instances
-- **Model Caching**: Shared model storage
-- **Database**: Consider PostgreSQL for high-volume production
-- **Monitoring**: Health checks and performance metrics
+- **Frontend**: http://localhost:5173
+- **Backend API**: http://localhost:8000
+- **API Docs**: http://localhost:8000/docs
+
+## 🛠️ Tech Stack
+
+### Frontend
+
+- **React 18** - Modern React with hooks and functional components
+- **TypeScript** - Type-safe development
+- **Vite** - Fast build tool and dev server
+- **Tailwind CSS** - Utility-first CSS framework
+- **Custom Design System** - Consistent UI components and styling
+
+### Backend
+
+- **FastAPI** - Modern, fast web framework for building APIs
+- **Python 3.8+** - Core programming language
+- **SQLite** - Lightweight database for analysis history
+- **Uvicorn** - ASGI server for running FastAPI
+
+### Machine Learning
+
+- **Scikit-learn** - ML algorithms and utilities
+- **Multiple Classifiers**: Naive Bayes, Random Forest, SVM, Logistic Regression
+- **Hybrid Classification** - Combination of rule-based and ML approaches
+- **Contextual Analysis** - Understanding of negations and context
+
+### Development Tools
+
+- **ESLint** - Code quality and consistency
+- **Prettier** - Code formatting
+- **TypeScript** - Static type checking
+- **Git** - Version control
+
+## 📁 Project Structure
+
+```
+toxiguard/
+├── frontend/                 # React frontend application
+│   ├── src/
+│   │   ├── components/      # Reusable UI components
+│   │   ├── hooks/          # Custom React hooks
+│   │   ├── lib/            # Utility functions and API
+│   │   ├── styles/         # Design system and styling
+│   │   └── App.tsx         # Main application component
+│   ├── package.json         # Frontend dependencies
+│   └── vite.config.ts      # Vite configuration
+├── backend/                 # FastAPI backend application
+│   ├── app/
+│   │   ├── main.py         # FastAPI application entry point
+│   │   ├── models.py       # Data models and schemas
+│   │   ├── services.py     # Business logic and ML services
+│   │   └── database.py     # Database operations
+│   ├── ml/                 # Machine learning modules
+│   ├── models/             # Trained ML models
+│   └── requirements.txt    # Python dependencies
+├── data/                   # Training data and datasets
+├── README.md              # This file
+└── package.json           # Root package.json for scripts
+```
+
+## 🔧 Available Scripts
+
+### Root Level (Project-wide)
+
+```bash
+npm run setup          # Setup entire project (frontend + backend)
+npm run dev            # Start both frontend and backend
+npm run build          # Build frontend for production
+npm run clean          # Clean build artifacts and dependencies
+npm run test           # Run all tests
+npm run lint           # Lint all code
+npm run format         # Format all code
+```
+
+### Frontend
+
+```bash
+npm run dev            # Start development server
+npm run build          # Build for production
+npm run preview        # Preview production build
+npm run lint           # Lint TypeScript/React code
+npm run type-check     # Check TypeScript types
+```
+
+### Backend
+
+```bash
+uvicorn app.main:app --reload    # Start development server
+python -m pytest                 # Run tests
+python -m black .                # Format Python code
+python -m flake8                 # Lint Python code
+```
+
+## 🌐 API Endpoints
+
+| Endpoint         | Method | Description                         |
+| ---------------- | ------ | ----------------------------------- |
+| `/`              | GET    | API information and status          |
+| `/health`        | GET    | System health check                 |
+| `/info`          | GET    | System information and capabilities |
+| `/analyze`       | POST   | Analyze single text for toxicity    |
+| `/batch-analyze` | POST   | Analyze multiple texts              |
+| `/history`       | GET    | Get analysis history                |
+| `/stats`         | GET    | Get system statistics               |
+| `/docs`          | GET    | Interactive API documentation       |
+
+## 🎨 Design System
+
+The project includes a comprehensive design system with:
+
+- **Typography Scale**: Consistent font sizes and weights
+- **Color Palette**: Semantic colors for different states
+- **Spacing System**: Standardized spacing values
+- **Component Library**: Reusable UI components
+- **Responsive Design**: Mobile-first approach with breakpoints
+
+## 🧪 Testing
+
+```bash
+# Frontend tests
+npm run test:frontend
+
+# Backend tests
+npm run test:backend
+
+# All tests
+npm run test
+```
+
+## 📦 Production Deployment
+
+### Frontend
+
+```bash
+cd frontend
+npm run build
+# Serve the dist/ folder with your web server
+```
+
+### Backend
+
+```bash
+cd backend
+pip install -r requirements.txt
+uvicorn app.main:app --host 0.0.0.0 --port 8000
+```
 
 ## 🤝 Contributing
 
 1. Fork the repository
-2. Create a feature branch
-3. Make your changes with proper testing
-4. Submit a pull request
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 🆘 Support
+## 👥 Authors
 
-For issues and questions:
+- **Emi** - Initial work - [Emi](https://github.com/emi)
 
-1. Check the documentation
-2. Review existing issues
-3. Create a new issue with detailed information
+## 🙏 Acknowledgments
+
+- Built with modern web technologies and best practices
+- Uses advanced ML techniques for accurate toxicity detection
+- Implements responsive design principles for all devices
+- Follows accessibility guidelines for inclusive user experience
 
 ---
 
-**ToxiGuard** - Advanced toxicity detection powered by machine learning and contextual analysis.
+**ToxiGuard** - Protecting digital spaces with intelligent content analysis 🛡️

@@ -1,6 +1,6 @@
 """
-🚀 ToxiGuard API - Backend Optimizado con Análisis Contextual
-API para detección de comentarios tóxicos usando Machine Learning optimizado y análisis contextual
+ToxiGuard Backend - Advanced Toxicity Detection API
+FastAPI application with ML-powered text analysis capabilities
 """
 
 from fastapi import FastAPI, HTTPException, Request
@@ -13,12 +13,11 @@ from typing import List, Optional
 import os
 
 # Importar clasificadores
-from .improved_classifier import optimized_classifier
-from .ml_classifier import ml_classifier
-from .hybrid_classifier import hybrid_classifier
-from .contextual_classifier import contextual_classifier
-from .models import AnalyzeRequest, AnalyzeResponse, BatchAnalyzeRequest, BatchAnalyzeResponse
-from .database import AnalysisHistoryDB
+from .services import (
+    primary_classifier,
+    contextual_classifier,
+    history_db
+)
 
 # Configurar logging
 logging.basicConfig(level=logging.INFO)
@@ -27,7 +26,7 @@ logger = logging.getLogger(__name__)
 # Inicializar FastAPI
 app = FastAPI(
     title="ToxiGuard API",
-    description="API profesional para detección de toxicidad en texto usando ML avanzado y análisis contextual con embeddings",
+    description="Advanced Toxicity Detection System with ML-powered text analysis",
     version="2.1.0",
     docs_url="/docs",
     redoc_url="/redoc"
@@ -42,44 +41,45 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Inicializar base de datos de historial
-history_db = None
-try:
-    history_db = AnalysisHistoryDB()
-    logger.info("✅ Base de datos de historial inicializada")
-except Exception as e:
-    logger.warning(f"⚠️ No se pudo inicializar la base de datos: {e}")
+# Importar modelos de respuesta
+from .models import (
+    AnalyzeRequest,
+    AnalyzeResponse,
+    BatchAnalyzeRequest,
+    BatchAnalyzeResponse
+)
 
-# Seleccionar clasificador principal (híbrido ultra-sensible por defecto)
-primary_classifier = hybrid_classifier
+# Verificar estado de los clasificadores al iniciar
 logger.info(f"✅ Clasificador principal: {primary_classifier.__class__.__name__}")
 
 @app.on_event("startup")
 async def startup_event():
     """Evento de inicio de la aplicación"""
-    logger.info("🚀 ToxiGuard API iniciando con análisis ultra-sensible...")
-    
-    # Verificar estado de los clasificadores
-    classifier_info = primary_classifier.get_classifier_info()
-    logger.info(f"📊 Estado de clasificadores: {classifier_info}")
-    
-    # Verificar disponibilidad del clasificador avanzado
-    if hasattr(primary_classifier, 'advanced_classifier'):
-        logger.info("✅ Clasificador avanzado ultra-sensible disponible")
-        advanced_info = primary_classifier.advanced_classifier.get_classifier_info()
-        logger.info(f"🚨 Clasificador avanzado: {advanced_info}")
-    
-    # Verificar disponibilidad del clasificador contextual
-    if contextual_classifier.embedding_model:
-        logger.info("✅ Clasificador contextual con embeddings disponible")
-    else:
-        logger.warning("⚠️ Clasificador contextual no disponible, usando fallback")
-    
-    logger.info("✅ ToxiGuard API lista para recibir solicitudes")
+    try:
+        # Verificar estado de los clasificadores
+        classifier_info = primary_classifier.get_classifier_info()
+        logger.info(f"📊 Estado de clasificadores: {classifier_info}")
+        
+        # Verificar disponibilidad del clasificador avanzado
+        if hasattr(primary_classifier, 'advanced_classifier'):
+            logger.info("✅ Clasificador avanzado ultra-sensible disponible")
+            advanced_info = primary_classifier.advanced_classifier.get_classifier_info()
+            logger.info(f"🚨 Clasificador avanzado: {advanced_info}")
+        
+        # Verificar disponibilidad del clasificador contextual
+        if contextual_classifier.embedding_model:
+            logger.info("✅ Clasificador contextual con embeddings disponible")
+        else:
+            logger.info("⚠️ Clasificador contextual sin embeddings")
+            
+        logger.info("🚀 ToxiGuard API iniciada exitosamente")
+        
+    except Exception as e:
+        logger.error(f"❌ Error durante el inicio: {e}")
 
-# Middleware optimizado para medir tiempo de respuesta
 @app.middleware("http")
 async def add_process_time_header(request: Request, call_next):
+    """Middleware para agregar tiempo de procesamiento a las respuestas"""
     start_time = time.time()
     response = await call_next(request)
     process_time = time.time() - start_time
@@ -88,7 +88,8 @@ async def add_process_time_header(request: Request, call_next):
 
 @app.exception_handler(ValueError)
 async def value_error_handler(request: Request, exc: ValueError):
-    """Maneja errores de validación de manera optimizada"""
+    """Maneja errores de validación"""
+    logger.warning(f"Error de validación: {exc}")
     return JSONResponse(
         status_code=400,
         content={
