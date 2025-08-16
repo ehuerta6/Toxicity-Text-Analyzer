@@ -47,7 +47,7 @@ const ColoredText: React.FC<ColoredTextProps> = ({ text, toxicityMap }) => {
               borderBottomWidth: '3px',
               borderBottomColor: color,
             }}
-                         title={`Toxicity: ${toxicityPercentage}%`}
+            title={`Toxicity: ${toxicityPercentage}%`}
           >
             {word}
           </span>
